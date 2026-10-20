@@ -703,6 +703,7 @@
             { id: 'werewolf', name: 'Werewolf', thai: 'มนุษย์หมาป่า', icon: '🐺', team: 'wolf', points: -6, multi: true, defaultCount: 1, desc: 'ตื่นขึ้นมาตอนกลางคืนพร้อมกับหมาป่าตัวอื่น เพื่อเลือกเหยื่อสังหาร 1 คน' },
             { id: 'wolf_cub', name: 'Wolf Cub', thai: 'ลูกหมาป่า', icon: '🐺', team: 'wolf', points: -8, multi: false, defaultCount: 0, desc: 'หากลูกหมาป่าถูกฆ่าตาย ในคืนถัดไปฝั่งหมาป่าจะสามารถสังหารเหยื่อได้ 2 คนทันที!' },
             { id: 'sorcerer', name: 'Sorcerer', thai: 'พ่อมดฝ่ายมืด', icon: '🧙', team: 'wolf', points: -3, multi: false, defaultCount: 0, desc: 'อยู่ฝ่ายหมาป่า ตื่นตอนกลางคืนเพื่อค้นหาว่าใครคือ Seer (ผู้หยั่งรู้)' },
+            { id: 'sorcerer2', name: 'Sorcerer2', thai: 'พ่อมดวางยา', icon: '🧪', team: 'wolf', points: -4, multi: false, defaultCount: 0, desc: 'อยู่ฝ่ายหมาป่า ตื่นหลังหมาป่าเพื่อเลือกวางยาผู้เล่น 1 คน ผู้ถูกวางยาจะถูกบล็อกความสามารถทันที (Seer ส่องจะเห็นผลตรงข้าม / หากถูกหมาป่าฆ่า ความสามารถตอนตายจะไม่ทำงาน)' },
             { id: 'seer', name: 'Seer', thai: 'ผู้หยั่งรู้', icon: '🔮', team: 'good', points: 7, multi: false, defaultCount: 1, desc: 'ตื่นขึ้นมาในตอนกลางคืนเพื่อส่องตรวจดูว่าผู้เล่น 1 คนเป็นหมาป่าหรือไม่' },
             { id: 'apprentice_seer', name: 'Apprentice Seer', thai: 'ผู้ช่วยหยั่งรู้', icon: '🔮', team: 'good', points: 4, multi: false, defaultCount: 0, desc: 'หาก Seer ตัวจริงเสียชีวิต ผู้ช่วยหยั่งรู้จะได้รับพลังและกลายร่างเป็น Seer คนใหม่ทันที' },
             { id: 'bodyguard', name: 'Bodyguard', thai: 'บอดี้การ์ด', icon: '🛡️', team: 'good', points: 3, multi: false, defaultCount: 1, desc: 'ตื่นขึ้นมาในตอนกลางคืนเพื่อเลือกปกป้องผู้เล่น 1 คนจากการถูกหมาป่าฆ่า' },
@@ -766,6 +767,8 @@
             wolvesInfected: false,
             wolvesInfectedNext: false,
             silencedTarget: '',
+            poisonedTarget: '',
+            nightKilled: [],
             lastNightResultText: '- เริ่มต้นเกมคืนแรก -'
         };
 
@@ -2114,11 +2117,12 @@
                 const nightSteps = [
                     { id: 'cupid', name: '1. Cupid เลือก Lovers (เฉพาะคืนแรก)', show: gameState.selectedRoles.includes('cupid') && gameState.dayCount === 1 },
                     { id: 'wolf', name: '2. Werewolf เลือกเหยื่อสังหาร', show: true },
-                    { id: 'bodyguard', name: '3. Bodyguard เลือกป้องกัน', show: gameState.selectedRoles.includes('bodyguard') },
-                    { id: 'seer', name: '4. Seer ส่องตรวจดูผู้เล่น', show: gameState.selectedRoles.includes('seer') },
-                    { id: 'spellcaster', name: '5. Spellcaster เลือกเสกใบ้ (ห้ามพูดวันรุ่งขึ้น)', show: gameState.selectedRoles.includes('spellcaster') },
-                    { id: 'sorcerer', name: '6. Sorcerer ตรวจหา Seer', show: gameState.selectedRoles.includes('sorcerer') },
-                    { id: 'apprentice', name: '7. Apprentice Seer ทำงาน', show: gameState.selectedRoles.includes('apprentice_seer') }
+                    { id: 'sorcerer2', name: '3. Sorcerer2 เลือกวางยา (บล็อกความสามารถ)', show: gameState.selectedRoles.includes('sorcerer2') },
+                    { id: 'bodyguard', name: '4. Bodyguard เลือกป้องกัน', show: gameState.selectedRoles.includes('bodyguard') },
+                    { id: 'seer', name: '5. Seer ส่องตรวจดูผู้เล่น', show: gameState.selectedRoles.includes('seer') },
+                    { id: 'spellcaster', name: '6. Spellcaster เลือกเสกใบ้ (ห้ามพูดวันรุ่งขึ้น)', show: gameState.selectedRoles.includes('spellcaster') },
+                    { id: 'sorcerer', name: '7. Sorcerer ตรวจหา Seer', show: gameState.selectedRoles.includes('sorcerer') },
+                    { id: 'apprentice', name: '8. Apprentice Seer ทำงาน', show: gameState.selectedRoles.includes('apprentice_seer') }
                 ];
 
                 checklistContainer.innerHTML = '';
@@ -2162,6 +2166,25 @@
                                                 ${playerOpts}
                                             </select>
                                         </div>
+                                    </div>
+                                </div>
+                            `;
+                        } else if (step.id === 'sorcerer2') {
+                            checklistContainer.innerHTML += `
+                                <div class="bg-fuchsia-950/30 p-2.5 rounded border border-fuchsia-800/60 space-y-2">
+                                    <label class="flex items-center space-x-2 cursor-pointer">
+                                        <input type="checkbox" id="sorcerer2-cb" class="w-4 h-4 text-fuchsia-500 rounded bg-slate-900 border-slate-700" onchange="toggleSorcerer2Dropdown()">
+                                        <span class="text-fuchsia-200 font-semibold">${step.name}</span>
+                                    </label>
+                                    <div id="sorcerer2-dropdown" class="hidden pl-6 space-y-1.5">
+                                        <div class="flex items-center justify-between text-[11px]">
+                                            <span class="text-slate-400">เลือกคนที่ถูกวางยา:</span>
+                                            <select id="sorcerer2-target-select" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100" onchange="updateSorcerer2Target()">
+                                                <option value="">-- ไม่วางยา / ข้าม --</option>
+                                                ${playerOpts}
+                                            </select>
+                                        </div>
+                                        <p class="text-[10px] text-fuchsia-300/80 leading-relaxed">🧪 ผู้ถูกวางยาจะถูกบล็อกความสามารถทันทีจนถึงคืนถัดไป • Seer ส่องจะเห็นผลตรงข้าม • หากถูกหมาป่าฆ่า ความสามารถตอนตาย (เช่น Mad Bomber, Hunter, Disease, Cursed, Tough Guy) จะไม่ทำงาน</p>
                                     </div>
                                 </div>
                             `;
@@ -2257,6 +2280,15 @@
                             document.getElementById('bg-target-select').value = gameState.bodyguardTarget;
                         }
                     }
+                    if (gameState.poisonedTarget) {
+                        const s2Cb = document.getElementById('sorcerer2-cb');
+                        if (s2Cb) {
+                            s2Cb.checked = true;
+                            document.getElementById('sorcerer2-dropdown').classList.remove('hidden');
+                            const s2Sel = document.getElementById('sorcerer2-target-select');
+                            if (s2Sel) s2Sel.value = gameState.poisonedTarget;
+                        }
+                    }
                     if (gameState.silencedTarget) {
                         const spCb = document.getElementById('spellcaster-cb');
                         if (spCb) {
@@ -2279,9 +2311,20 @@
                 let hunterCheckHtml = '';
                 const wolf = gameState.wolfTarget;
                 const bg = gameState.bodyguardTarget;
-                const isHunterKilled = wolf && (gameState.rolePlayerMap[wolf] === 'hunter') && (!(bg && wolf === bg));
+                const isHunterKilled = wolf && (gameState.rolePlayerMap[wolf] === 'hunter') && (!(bg && wolf === bg && !isPoisoned(getPlayerByRole('bodyguard'))));
 
-                if (isHunterKilled) {
+                if (isHunterKilled && isPoisoned(wolf)) {
+                    hunterCheckHtml = `
+                        <div class="bg-fuchsia-950/60 p-3 rounded-xl border border-fuchsia-800 space-y-1 shadow">
+                            <span class="text-fuchsia-300 font-bold text-xs flex items-center gap-1.5">
+                                <span>🧪</span> Hunter (${wolf}) ถูกหมาป่าสังหาร แต่ถูกวางยา!
+                            </span>
+                            <div class="text-[11px] text-slate-300">
+                                • ความสามารถถูกบล็อก <b>Hunter ไม่สามารถยิงใครได้</b>
+                            </div>
+                        </div>
+                    `;
+                } else if (isHunterKilled) {
                     hunterCheckHtml = `
                         <div class="bg-rose-950/70 p-3 rounded-xl border border-rose-800 space-y-1 shadow">
                             <span class="text-rose-400 font-bold text-xs flex items-center gap-1.5">
@@ -2294,8 +2337,33 @@
                     `;
                 }
 
+                let poisonCheckHtml = '';
+                if (gameState.poisonedTarget) {
+                    const pRole = ROLES_DATABASE.find(r => r.id === gameState.rolePlayerMap[gameState.poisonedTarget]);
+                    poisonCheckHtml = `
+                        <div class="bg-fuchsia-950/60 p-3 rounded-xl border border-fuchsia-800 space-y-1 shadow">
+                            <span class="text-fuchsia-300 font-bold text-xs flex items-center gap-1.5">
+                                <span>🧪</span> ผู้เล่นถูกวางยา: <b>${gameState.poisonedTarget}</b> ${pRole ? '(' + pRole.icon + ' ' + pRole.name + ')' : ''}
+                            </span>
+                            <div class="text-[11px] text-slate-300">
+                                • ความสามารถของผู้เล่นนี้ถูก <b>Sorcerer2</b> บล็อกตลอดวันนี้ (หากถูกโหวตตาย ความสามารถตอนตายจะไม่ทำงาน)
+                            </div>
+                        </div>
+                    `;
+                }
+
+                const spellcasterBlocked = gameState.silencedTarget && isPoisoned(getPlayerByRole('spellcaster'));
                 let silencedCheckHtml = '';
-                if (gameState.silencedTarget) {
+                if (spellcasterBlocked) {
+                    silencedCheckHtml = `
+                        <div class="bg-fuchsia-950/60 p-3 rounded-xl border border-fuchsia-800 space-y-1 shadow">
+                            <span class="text-fuchsia-300 font-bold text-xs flex items-center gap-1.5">
+                                <span>🧪</span> Spellcaster ถูกวางยา — เวทใบ้ใส่ <b>${gameState.silencedTarget}</b> ไม่ทำงาน
+                            </span>
+                            <div class="text-[11px] text-slate-300">• ผู้เล่นคนนี้สามารถพูดได้ตามปกติ</div>
+                        </div>
+                    `;
+                } else if (gameState.silencedTarget) {
                     silencedCheckHtml = `
                         <div class="bg-purple-950/70 p-3 rounded-xl border border-purple-800 space-y-1 shadow">
                             <span class="text-purple-300 font-bold text-xs flex items-center gap-1.5">
@@ -2319,6 +2387,7 @@
                             </div>
                         </div>
 
+                        ${poisonCheckHtml}
                         ${hunterCheckHtml}
                         ${silencedCheckHtml}
 
@@ -2344,7 +2413,7 @@
                                 </button>
                             </div>
                             <p class="text-[10px] text-slate-400 italic">
-                                * หากโหวต Tanner จะชนะเกมทันที | หากโหวต Mad Bomber ผู้เล่นซ้าย-ขวาจะระเบิดตายด้วย
+                                * หากโหวต Tanner จะชนะเกมทันที | หากโหวต Mad Bomber จะมี Popup ให้เลือกคนนั่งซ้าย-ขวาที่ระเบิดตายด้วย
                             </p>
                         </div>
                     </div>
@@ -2379,6 +2448,8 @@
                 const isInjuredTG = gameState.toughGuyInjured && gameState.toughGuyInjured.player === p && status.alive;
                 const toughGuyBadge = isInjuredTG ? '<span class="text-rose-400 font-bold ml-1 animate-pulse" title="Tough Guy ได้รับบาดเจ็บ (จะเสียชีวิตในวันถัดไป)">🩸</span>' : '';
                 const isSilenced = gameState.silencedTarget === p && status.alive;
+                const isPoisonedP = gameState.poisonedTarget === p && status.alive;
+                const poisonBadge = isPoisonedP ? '<span class="text-fuchsia-400 font-bold ml-1 animate-pulse" title="ถูก Sorcerer2 วางยา (ความสามารถถูกบล็อก)">🧪</span>' : '';
                 const silencedBadge = isSilenced ? '<span class="text-purple-400 font-bold ml-1 animate-pulse" title="ถูก Spellcaster เสกใบ้ (ห้ามพูดในวันนี้)">🤐</span>' : '';
 
                 statusList.innerHTML += `
@@ -2390,6 +2461,7 @@
                                 ${wolfTurnBadge}
                                 ${toughGuyBadge}
                                 ${silencedBadge}
+                                ${poisonBadge}
                                 <span class="text-[10px] text-amber-400 bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-900/50">${roleObj ? (roleObj.icon + ' ' + roleObj.name) : role}</span>
                             </div>
                             <input type="text" placeholder="จดโน้ตย่อ..." class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-0.5 text-[11px] text-slate-300 focus:outline-none focus:border-amber-500" value="${status.note}" onchange="updatePlayerNote('${p}', this.value)">
@@ -2489,18 +2561,66 @@
             const roleId = gameState.rolePlayerMap[target];
             const isTurnedWolf = gameState.cursedTurned && gameState.cursedTurned.includes(target);
             const isLycan = roleId === 'lycan';
-            const isWolfRole = roleId === 'werewolf' || roleId === 'wolf_cub' || isTurnedWolf;
+            let isWolfRole = roleId === 'werewolf' || roleId === 'wolf_cub' || isTurnedWolf;
+
+            const seerPlayer = getPlayerByRole('seer');
+            const seerPoisonWarn = isPoisoned(seerPlayer)
+                ? `<div class="text-[10px] text-fuchsia-300 mt-1">⚠️ Seer (${seerPlayer}) ถูกวางยาในคืนนี้ — ความสามารถถูกบล็อก (Mod พิจารณาไม่ให้ผล หรือให้ผลหลอกได้)</div>`
+                : '';
+
+            if (isPoisoned(target)) {
+                // Poisoned target: Seer sees the OPPOSITE result
+                const truthWolf = isWolfRole || isLycan;
+                if (truthWolf) {
+                    disp.className = "text-xs p-2.5 rounded-lg border border-emerald-700 bg-emerald-950/80 text-emerald-300 space-y-1";
+                    disp.innerHTML = `<div>🟢 ผลการส่อง: <b>เห็นเป็นคนดี (ไม่ใช่หมาป่า)</b></div><div class="text-[10px] text-fuchsia-300">🧪 ผู้เล่นนี้ถูกวางยา! ผลจริงคือ <b>หมาป่า</b> แต่ Seer จะเห็นเป็นตรงข้าม</div><div class="text-[10px] text-slate-400">👉 ให้สัญญาณ Seer: ชูนิ้วโป้งขึ้น หรือส่ายหน้า</div>${seerPoisonWarn}`;
+                } else {
+                    disp.className = "text-xs p-2.5 rounded-lg border border-rose-700 bg-rose-950/80 text-rose-300 space-y-1";
+                    disp.innerHTML = `<div>🐺 ผลการส่อง: <b>เห็นเป็นมนุษย์หมาป่า (Werewolf)</b></div><div class="text-[10px] text-fuchsia-300">🧪 ผู้เล่นนี้ถูกวางยา! ผลจริงคือ <b>คนดี</b> แต่ Seer จะเห็นเป็นตรงข้าม</div><div class="text-[10px] text-slate-400">👉 ให้สัญญาณ Seer: คว่ำนิ้วโป้งลง หรือพยักหน้า</div>${seerPoisonWarn}`;
+                }
+                return;
+            }
 
             if (isWolfRole) {
                 disp.className = "text-xs p-2.5 rounded-lg border border-rose-700 bg-rose-950/80 text-rose-300 space-y-1";
-                disp.innerHTML = `<div>🐺 ผลการส่อง: <b>เป็นมนุษย์หมาป่า (Werewolf)</b></div><div class="text-[10px] text-slate-400">👉 ให้สัญญาณ Seer: คว่ำนิ้วโป้งลง หรือพยักหน้า</div>`;
+                disp.innerHTML = `<div>🐺 ผลการส่อง: <b>เป็นมนุษย์หมาป่า (Werewolf)</b></div><div class="text-[10px] text-slate-400">👉 ให้สัญญาณ Seer: คว่ำนิ้วโป้งลง หรือพยักหน้า</div>${seerPoisonWarn}`;
             } else if (isLycan) {
                 disp.className = "text-xs p-2.5 rounded-lg border border-rose-700 bg-rose-950/80 text-rose-300 space-y-1";
-                disp.innerHTML = `<div>🐺 ผลการส่อง: <b>เห็นเป็นมนุษย์หมาป่า (Werewolf)</b></div><div class="text-[10px] text-amber-300">👉 แท้จริงคือ <b>Lycan (ฝ่ายชาวบ้าน)</b> แต่ Seer จะมองเห็นเป็นหมาป่า!</div><div class="text-[10px] text-slate-400">👉 ให้สัญญาณ Seer: คว่ำนิ้วโป้งลง หรือพยักหน้า</div>`;
+                disp.innerHTML = `<div>🐺 ผลการส่อง: <b>เห็นเป็นมนุษย์หมาป่า (Werewolf)</b></div><div class="text-[10px] text-amber-300">👉 แท้จริงคือ <b>Lycan (ฝ่ายชาวบ้าน)</b> แต่ Seer จะมองเห็นเป็นหมาป่า!</div><div class="text-[10px] text-slate-400">👉 ให้สัญญาณ Seer: คว่ำนิ้วโป้งลง หรือพยักหน้า</div>${seerPoisonWarn}`;
             } else {
                 disp.className = "text-xs p-2.5 rounded-lg border border-emerald-700 bg-emerald-950/80 text-emerald-300 space-y-1";
-                disp.innerHTML = `<div>🟢 ผลการส่อง: <b>เป็นคนดี (ไม่ใช่หมาป่า)</b></div><div class="text-[10px] text-slate-400">👉 ให้สัญญาณ Seer: ชูนิ้วโป้งขึ้น หรือส่ายหน้า</div>`;
+                disp.innerHTML = `<div>🟢 ผลการส่อง: <b>เป็นคนดี (ไม่ใช่หมาป่า)</b></div><div class="text-[10px] text-slate-400">👉 ให้สัญญาณ Seer: ชูนิ้วโป้งขึ้น หรือส่ายหน้า</div>${seerPoisonWarn}`;
             }
+        }
+
+        // ---------------- Sorcerer2 (Poison) helpers ----------------
+        function getPlayerByRole(roleId) {
+            return gameState.players.find(p => gameState.rolePlayerMap[p] === roleId) || '';
+        }
+
+        function isPoisoned(playerName) {
+            return !!playerName && gameState.poisonedTarget === playerName;
+        }
+
+        function toggleSorcerer2Dropdown() {
+            const cb = document.getElementById('sorcerer2-cb');
+            const dropdown = document.getElementById('sorcerer2-dropdown');
+            if (!cb || !dropdown) return;
+            if (cb.checked) {
+                dropdown.classList.remove('hidden');
+                updateSorcerer2Target();
+            } else {
+                dropdown.classList.add('hidden');
+                gameState.poisonedTarget = '';
+                calculateNightResult();
+            }
+        }
+
+        function updateSorcerer2Target() {
+            const sel = document.getElementById('sorcerer2-target-select');
+            gameState.poisonedTarget = sel ? sel.value : '';
+            calculateNightResult();
+            inspectSeerTarget();
         }
 
         function toggleSpellcasterDropdown() {
@@ -2585,25 +2705,16 @@
                 return;
             }
 
-            // 2. Mad Bomber check!
+            // 2. Mad Bomber check! -> Mod chooses the real left/right neighbours
             if (roleId === 'mad_bomber') {
-                if (gameState.playerStatus[victim]) gameState.playerStatus[victim].alive = false;
-                const adjacent = getAdjacentLivingPlayers(victim);
-                adjacent.forEach(adj => {
-                    if (gameState.playerStatus[adj]) gameState.playerStatus[adj].alive = false;
-                    if (gameState.lovers.includes(adj)) {
-                        const partner = gameState.lovers.find(p => p !== adj);
-                        if (partner && gameState.playerStatus[partner]) gameState.playerStatus[partner].alive = false;
-                    }
-                });
-                if (gameState.lovers.includes(victim)) {
-                    const partner = gameState.lovers.find(p => p !== victim);
-                    if (partner && gameState.playerStatus[partner]) gameState.playerStatus[partner].alive = false;
+                if (isPoisoned(victim)) {
+                    alert(`🧪 "${victim}" คือ Mad Bomber แต่ถูก Sorcerer2 วางยาไว้!\nระเบิดไม่ทำงาน — เสียชีวิตเพียงคนเดียว`);
+                    killWithLover(victim);
+                    renderPlayerStatusList();
+                    renderGameplay();
+                    return;
                 }
-                renderPlayerStatusList();
-                const adjText = adjacent.length > 0 ? adjacent.join(', ') : 'ไม่มี';
-                alert(`💥 ระเบิดทำงาน!\n\nผู้เล่น "${victim}" คือ Mad Bomber (มือระเบิดบ้าคลั่ง)!\nเมื่อถูกโหวตประหารชีวิต ระเบิดจะทำงานสังหารผู้เล่นทางซ้ายและขวา (${adjText}) เสียชีวิตตามทันที! 💣💀`);
-                renderGameplay();
+                openMadBomberModal(victim, 'vote');
                 return;
             }
 
@@ -2620,7 +2731,9 @@
             }
 
             // Hunter check
-            if (roleId === 'hunter') {
+            if (roleId === 'hunter' && isPoisoned(victim)) {
+                alert(`🧪 Hunter (${victim}) ถูกโหวตประหารชีวิต แต่ถูกวางยาไว้!\nความสามารถถูกบล็อก — ไม่สามารถยิงใครได้`);
+            } else if (roleId === 'hunter') {
                 alert(`🏹 Hunter (${victim}) ถูกโหวตประหารชีวิต!\nให้ Mod สอบถาม Hunter เพื่อใช้สิทธิ์ยิงผู้เล่น 1 คนให้ตายตามทันที`);
             }
 
@@ -2628,10 +2741,41 @@
             renderGameplay();
         }
 
+        function killWithLover(player) {
+            if (gameState.playerStatus[player]) gameState.playerStatus[player].alive = false;
+            if (gameState.lovers.includes(player)) {
+                const partner = gameState.lovers.find(p => p !== player);
+                if (partner && gameState.playerStatus[partner] && gameState.playerStatus[partner].alive) {
+                    gameState.playerStatus[partner].alive = false;
+                    return partner;
+                }
+            }
+            return null;
+        }
+
+        function nightKill(player) {
+            if (!player || !gameState.playerStatus[player]) return;
+            if (gameState.playerStatus[player].alive) {
+                gameState.playerStatus[player].alive = false;
+                gameState.nightKilled.push(player);
+            }
+        }
+
         function calculateNightResult() {
             const wolf = gameState.wolfTarget;
             const bg = gameState.bodyguardTarget;
+
+            // Undo any provisional kills from a previous calculation this night
+            (gameState.nightKilled || []).forEach(p => {
+                if (gameState.playerStatus[p]) gameState.playerStatus[p].alive = true;
+            });
+            gameState.nightKilled = [];
             gameState.cursedTurned = [];
+            gameState.wolvesInfectedNext = false;
+            gameState.pendingMadBomber = null;
+            if (gameState.toughGuyInjured && gameState.toughGuyInjured.night === gameState.dayCount) {
+                gameState.toughGuyInjured = null;
+            }
 
             if (!wolf) {
                 gameState.lastNightResultText = "- ยังไม่ได้เลือกเป้าหมายที่หมาป่าฆ่า -";
@@ -2641,82 +2785,89 @@
 
             const targetRole = gameState.rolePlayerMap[wolf];
             const isLoverTarget = gameState.lovers.includes(wolf);
+            const targetPoisoned = isPoisoned(wolf);
+            const bgPlayer = getPlayerByRole('bodyguard');
+            const poisonNote = targetPoisoned ? '<br>🧪 <b>เป้าหมายถูก Sorcerer2 วางยา</b> — ความสามารถถูกบล็อก' : '';
 
-            // 1. Bodyguard protection
+            // 1. Bodyguard protection (blocked if the Bodyguard is poisoned)
             if (bg && wolf === bg) {
-                gameState.lastNightResultText = `🛡️ Bodyguard ป้องกัน <b>${wolf}</b> สำเร็จ!<br>👉 <b>ผลลัพธ์: ไม่มีใครตาย</b> (การโจมตีถูกบล็อก)`;
-                renderPlayerStatusList();
-                return;
+                if (isPoisoned(bgPlayer)) {
+                    // fall through: protection fails
+                } else {
+                    gameState.lastNightResultText = `🛡️ Bodyguard ป้องกัน <b>${wolf}</b> สำเร็จ!<br>👉 <b>ผลลัพธ์: ไม่มีใครตาย</b> (การโจมตีถูกบล็อก)`;
+                    renderPlayerStatusList();
+                    return;
+                }
             }
+            const bgFailNote = (bg && wolf === bg && isPoisoned(bgPlayer)) ? '<br>🧪 Bodyguard ถูกวางยา — <b>การป้องกันล้มเหลว</b>' : '';
 
             // 2. Wolves infected by Disease from previous night
             if (gameState.wolvesInfected) {
                 gameState.lastNightResultText = `🐺 หมาป่าพยายามสังหาร <b>${wolf}</b>!<br>👉 <b>ผลลัพธ์: ไม่มีใครตาย</b> (เชื้อโรคระบาดจาก Disease ในคืนก่อนหน้าทำให้หมาป่าอ่อนแรง ไม่สามารถสังหารใครได้ในคืนนี้) 🦠🚫`;
-                gameState.wolvesInfected = false; // Infection is consumed
                 renderPlayerStatusList();
                 return;
             }
 
+            // Poisoned target: special on-death abilities are blocked -> normal death
+            const effRole = targetPoisoned ? '__poisoned__' : targetRole;
+
             // 3. Target is Disease: dies, wolves get infected for next night
-            if (targetRole === 'disease') {
+            if (effRole === 'disease') {
                 gameState.wolvesInfectedNext = true;
-                if (gameState.playerStatus[wolf]) gameState.playerStatus[wolf].alive = false;
+                nightKill(wolf);
                 if (isLoverTarget) {
                     const partner = gameState.lovers.find(p => p !== wolf);
-                    if (partner && gameState.playerStatus[partner]) gameState.playerStatus[partner].alive = false;
-                    gameState.lastNightResultText = `🦠 Disease (<b>${wolf}</b>) ถูกหมาป่าสังหาร และเป็นหนึ่งในคู่รัก (Lovers)!<br>👉 <b>ผลลัพธ์: Disease และคู่รัก (${partner}) เสียชีวิตในคืนนี้</b> และ <b>หมาป่าติดเชื้อโรคระบาด</b> (การสังหารในคืนถัดไปจะไม่มีใครตาย 🐺🚫)`;
+                    nightKill(partner);
+                    gameState.lastNightResultText = `🦠 Disease (<b>${wolf}</b>) ถูกหมาป่าสังหาร และเป็นหนึ่งในคู่รัก (Lovers)!<br>👉 <b>ผลลัพธ์: Disease และคู่รัก (${partner}) เสียชีวิตในคืนนี้</b> และ <b>หมาป่าติดเชื้อโรคระบาด</b> (การสังหารในคืนถัดไปจะไม่มีใครตาย 🐺🚫)${bgFailNote}`;
                 } else {
-                    gameState.lastNightResultText = `🦠 Disease (<b>${wolf}</b>) ถูกหมาป่าสังหาร!<br>👉 <b>ผลลัพธ์: Disease เสียชีวิตในคืนนี้</b> และ <b>หมาป่าติดเชื้อโรคระบาด</b> (การสังหารในคืนถัดไปจะไม่มีใครตาย 🐺🚫)`;
+                    gameState.lastNightResultText = `🦠 Disease (<b>${wolf}</b>) ถูกหมาป่าสังหาร!<br>👉 <b>ผลลัพธ์: Disease เสียชีวิตในคืนนี้</b> และ <b>หมาป่าติดเชื้อโรคระบาด</b> (การสังหารในคืนถัดไปจะไม่มีใครตาย 🐺🚫)${bgFailNote}`;
                 }
                 renderPlayerStatusList();
                 return;
             }
 
             // 4. Target is Cursed: turns into Werewolf!
-            if (targetRole === 'cursed') {
+            if (effRole === 'cursed') {
                 gameState.cursedTurned.push(wolf);
-                gameState.lastNightResultText = `🧑 Cursed (<b>${wolf}</b>) ถูกหมาป่าโจมตี<br>👉 <b>ผลลัพธ์: ไม่มีใครตาย และ Cursed กลายร่างเป็นหมาป่า 🐺</b>`;
+                gameState.lastNightResultText = `🧑 Cursed (<b>${wolf}</b>) ถูกหมาป่าโจมตี<br>👉 <b>ผลลัพธ์: ไม่มีใครตาย และ Cursed กลายร่างเป็นหมาป่า 🐺</b>${bgFailNote}`;
                 renderPlayerStatusList();
                 return;
             }
 
-            // 5. Target is Mad Bomber: dies, and adjacent living players also die!
-            if (targetRole === 'mad_bomber') {
-                if (gameState.playerStatus[wolf]) gameState.playerStatus[wolf].alive = false;
-                const adjacent = getAdjacentLivingPlayers(wolf);
-                adjacent.forEach(adj => {
-                    if (gameState.playerStatus[adj]) gameState.playerStatus[adj].alive = false;
-                    if (gameState.lovers.includes(adj)) {
-                        const partner = gameState.lovers.find(p => p !== adj);
-                        if (partner && gameState.playerStatus[partner]) gameState.playerStatus[partner].alive = false;
-                    }
-                });
-                if (isLoverTarget) {
-                    const partner = gameState.lovers.find(p => p !== wolf);
-                    if (partner && gameState.playerStatus[partner]) gameState.playerStatus[partner].alive = false;
-                }
-                const adjText = adjacent.length > 0 ? adjacent.join(', ') : 'ไม่มี';
-                gameState.lastNightResultText = `💣 Mad Bomber (<b>${wolf}</b>) ถูกหมาป่าสังหาร!<br>👉 <b>ผลลัพธ์: ระเบิดทำงาน!</b> ผู้เล่นซ้าย-ขวา (<b>${adjText}</b>) เสียชีวิตตามไปด้วยทันที! 💥`;
+            // 5. Target is Mad Bomber: dies; Mod picks the real neighbours in the morning
+            if (effRole === 'mad_bomber') {
+                nightKill(wolf);
+                if (isLoverTarget) nightKill(gameState.lovers.find(p => p !== wolf));
+                gameState.pendingMadBomber = wolf;
+                gameState.lastNightResultText = `💣 Mad Bomber (<b>${wolf}</b>) ถูกหมาป่าสังหาร!<br>👉 <b>ผลลัพธ์: ระเบิดทำงาน!</b> เมื่อเข้าสู่ช่วงเช้า จะมี Popup ให้ Mod เลือกผู้เล่นที่นั่งซ้าย-ขวา 💥${bgFailNote}`;
                 renderPlayerStatusList();
                 return;
             }
 
             // 6. Target is Tough Guy: delayed death
-            if (targetRole === 'tough_guy') {
+            if (effRole === 'tough_guy') {
                 gameState.toughGuyInjured = {
                     player: wolf,
                     night: gameState.dayCount
                 };
-                gameState.lastNightResultText = `💪 Tough Guy (<b>${wolf}</b>) ถูกหมาป่ากัด<br>👉 <b>ผลลัพธ์: ยังไม่ตายในวันนี้</b> (จะตายในวันถัดไป)`;
+                gameState.lastNightResultText = `💪 Tough Guy (<b>${wolf}</b>) ถูกหมาป่ากัด<br>👉 <b>ผลลัพธ์: ยังไม่ตายในวันนี้</b> (จะตายในวันถัดไป)${bgFailNote}`;
             } else {
+                const roleObj = ROLES_DATABASE.find(r => r.id === targetRole);
+                const roleLabel = roleObj ? roleObj.name : (targetRole || 'unknown');
+                let blockedNote = '';
+                if (targetPoisoned && ['mad_bomber', 'disease', 'cursed', 'tough_guy', 'hunter'].includes(targetRole)) {
+                    blockedNote = `<br>🧪 <b>${roleLabel}</b> ถูกวางยา — ความสามารถไม่ทำงาน${targetRole === 'mad_bomber' ? ' (ระเบิดไม่ทำงาน คนรอบข้างไม่ตาย)' : ''}`;
+                } else if (targetPoisoned) {
+                    blockedNote = poisonNote;
+                }
                 if (isLoverTarget) {
                     const partner = gameState.lovers.find(p => p !== wolf);
-                    gameState.lastNightResultText = `🐺 หมาป่าฆ่า <b>${wolf}</b> ซึ่งเป็นหนึ่งในคู่รัก (Lovers)!<br>👉 <b>ผลลัพธ์: ผู้เล่นคู่รักทั้งคู่ (${wolf} และ ${partner}) เสียชีวิตทันทีตามเงื่อนไข ❤️</b>`;
-                    if (gameState.playerStatus[wolf]) gameState.playerStatus[wolf].alive = false;
-                    if (partner && gameState.playerStatus[partner]) gameState.playerStatus[partner].alive = false;
+                    gameState.lastNightResultText = `🐺 หมาป่าฆ่า <b>${wolf}</b> ซึ่งเป็นหนึ่งในคู่รัก (Lovers)!<br>👉 <b>ผลลัพธ์: ผู้เล่นคู่รักทั้งคู่ (${wolf} และ ${partner}) เสียชีวิตทันทีตามเงื่อนไข ❤️</b>${blockedNote}${bgFailNote}`;
+                    nightKill(wolf);
+                    nightKill(partner);
                 } else {
-                    gameState.lastNightResultText = `🐺 หมาป่าเลือกฆ่า: <b>${wolf}</b> (${targetRole || 'unknown'})<br>👉 <b>ผลลัพธ์: ผู้เล่นเสียชีวิตในคืนนี้</b>`;
-                    if (gameState.playerStatus[wolf]) gameState.playerStatus[wolf].alive = false;
+                    gameState.lastNightResultText = `🐺 หมาป่าเลือกฆ่า: <b>${wolf}</b> (${roleLabel})<br>👉 <b>ผลลัพธ์: ผู้เล่นเสียชีวิตในคืนนี้</b>${blockedNote}${bgFailNote}`;
+                    nightKill(wolf);
                 }
             }
             renderPlayerStatusList();
@@ -2730,7 +2881,7 @@
                 const roleId = gameState.rolePlayerMap[playerName];
 
                 // If Cursed is being killed, check if it's a wolf bite to transform them instead
-                if (roleId === 'cursed' && !gameState.cursedTurned.includes(playerName)) {
+                if (roleId === 'cursed' && !gameState.cursedTurned.includes(playerName) && !isPoisoned(playerName)) {
                     const isWolfBite = confirm(`ผู้เล่น ${playerName} คือ Cursed (คนต้องสาป)!\n\nการกดให้เสียชีวิตครั้งนี้ เกิดจากการ "ถูกหมาป่ากัดในตอนกลางคืน" ใช่หรือไม่?\n\n- กด OK: หากถูกหมาป่ากัด (จะกลายร่างเป็นหมาป่า และปุ่มจะเปลี่ยนเป็นปุ่มสีเหลือง)\n- กด Cancel: หากถูกชาวบ้านโหวต หรือตายจากสาเหตุอื่น (จะเสียชีวิตทันที)`);
                     if (isWolfBite) {
                         gameState.cursedTurned.push(playerName);
@@ -2752,8 +2903,10 @@
                 }
 
                 // If Mad Bomber dies, open target selection modal
-                if (roleId === 'mad_bomber') {
-                    openMadBomberModal(playerName);
+                if (roleId === 'mad_bomber' && isPoisoned(playerName)) {
+                    alert(`🧪 ${playerName} (Mad Bomber) ถูกวางยาไว้ — ระเบิดไม่ทำงาน`);
+                } else if (roleId === 'mad_bomber') {
+                    openMadBomberModal(playerName, 'manual');
                     return; // Stop here, modal will handle the status update
                 }
             }
@@ -2771,9 +2924,11 @@
         }
 
         let activeMadBomber = null;
+        let madBomberContext = 'manual'; // 'manual' | 'vote' | 'night'
 
-        function openMadBomberModal(playerName) {
+        function openMadBomberModal(playerName, context) {
             activeMadBomber = playerName;
+            madBomberContext = context || 'manual';
             
             const leftSelect = document.getElementById('mad-bomber-target-left');
             const rightSelect = document.getElementById('mad-bomber-target-right');
@@ -2812,9 +2967,19 @@
                     }
                 }
             }
+            if (madBomberContext === 'night') {
+                gameState.lastNightResultText += '<br>💣 Mod ยืนยัน: ไม่มีผู้เล่นถูกระเบิดตามไปด้วย';
+            }
+            finishMadBomberModal();
+        }
+
+        function finishMadBomberModal() {
+            const ctx = madBomberContext;
             activeMadBomber = null;
+            madBomberContext = 'manual';
             document.getElementById('modal-mad-bomber').classList.add('hidden');
             renderPlayerStatusList();
+            if (ctx === 'vote' || ctx === 'night') renderGameplay();
         }
 
         function triggerMadBomberBlast() {
@@ -2845,10 +3010,11 @@
             const killedList = Array.from(targetsToKill).filter(p => p !== activeMadBomber);
             const adjText = killedList.length > 0 ? killedList.join(', ') : 'ไม่มี (ระเบิดว่าว)';
             alert(`💥 ระเบิดทำงาน!\n\nMad Bomber (${activeMadBomber}) เสียชีวิต ทำให้ผู้เล่นที่เลือก (${adjText}) เสียชีวิตตามทันที! 💣💀`);
+            if (madBomberContext === 'night') {
+                gameState.lastNightResultText += `<br>💥 ระเบิดสังหารผู้เล่นที่นั่งข้าง: <b>${adjText}</b>`;
+            }
 
-            activeMadBomber = null;
-            document.getElementById('modal-mad-bomber').classList.add('hidden');
-            renderPlayerStatusList();
+            finishMadBomberModal();
         }
 
         function updatePlayerNote(playerName, note) {
@@ -2856,14 +3022,23 @@
         }
 
         function nextPhase() {
+            let openBomberFor = null;
             if (gameState.gamePhase === 'night') {
                 gameState.gamePhase = 'day';
+                gameState.wolvesInfected = false; // Disease infection consumed this night
+                gameState.nightKilled = [];       // Lock in tonight's kills
+                if (gameState.pendingMadBomber) {
+                    openBomberFor = gameState.pendingMadBomber;
+                    gameState.pendingMadBomber = null;
+                }
             } else {
                 gameState.gamePhase = 'night';
                 gameState.dayCount++;
 
-                // Reset silenced effect for the new night/day
+                // Reset silenced / poisoned effect for the new night/day
                 gameState.silencedTarget = '';
+                gameState.poisonedTarget = '';
+                gameState.nightKilled = [];
 
                 // Activate wolf disease infection for this night if infected from earlier
                 if (gameState.wolvesInfectedNext) {
@@ -2895,6 +3070,9 @@
             }
             renderGameplay();
             resetTimer();
+            if (openBomberFor) {
+                setTimeout(() => openMadBomberModal(openBomberFor, 'night'), 150);
+            }
         }
 
         function updateTimerRange(val) {
@@ -2984,6 +3162,8 @@
                     wolvesInfected: false,
                     wolvesInfectedNext: false,
                     silencedTarget: '',
+                    poisonedTarget: '',
+                    nightKilled: [],
                     lastNightResultText: ''
                 };
                 showScreen('screen-home');
