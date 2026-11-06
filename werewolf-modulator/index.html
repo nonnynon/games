@@ -1135,10 +1135,10 @@
             joinRequestId = myDeviceId + '-' + Date.now() + '-' + Math.random().toString(36).slice(2);
             try { sessionStorage.removeItem('ww_joined_room'); } catch(e) {}
             document.getElementById('btn-player-join').disabled = true;
-            updatePlayerConnBadge(false, 'รอ Host ยืนยัน — ยังไม่ได้เข้าร่วม');
+            updatePlayerConnBadge(false, 'กำลังเข้าร่วมห้อง…');
             clearTimeout(joinDeadline);
             joinDeadline = setTimeout(() => {
-                if (joinIntent && !joinAdmitted) showJoinError('Host ยังไม่ยืนยัน กรุณาลองอีกครั้ง');
+                if (joinIntent && !joinAdmitted) showJoinError('ยังเชื่อมต่อเข้าห้องไม่สำเร็จ กรุณาลองอีกครั้ง');
             }, 15000);
         }
 
@@ -1165,7 +1165,7 @@
                 sessionStorage.setItem('ww_room_code', activeRoomCode);
                 sessionStorage.setItem('ww_joined_room', 'true');
             } catch(e) {}
-            updatePlayerConnBadge(true, 'Host ยืนยันเข้าร่วมแล้ว');
+            updatePlayerConnBadge(true, 'เข้าร่วมห้องสำเร็จ');
             document.getElementById('waiting-room-tag').innerText = activeRoomCode;
             document.getElementById('player-my-name-display').innerText = myPlayerName;
             if (!myAssignedRole) showScreen('screen-player-waiting');
@@ -1203,7 +1203,7 @@
             clearTimeout(reconnectTimer); reconnectTimer = null;
             const params = new URLSearchParams(window.location.search);
             const targetModId = targetId || params.get('mid') || currentModPeerId || getModPeerId(roomCode);
-            updatePlayerConnBadge(false, 'กำลังเชื่อมต่อ / รอ Host ยืนยัน');
+            updatePlayerConnBadge(false, 'กำลังเชื่อมต่อเข้าห้อง…');
             try {
                 const conn = peerInstance.connect(targetModId, { serialization: 'json' });
                 playerModConn = conn;
@@ -1221,7 +1221,7 @@
                 conn.on('open', () => {
                     if (!current()) return;
                     clearTimeout(connectDeadline); connectDeadline = null;
-                    updatePlayerConnBadge(false, joinIntent ? 'รอ Host ยืนยัน' : 'กรอกชื่อแล้วกดเข้าร่วม');
+                    updatePlayerConnBadge(false, joinIntent ? 'กำลังเข้าร่วมห้อง…' : 'กรอกชื่อแล้วกดเข้าร่วม');
                     sendPlayerJoinMessage();
                 });
                 conn.on('data', data => { if (current()) handleIncomingMessage(data, conn); });
