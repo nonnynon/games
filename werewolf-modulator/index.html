@@ -1954,10 +1954,10 @@
             back.textContent = '';
             if (travelerCardInfo) {
                 const label = document.createElement('div');
-                label.className = 'h-full overflow-y-auto p-5 text-center text-purple-200 space-y-3';
-                const icon = document.createElement('div'); icon.className = 'text-6xl'; icon.textContent = roleInfo.roleIcon;
-                const title = document.createElement('h2'); title.className = 'text-2xl font-bold break-words'; title.textContent = roleInfo.roleName;
-                const desc = document.createElement('p'); desc.className = 'text-xs text-slate-300 leading-relaxed text-left break-words'; desc.textContent = roleInfo.desc;
+                label.className = 'h-full overflow-y-auto p-5 text-center text-purple-200 flex flex-col';
+                const icon = document.createElement('div'); icon.className = 'text-6xl mt-auto shrink-0'; icon.textContent = roleInfo.roleIcon;
+                const title = document.createElement('h2'); title.className = 'text-2xl font-bold break-words mt-3 shrink-0'; title.textContent = roleInfo.roleName;
+                const desc = document.createElement('p'); desc.className = 'text-xs text-slate-300 leading-relaxed text-center break-words mt-3 mb-auto shrink-0'; desc.textContent = roleInfo.desc;
                 label.append(icon); label.append(title); label.append(desc);
                 back.append(label);
                 document.getElementById('player-card-inner').classList.remove('flipped');
@@ -3719,7 +3719,12 @@
             Object.entries(state.admitted).forEach(([name,p]) => {
                 const row=document.createElement('div'); const role=travelerRole(p.kind);
                 const summary=document.createElement('span'); summary.className='traveler-summary';
-                summary.textContent=name+' — '+role.icon+' '+role.name+' / ฝ่ายลับ: '+p.team+(p.exiled?' / ถูกขับไล่':'')+' — '+role.desc; row.append(summary);
+                summary.textContent=name+' — '+role.icon+' '+role.name+' ';
+                const faction=document.createElement('span');
+                faction.className='text-[10px] px-1.5 py-0.5 rounded border '+(p.team==='wolf'?'text-red-400 bg-red-950/60 border-red-900/50':'text-blue-400 bg-blue-950/60 border-blue-900/50');
+                faction.textContent=p.team==='wolf'?'ฝ่าย: หมาป่า':'ฝ่าย: ชาวบ้าน'; summary.append(faction);
+                if (p.exiled) { const status=document.createElement('span'); status.textContent=' / ถูกขับไล่'; summary.append(status); }
+                const description=document.createElement('span'); description.className='block mt-1'; description.textContent=role.desc; summary.append(description); row.append(summary);
                 if (gameState.offlineGame) { const preview=document.createElement('button');preview.textContent='ดูการ์ดส่วนตัว';preview.className='p-2 bg-slate-700 rounded';preview.onclick=()=>previewLocalTraveler(name);row.append(preview); }
                 const alive=gameState.playerStatus[name]?.alive && !p.exiled;
                 if (p.kind === 'bureaucrat' && p.used) {
@@ -3737,7 +3742,7 @@
                     b.textContent=p.used?'ใช้แล้ว'+(p.target?' → '+p.target:''):(p.kind === 'gunslinger' ? 'ยิงเป้าหมาย' : 'ให้ +1 รอบถัดไป');
                     b.disabled=!travelerPowerAvailable(name) || !!activeMadBomber; b.onclick=()=>recordTravelerPower(name,p.kind==='judge'?'':select.value); row.append(b);
                 }
-                if (alive && gameState.gamePhase==='day') { const b=document.createElement('button');b.textContent='บันทึกผลขับไล่';b.className='p-2 bg-rose-950 rounded';b.onclick=()=>exileTraveler(name);row.append(b); }
+                if (alive && gameState.gamePhase==='day') { const b=document.createElement('button');b.textContent='ขับไล่ออกจากหมู่บ้าน';b.className='p-2 bg-rose-950 rounded';b.onclick=()=>exileTraveler(name);row.append(b); }
                 panel.append(row);
             });
         }
