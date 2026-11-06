@@ -921,6 +921,7 @@
         }
 
         function setupRealtimeListener(roomCode, asMod) {
+            gameState.offlineGame = false;
             isMod = asMod;
             activeRoomCode = roomCode;
 
@@ -1590,13 +1591,11 @@
             return url;
         }
 
-        function generateLobbyQRCode() {
-            const container = document.getElementById('qrcode-container');
+        function generateLobbyQRCode(container = document.getElementById('qrcode-container'), urlDisplay = document.getElementById('qr-target-url-display')) {
             container.innerHTML = '';
             const joinUrl = getFullJoinUrl();
 
             // Display target URL text for Mod verification
-            const urlDisplay = document.getElementById('qr-target-url-display');
             if (urlDisplay) urlDisplay.innerText = joinUrl;
 
             try {
@@ -2085,6 +2084,18 @@
         }
 
         function startOfflineGame() {
+            isMod = true;
+            isGameStarted = false;
+            gameState.offlineGame = true;
+            gameState.travelers = { pending: [], admitted: {} };
+            activeRoleAssignments = {};
+            joinedPlayers = [];
+            activeRoomCode = '';
+            currentModPeerId = '';
+            if (localChannel) { localChannel.close(); localChannel = null; }
+            if (peerInstance) { peerInstance.destroy(); peerInstance = null; }
+            connectedPeers = {};
+            playerModConn = null;
             const selects = document.querySelectorAll('.match-select-offline');
             gameState.playerRoleMap = {};
             gameState.rolePlayerMap = {};
@@ -3365,6 +3376,82 @@
             document.getElementById('modal-traveler').classList.add('hidden');
         }
 
+        // Gameplay is independent of the network lobby's isGameStarted flag.
+        function travelerGameActive() {
+            return isMod && (isGameStarted || gameState.offlineGame === true);
+        }
+        function travelerOverlay() {
+            closeTravelerOverlay();
+            const modal = document.createElement('dialog'); modal.id = 'traveler-game-overlay';
+            modal.style.cssText = 'position:fixed;inset:0;margin:0;width:100vw;height:100dvh;max-width:none;max-height:none;box-sizing:border-box;background:#020617;color:#e2e8f0;border:0;padding:24px;overflow:auto;z-index:2147483647;';
+            modal.setAttribute('aria-label', 'Traveler');
+            const close = document.createElement('button'); close.textContent = 'ปิด / กลับเกม';
+            close.style.cssText = 'display:block;padding:12px;background:#334155;border-radius:8px;margin-bottom:16px;';
+            close.onclick = closeTravelerOverlay; modal.append(close);
+            modal.addEventListener('cancel', e => { e.preventDefault(); closeTravelerOverlay(); });
+            document.body.append(modal); modal.showModal();
+            return modal;
+        }
+        function closeTravelerOverlay() {
+            const modal = document.getElementById('traveler-game-overlay');
+            if (!modal) return;
+            const card = document.getElementById('screen-player-card');
+            if (modal.contains(card)) {
+                document.getElementById('player-card-inner').classList.remove('flipped');
+                paintTravelerPrivacy(false); travelerCardInfo = null;
+                card.classList.add('hidden');
+                const anchor = document.getElementById('traveler-card-anchor');
+                anchor.replaceWith(card);
+            }
+            modal.close(); modal.remove();
+        }
+        function openAddTraveler() {
+            if (!travelerGameActive()) return;
+            const modal = travelerOverlay();
+            if (gameState.offlineGame) {
+                const title = document.createElement('p'); title.textContent = 'เพิ่ม Traveler เครื่องเดียว — หน้าลับ Mod'; modal.append(title);
+                const input = document.createElement('input'); input.id = 'local-traveler-name'; input.placeholder = 'ชื่อ Traveler'; input.maxLength = 40;
+                input.style.cssText = 'display:block;padding:12px;background:#334155;margin:12px 0;'; input.setAttribute('aria-label','ชื่อ Traveler'); modal.append(input);
+                const kind = document.createElement('select'); kind.id = 'local-traveler-kind'; kind.setAttribute('aria-label','บทบาท Traveler');
+                travelerKinds.forEach(k => { const o=document.createElement('option'); o.value=k; o.textContent=travelerRole(k).name; kind.append(o); });
+                const team = document.createElement('select'); team.id='local-traveler-team'; team.setAttribute('aria-label','ฝ่ายลับ');
+                [['good','ฝ่ายชาวบ้าน'],['wolf','ฝ่ายหมาป่า']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;team.append(o);});
+                [kind,team].forEach(el=>{el.style.cssText='padding:12px;background:#334155;margin:8px;';modal.append(el);});
+                const error=document.createElement('p'); error.id='local-traveler-error'; error.setAttribute('role','alert');
+                const add=document.createElement('button'); add.textContent=gameState.gamePhase==='day'?'รับเข้าหมู่บ้าน':'เพิ่มคิว / รอเช้า'; add.style.cssText='display:block;padding:12px;background:#581c87;';
+                add.onclick=()=>queueLocalTraveler(input.value,kind.value,team.value); modal.append(add,error);
+                return;
+            }
+            // Public invitation only: no player roster, assignments or faction data.
+            const title=document.createElement('p');title.textContent='Add Traveler — สแกนเข้าห้องเดิม';modal.append(title);
+            const code=document.createElement('p');code.textContent='ห้อง '+activeRoomCode;modal.append(code);
+            const qr=document.createElement('div');qr.style.cssText='background:white;padding:16px;width:222px;box-sizing:border-box;margin:24px auto;';modal.append(qr);
+            const url=document.createElement('p');url.style.overflowWrap='anywhere';modal.append(url);
+            generateLobbyQRCode(qr,url);
+        }
+        function queueLocalTraveler(value, kind, team) {
+            if (!travelerGameActive() || !gameState.offlineGame || !travelerKinds.includes(kind) || !['good','wolf'].includes(team)) return;
+            const name=typeof value==='string'?value.trim():'';
+            const error=joinNameError(name,'',true);
+            if(error){document.getElementById('local-traveler-error').textContent=error;return;}
+            const state=travelerState();state.localSerial=(state.localSerial||0)+1;
+            const id='local-traveler-'+state.localSerial;
+            state.pending.push({id,name,kind,team});
+            closeTravelerOverlay();
+            if(gameState.gamePhase==='day') admitTraveler(id,team);
+            renderTravelerControls();
+        }
+        function previewLocalTraveler(name) {
+            if (!travelerGameActive() || !gameState.offlineGame) return;
+            const p=travelerState().admitted[name];if(!p)return;
+            const modal=travelerOverlay();
+            const card=document.getElementById('screen-player-card');
+            const anchor=document.createElement('span');anchor.id='traveler-card-anchor';card.before(anchor);
+            renderPlayerCard(activeRoleAssignments[p.id]);
+            document.getElementById('card-player-name-tag').innerText=name;
+            modal.append(card);card.classList.remove('hidden');
+        }
+
         // Traveler: moderator records outcomes; no vote tally or winner adjudication.
         const travelerKinds = ['judge', 'gunslinger', 'politician', 'bureaucrat'];
         function travelerState() {
@@ -3443,7 +3530,7 @@
             renderTravelerControls();
         }
         function admitTraveler(id, team) {
-            if (!isMod || !isGameStarted || gameState.gamePhase !== 'day' || activeMadBomber || !['good','wolf'].includes(team)) return;
+            if (!travelerGameActive() || gameState.gamePhase !== 'day' || activeMadBomber || !['good','wolf'].includes(team)) return;
             const state = travelerState();
             const p = state.pending.find(p => p.id === id);
             if (!p || activeRoleAssignments[id] || gameState.players.some(n => n.toLowerCase() === p.name.toLowerCase())) return;
@@ -3467,8 +3554,7 @@
             gameState.playerStatus[p.name] = { alive: true, note: '' };
             activeRoleAssignments[id] = { playerId: id, playerName: p.name, roleId: p.kind,
                 roleName: role.name, roleThai: role.thai, roleIcon: role.icon, team, desc: role.desc, ...(team === 'wolf' ? { wolfDisclosure } : {}) };
-            broadcastAssignments();
-            broadcastRoomStateUpdate();
+            if (!gameState.offlineGame) { broadcastAssignments(); broadcastRoomStateUpdate(); }
             renderGameplay();
         }
         function exileTraveler(name) {
@@ -3496,7 +3582,7 @@
         }
         function recordTravelerPower(name, target) {
             const p = travelerState().admitted[name];
-            if (!isMod || !isGameStarted || activeMadBomber || !travelerPowerAvailable(name) || !['gunslinger','bureaucrat'].includes(p.kind)) return;
+            if (!travelerGameActive() || activeMadBomber || !travelerPowerAvailable(name) || !['gunslinger','bureaucrat'].includes(p.kind)) return;
             if (!gameState.playerStatus[target]?.alive || (p.kind === 'bureaucrat' && target === name)) return;
             if (p.kind === 'gunslinger' && gameState.gamePhase === 'night' && (bedriddenState().preview || (gameState.nightKilled || []).length || gameState.pendingMadBomber)) {
                 alert('มีผลสังหารกลางคืนที่ยังเป็นตัวอย่าง: ให้ Mod จบช่วงกลางคืนก่อนยิง เพื่อไม่ให้การคำนวณซ้ำย้อนผลยิง'); return;
@@ -3518,7 +3604,7 @@
         }
         function setTravelerVotingRound(open) {
             const state = travelerState();
-            if (!isMod || !isGameStarted || gameState.gamePhase !== 'day' || activeMadBomber || !!state.votingOpen === open) return;
+            if (!travelerGameActive() || gameState.gamePhase !== 'day' || activeMadBomber || !!state.votingOpen === open) return;
             if (!confirm(open ? 'เริ่มรอบลงมติถัดไป (รวมขับไล่): เปิดโบนัส +1 ที่รออยู่ — Mod นับเอง' : 'จบรอบลงมตินี้: โบนัส +1 ของรอบนี้หมดอายุ แม้ไม่ได้ลงคะแนน')) return;
             state.votingOpen = open;
             Object.values(state.admitted).forEach(p => {
@@ -3545,18 +3631,20 @@
             round.textContent = state.votingOpen ? 'จบรอบลงมติ / หมดอายุโบนัส +1' : 'เริ่มรอบลงมติถัดไป / เปิดโบนัส +1';
             round.disabled = gameState.gamePhase !== 'day' || !!activeMadBomber;
             round.onclick = () => setTravelerVotingRound(!state.votingOpen); panel.append(round);
+            const add = document.createElement('button'); add.id='btn-add-traveler'; add.textContent='➕ Add Traveler / เพิ่ม Traveler'; add.className='block w-full p-3 bg-purple-900 rounded'; add.onclick=openAddTraveler; panel.append(add);
             state.pending.forEach(p => {
                 const row = document.createElement('div');
                 row.textContent = p.name + ' — ' + travelerRole(p.kind).name + (gameState.gamePhase === 'day' ? '' : ' (รอเช้า)');
                 const select = document.createElement('select');
                 [['good','ฝ่ายชาวบ้าน'],['wolf','ฝ่ายหมาป่า']].forEach(([value,label]) => { const o = document.createElement('option'); o.value=value; o.textContent=label; select.append(o); });
-                select.className='bg-slate-800 p-1'; row.append(select);
+                select.value=p.team || 'good'; select.className='bg-slate-800 p-1'; row.append(select);
                 const b=document.createElement('button'); b.textContent='รับเข้าหมู่บ้าน'; b.className='p-2 bg-purple-900 rounded';
                 b.disabled=gameState.gamePhase !== 'day'; b.onclick=()=>admitTraveler(p.id,select.value); row.append(b); panel.append(row);
             });
             Object.entries(state.admitted).forEach(([name,p]) => {
                 const row=document.createElement('div'); const role=travelerRole(p.kind);
                 row.textContent=name+' — '+role.icon+' '+role.name+' / ฝ่ายลับ: '+p.team+(p.exiled?' / ถูกขับไล่':'')+' — '+role.desc;
+                if (gameState.offlineGame) { const preview=document.createElement('button');preview.textContent='ดูการ์ดส่วนตัว';preview.className='p-2 bg-slate-700 rounded';preview.onclick=()=>previewLocalTraveler(name);row.append(preview); }
                 const alive=gameState.playerStatus[name]?.alive && !p.exiled;
                 if (p.kind === 'bureaucrat' && p.used) {
                     const bonus = document.createElement('p');
