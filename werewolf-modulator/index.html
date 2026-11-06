@@ -771,6 +771,7 @@
         } catch(e){}
         let myPlayerName = '';
         let myAssignedRole = null;
+        let lastCardDelivery = null; // In-memory only: a new connection must start hidden.
         let isMod = false;
         let isGameStarted = false;
         let autoStartTimer = null;
@@ -1413,6 +1414,12 @@
                 let myAssignment = data.assignments[myDeviceId];
 
                 if (myAssignment) {
+                    const cardKey = JSON.stringify([activeRoomCode, data.gameSessionId || '',
+                        myAssignment.playerId, myAssignment.playerName, myAssignment.roleId,
+                        myAssignment.roleName, myAssignment.roleThai, myAssignment.roleIcon,
+                        myAssignment.team, myAssignment.desc, myAssignment.wolfDisclosure || []]);
+                    const repeatedCard = myAssignedRole && lastCardDelivery &&
+                        lastCardDelivery.conn === conn && lastCardDelivery.key === cardKey;
                     acceptJoin(myAssignment.playerName);
                     myAssignedRole = myAssignment;
                     try {
@@ -1423,7 +1430,8 @@
                     } catch(e) {}
 
                     closeTravelerModal();
-                    renderPlayerCard(myAssignment);
+                    if (!repeatedCard) renderPlayerCard(myAssignment);
+                    lastCardDelivery = { conn, key: cardKey };
                     showScreen('screen-player-card');
                 }
             }
