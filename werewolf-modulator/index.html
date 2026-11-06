@@ -2651,8 +2651,8 @@
                     const other = living[(idx + 1) % 2];
                     return [other];
                 }
-                const left = living[(idx - 1 + living.length) % living.length];
-                const right = living[(idx + 1) % living.length];
+                const left = living[(idx + 1) % living.length];
+                const right = living[(idx - 1 + living.length) % living.length];
                 return [left, right];
             } else {
                 const total = gameState.players.length;
@@ -2661,7 +2661,7 @@
 
                 let left = null, right = null;
                 for (let i = 1; i < total; i++) {
-                    const checkIdx = (pIdx - i + total) % total;
+                    const checkIdx = (pIdx + i) % total;
                     const p = gameState.players[checkIdx];
                     if (gameState.playerStatus[p] && gameState.playerStatus[p].alive) {
                         left = p;
@@ -2669,7 +2669,7 @@
                     }
                 }
                 for (let i = 1; i < total; i++) {
-                    const checkIdx = (pIdx + i) % total;
+                    const checkIdx = (pIdx - i + total) % total;
                     const p = gameState.players[checkIdx];
                     if (gameState.playerStatus[p] && gameState.playerStatus[p].alive) {
                         right = p;
@@ -3223,6 +3223,104 @@
             closeTravelerModal();
             showScreen('screen-player-card');
         }
+    </script>
+    <!-- Seating-only upgrade -->
+    <script>
+    // Seating-only extension. Player names remain the original stable state keys.
+    (function () {
+        function moveSeat(order, from, to) {
+            if (!Number.isInteger(from) || !Number.isInteger(to) || from < 0 || to < 0 || from >= order.length || to >= order.length) return order.slice();
+            const next = order.slice();
+            next.splice(to, 0, next.splice(from, 1)[0]);
+            return next;
+        }
+        function saveSeats(state, draft, originalOrder) {
+            const current = state.players;
+            // Reject stale/ambiguous drafts rather than dropping or duplicating anyone.
+            if (current.length !== originalOrder.length || current.some((key, i) => key !== originalOrder[i]) ||
+                new Set(current).size !== current.length || draft.length !== current.length ||
+                new Set(draft).size !== draft.length || draft.some(key => !current.includes(key))) return false;
+            current.splice(0, current.length, ...draft);
+            return true;
+        }
+        // Exposed only to the standalone harness; no gameplay data is exported.
+        if (typeof module !== 'undefined' && module.exports) {
+            module.exports = { moveSeat, saveSeats };
+            return;
+        }
+        let draft = null;
+        let originalOrder = null;
+        let statusIdentity = null;
+        const originalRender = renderPlayerStatusList;
+        function button(parent, label, action, disabled) {
+            const el = document.createElement('button');
+            el.type = 'button'; el.textContent = label;
+            el.className = 'px-2 py-1 bg-slate-700 rounded text-xs disabled:opacity-40';
+            el.disabled = !!disabled; el.onclick = action; parent.append(el);
+        }
+        function renderSeats() {
+            if (statusIdentity !== gameState.playerStatus) {
+                statusIdentity = gameState.playerStatus;
+                draft = null;
+            }
+            document.getElementById('ww-seating-panel')?.remove();
+            const list = document.getElementById('player-status-list');
+            if (!list) return;
+            const panel = document.createElement('div');
+            panel.id = 'ww-seating-panel';
+            panel.className = 'p-3 border border-slate-600 rounded-xl space-y-2 text-sm';
+            const title = document.createElement('h3');
+            title.textContent = 'ลำดับที่นั่ง 1–N'; panel.append(title);
+            const hint = document.createElement('p');
+            hint.className = 'text-xs text-slate-400';
+            hint.textContent = 'เรียงรอบวง: เลขก่อนหน้า = ขวา เลขถัดไป = ซ้าย (วนหัวท้าย) • เก็บที่นั่งผู้ตาย • ระเบิด จะแนะนำคนที่ยังมีชีวิตข้างถัดไปตามกติกาเดิม Mod ยืนยันเป้าหมายเอง';
+            panel.append(hint);
+            (draft || gameState.players).forEach((key, index, order) => {
+                const row = document.createElement('div');
+                row.className = 'flex flex-wrap items-center gap-2';
+                const name = document.createElement('span');
+                name.textContent = (index + 1) + '. ' + key + (gameState.playerStatus[key]?.alive === false ? ' (ตาย)' : '');
+                row.append(name);
+                if (draft) {
+                    const move = to => { draft = moveSeat(draft, index, to); renderSeats(); };
+                    button(row, '↑', () => move(index - 1), index === 0);
+                    button(row, '↓', () => move(index + 1), index === order.length - 1);
+                    const input = document.createElement('input');
+                    input.type = 'number'; input.min = 1; input.max = order.length; input.step = 1;
+                    input.value = index + 1; input.className = 'w-16 bg-slate-950 border border-slate-700 rounded px-1';
+                    input.setAttribute('aria-label', 'ย้าย ' + key + ' ไปที่นั่ง'); row.append(input);
+                    button(row, 'ย้ายไป', () => {
+                        const to = Number(input.value);
+                        if (!Number.isInteger(to) || to < 1 || to > draft.length) { alert('กรุณาระบุเลขที่นั่ง 1–' + draft.length); return; }
+                        move(to - 1);
+                    });
+                }
+                panel.append(row);
+            });
+            const actions = document.createElement('div'); actions.className = 'flex gap-2'; panel.append(actions);
+            if (!draft) {
+                button(actions, 'แก้ไขที่นั่ง', () => {
+                    originalOrder = gameState.players.slice(); draft = originalOrder.slice(); renderSeats();
+                });
+            } else {
+                button(actions, 'บันทึก', () => {
+                    if (!saveSeats(gameState, draft, originalOrder)) {
+                        alert('รายชื่อเปลี่ยนหรือมีชื่อซ้ำ กรุณายกเลิกแล้วตรวจสอบรายชื่อก่อนแก้ไขใหม่'); return;
+                    }
+                    draft = null;
+                    // Only refresh status/seats. Never rebuild target dropdowns or resolve a night.
+                    renderPlayerStatusList();
+                });
+                button(actions, 'ยกเลิก', () => { draft = null; renderSeats(); });
+            }
+            list.after(panel);
+        }
+        renderPlayerStatusList = function () {
+            originalRender();
+            renderSeats();
+        };
+    })();
+    
     </script>
 </body>
 </html>
