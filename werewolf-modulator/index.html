@@ -2651,8 +2651,8 @@
                     const other = living[(idx + 1) % 2];
                     return [other];
                 }
-                const left = living[(idx - 1 + living.length) % living.length];
-                const right = living[(idx + 1) % living.length];
+                const left = living[(idx + 1) % living.length];
+                const right = living[(idx - 1 + living.length) % living.length];
                 return [left, right];
             } else {
                 const total = gameState.players.length;
@@ -2661,7 +2661,7 @@
 
                 let left = null, right = null;
                 for (let i = 1; i < total; i++) {
-                    const checkIdx = (pIdx - i + total) % total;
+                    const checkIdx = (pIdx + i) % total;
                     const p = gameState.players[checkIdx];
                     if (gameState.playerStatus[p] && gameState.playerStatus[p].alive) {
                         left = p;
@@ -2669,7 +2669,7 @@
                     }
                 }
                 for (let i = 1; i < total; i++) {
-                    const checkIdx = (pIdx + i) % total;
+                    const checkIdx = (pIdx - i + total) % total;
                     const p = gameState.players[checkIdx];
                     if (gameState.playerStatus[p] && gameState.playerStatus[p].alive) {
                         right = p;
@@ -3273,7 +3273,7 @@
             title.textContent = 'ลำดับที่นั่ง 1–N'; panel.append(title);
             const hint = document.createElement('p');
             hint.className = 'text-xs text-slate-400';
-            hint.textContent = 'เรียงรอบวง: เลขก่อนหน้า = ซ้าย เลขถัดไป = ขวา (วนหัวท้าย) • เก็บที่นั่งผู้ตาย • ระเบิดแนะนำคนที่ยังมีชีวิตข้างถัดไปตามกติกาเดิม Mod ยืนยันเป้าหมายเอง';
+            hint.textContent = 'เรียงรอบวง: เลขก่อนหน้า = ขวา เลขถัดไป = ซ้าย (วนหัวท้าย) • เก็บที่นั่งผู้ตาย • ระเบิด จะแนะนำคนที่ยังมีชีวิตข้างถัดไปตามกติกาเดิม Mod ยืนยันเป้าหมายเอง';
             panel.append(hint);
             (draft || gameState.players).forEach((key, index, order) => {
                 const row = document.createElement('div');
