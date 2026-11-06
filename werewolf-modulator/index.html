@@ -90,12 +90,14 @@
         #traveler-controls .traveler-summary { grid-column: 1 / -1; min-width: 0; }
         #traveler-controls button, #traveler-controls select {
             width: 100%; min-width: 0; min-height: 44px;
+        }
+        #traveler-controls button, #traveler-controls select:not(.traveler-target-select) {
             padding: .5rem; border-radius: .5rem;
             font-size: .75rem; line-height: 1.5;
         }
         #traveler-controls button { white-space: normal; overflow-wrap: anywhere; }
         #traveler-controls button:disabled { opacity: .4; cursor: not-allowed; }
-        #traveler-controls button:focus-visible, #traveler-controls select:focus-visible {
+        #traveler-controls button:focus-visible, #traveler-controls select:not(.traveler-target-select):focus-visible {
             outline: 2px solid #c084fc; outline-offset: 2px;
         }
         #traveler-controls > div > select { grid-column: 1; }
@@ -1952,8 +1954,11 @@
             back.textContent = '';
             if (travelerCardInfo) {
                 const label = document.createElement('div');
-                label.className = 'h-full flex flex-col items-center justify-center p-5 text-center text-purple-200 text-2xl font-bold';
-                label.textContent = roleInfo.roleName;
+                label.className = 'h-full overflow-y-auto p-5 text-center text-purple-200 space-y-3';
+                const icon = document.createElement('div'); icon.className = 'text-6xl'; icon.textContent = roleInfo.roleIcon;
+                const title = document.createElement('h2'); title.className = 'text-2xl font-bold break-words'; title.textContent = roleInfo.roleName;
+                const desc = document.createElement('p'); desc.className = 'text-xs text-slate-300 leading-relaxed text-left break-words'; desc.textContent = roleInfo.desc;
+                label.append(icon); label.append(title); label.append(desc);
                 back.append(label);
                 document.getElementById('player-card-inner').classList.remove('flipped');
             } else {
@@ -2862,7 +2867,12 @@
             }
         }
 
-        function executeDayVote() {
+        let judgeExecutionPending = false;
+        async function executeDayVote() {
+            if (judgeExecutionPending) return;
+            judgeExecutionPending = true;
+            const executionState = gameState;
+            try {
             const select = document.getElementById('day-vote-target-select');
             if (!select) return;
             const victim = select.value;
@@ -2875,7 +2885,8 @@
             }
 
             if (!isMod || gameState.gamePhase !== 'day' || !gameState.playerStatus[victim]?.alive || activeMadBomber) return;
-            if (cancelExecutionWithJudge(victim)) return;
+            if (await cancelExecutionWithJudge(victim)) return;
+            if (gameState !== executionState || !isMod || gameState.gamePhase !== 'day' || !gameState.playerStatus[victim]?.alive || activeMadBomber) return;
             const roleId = isBedridden(victim) && gameState.rolePlayerMap[victim] === 'mad_bomber' ? 'mad_bomber' : effectiveRole(victim);
 
             // 1. Tanner Victory check!
@@ -2920,6 +2931,7 @@
 
             renderPlayerStatusList();
             renderGameplay();
+            } finally { judgeExecutionPending = false; }
         }
 
         function killWithLover(player) {
@@ -3600,11 +3612,42 @@
             const p = travelerState().admitted[name];
             return !!(p && !p.used && !p.exiled && gameState.playerStatus[name]?.alive && !isBedridden(name) && !isPoisoned(name));
         }
-        function cancelExecutionWithJudge(victim) {
-            // The Mod has confirmed a successful execution vote; ask before ANY death effects.
+        function askJudgePower(name, victim) {
+            return new Promise(resolve => {
+                const modal = document.createElement('dialog'); modal.id = 'judge-power-modal';
+                modal.className = 'bg-slate-900 text-slate-100 border border-purple-700 rounded-xl p-5 space-y-4 w-full max-w-sm';
+                modal.setAttribute('aria-labelledby', 'judge-power-title');
+                const title = document.createElement('h2'); title.id = 'judge-power-title'; title.className = 'text-lg font-bold text-purple-200';
+                title.textContent = '⚖️ Mod: สอบถาม Judge';
+                const question = document.createElement('p'); question.textContent = name + ' ใช้พลังครั้งเดียว ยกเลิกการประหาร ' + victim + ' หรือไม่?';
+                const note = document.createElement('p'); note.className = 'text-xs text-slate-400'; note.textContent = 'Mod สอบถามผู้เล่น แล้วบันทึกคำตอบที่เครื่องนี้';
+                let settled = false;
+                const finish = answer => {
+                    if (settled) return;
+                    settled = true; modal.close(); modal.remove(); resolve(answer);
+                };
+                modal.append(title, question, note);
+                for (const [answer, label, color] of [['use','ใช้พลัง','bg-purple-800'],['decline','ไม่ใช้พลัง','bg-slate-700'],['cancel','ปิด / ยกเลิกการประหารครั้งนี้','bg-slate-800']]) {
+                    const button = document.createElement('button'); button.type = 'button'; button.dataset.answer = answer;
+                    button.className = 'block w-full rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-purple-400 ' + color;
+                    button.textContent = label; button.onclick = () => finish(answer); modal.append(button);
+                }
+                modal.addEventListener('cancel', e => { e.preventDefault(); finish('cancel'); });
+                modal.addEventListener('close', () => finish('cancel'));
+                document.body.append(modal); modal.showModal();
+                modal.querySelector('[data-answer="cancel"]').focus();
+            });
+        }
+        async function cancelExecutionWithJudge(victim) {
+            // Only an explicit decline allows this execution to continue.
+            const state = gameState;
             for (const [name, p] of Object.entries(travelerState().admitted)) {
                 if (p.kind !== 'judge' || !travelerPowerAvailable(name)) continue;
-                if (!confirm(name + ' (Judge) ใช้พลังครั้งเดียว ยกเลิกการประหาร ' + victim + ' หรือไม่?')) continue;
+                const answer = await askJudgePower(name, victim);
+                if (gameState !== state || !isMod || gameState.gamePhase !== 'day' || activeMadBomber || !gameState.playerStatus[victim]?.alive) return true;
+                if (answer === 'cancel') return true;
+                if (answer === 'decline') continue;
+                if (answer !== 'use' || travelerState().admitted[name] !== p || !travelerPowerAvailable(name)) return true;
                 p.used = true; p.target = victim;
                 renderGameplay();
                 return true;
@@ -3687,7 +3730,7 @@
                     const note = document.createElement('p'); note.textContent = p.used ? 'ใช้ยกเลิกประหารแล้ว → ' + p.target : 'Mod ยืนยันผลประหารแล้วจะมีคำถามใช้พลัง (ไม่ยกเลิกขับไล่)'; row.append(note);
                 }
                 if (alive && !['politician','judge'].includes(p.kind)) {
-                    const select=document.createElement('select'); select.className='bg-slate-800 p-1';
+                    const select=document.createElement('select'); select.className='traveler-target-select w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-500';
                     gameState.players.filter(n=>gameState.playerStatus[n]?.alive && (p.kind !== 'bureaucrat' || n!==name)).forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;select.append(o);});
                     if (p.kind !== 'judge') row.append(select);
                     const b=document.createElement('button'); b.className='p-2 bg-purple-900 rounded';
