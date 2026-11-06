@@ -2449,6 +2449,10 @@
                     statusBtnClass = 'bg-amber-950 text-amber-400 border-amber-800';
                 }
 
+                if (status.alive && isBedridden(p)) {
+                    statusBtnText = '🛌 <span>ติดเตียง</span>';
+                    statusBtnClass = 'bg-purple-950 text-purple-400 border-purple-800';
+                }
                 const isLover = gameState.lovers.includes(p);
                 const loverBadge = isLover ? '<span class="text-rose-400 font-bold ml-1" title="Lovers (คู่รัก)">❤️</span>' : '';
 
