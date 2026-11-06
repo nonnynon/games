@@ -3410,8 +3410,13 @@
             panel.append(hint);
             (draft || gameState.players).forEach((key, index, order) => {
                 const row = document.createElement('div');
-                row.className = 'flex flex-wrap items-center gap-2';
+                row.className = 'grid items-center gap-2';
+                row.style.gridTemplateColumns = draft
+                    ? 'minmax(0, 1fr) 28px 28px 64px 48px'
+                    : 'minmax(0, 1fr)';
                 const name = document.createElement('span');
+                name.style.minWidth = '0';
+                name.style.overflowWrap = 'anywhere';
                 name.textContent = (index + 1) + '. ' + key + (gameState.playerStatus[key]?.alive === false ? ' (ตาย)' : '');
                 row.append(name);
                 if (draft) {
@@ -3446,7 +3451,7 @@
                 });
                 button(actions, 'ยกเลิก', () => { draft = null; renderSeats(); });
             }
-            list.after(panel);
+            document.getElementById('gameplay-screen').append(panel);
         }
         renderPlayerStatusList = function () {
             originalRender();
