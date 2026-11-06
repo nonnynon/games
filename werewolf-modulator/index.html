@@ -1836,6 +1836,10 @@
             gameState.playerRoleMap = {};
             gameState.rolePlayerMap = {};
             gameState.playerStatus = {};
+            resetBedridden();
+            gameState.poisonedTarget = '';
+            gameState.nightKilled = [];
+            gameState.pendingMadBomber = null;
             gameState.lovers = [];
             gameState.wolfTarget = '';
             gameState.bodyguardTarget = '';
@@ -2055,6 +2059,10 @@
             gameState.playerRoleMap = {};
             gameState.rolePlayerMap = {};
             gameState.playerStatus = {};
+            resetBedridden();
+            gameState.poisonedTarget = '';
+            gameState.nightKilled = [];
+            gameState.pendingMadBomber = null;
             gameState.lovers = [];
             gameState.wolfTarget = '';
             gameState.bodyguardTarget = '';
@@ -2115,14 +2123,14 @@
                 cardTitle.innerText = "ลำดับการทำงานตอนกลางคืน";
 
                 const nightSteps = [
-                    { id: 'cupid', name: '1. Cupid เลือก Lovers (เฉพาะคืนแรก)', show: gameState.selectedRoles.includes('cupid') && gameState.dayCount === 1 },
-                    { id: 'wolf', name: '2. Werewolf เลือกเหยื่อสังหาร', show: true },
-                    { id: 'sorcerer2', name: '3. Sorcerer2 เลือกวางยา (บล็อกความสามารถ)', show: gameState.selectedRoles.includes('sorcerer2') },
-                    { id: 'bodyguard', name: '4. Bodyguard เลือกป้องกัน', show: gameState.selectedRoles.includes('bodyguard') },
-                    { id: 'seer', name: '5. Seer ส่องตรวจดูผู้เล่น', show: gameState.selectedRoles.includes('seer') },
-                    { id: 'spellcaster', name: '6. Spellcaster เลือกเสกใบ้ (ห้ามพูดวันรุ่งขึ้น)', show: gameState.selectedRoles.includes('spellcaster') },
-                    { id: 'sorcerer', name: '7. Sorcerer ตรวจหา Seer', show: gameState.selectedRoles.includes('sorcerer') },
-                    { id: 'apprentice', name: '8. Apprentice Seer ทำงาน', show: gameState.selectedRoles.includes('apprentice_seer') }
+                    { id: 'cupid', name: '1. Cupid เลือก Lovers (เฉพาะคืนแรก)', show: roleAvailable('cupid') && gameState.dayCount === 1 },
+                    { id: 'wolf', name: '2. Werewolf เลือกเหยื่อสังหาร', show: roleAvailable('werewolf') || roleAvailable('wolf_cub') || gameState.cursedTurned.some(p => !isBedridden(p)) },
+                    { id: 'sorcerer2', name: '3. Sorcerer2 เลือกวางยา (บล็อกความสามารถ)', show: roleAvailable('sorcerer2') },
+                    { id: 'bodyguard', name: '4. Bodyguard เลือกป้องกัน', show: roleAvailable('bodyguard') },
+                    { id: 'seer', name: '5. Seer ส่องตรวจดูผู้เล่น', show: roleAvailable('seer') },
+                    { id: 'spellcaster', name: '6. Spellcaster เลือกเสกใบ้ (ห้ามพูดวันรุ่งขึ้น)', show: roleAvailable('spellcaster') },
+                    { id: 'sorcerer', name: '7. Sorcerer ตรวจหา Seer', show: roleAvailable('sorcerer') },
+                    { id: 'apprentice', name: '8. Apprentice Seer ทำงาน', show: roleAvailable('apprentice_seer') }
                 ];
 
                 checklistContainer.innerHTML = '';
@@ -2259,7 +2267,7 @@
                         const cupidCb = document.getElementById('cupid-cb');
                         if (cupidCb) {
                             cupidCb.checked = true;
-                            toggleCupidDropdown();
+                            document.getElementById('cupid-dropdowns').classList.remove('hidden');
                             document.getElementById('lover-1').value = gameState.lovers[0];
                             document.getElementById('lover-2').value = gameState.lovers[1];
                         }
@@ -2268,7 +2276,7 @@
                         const wolfCb = document.getElementById('wolf-cb');
                         if (wolfCb) {
                             wolfCb.checked = true;
-                            toggleWolfDropdown();
+                            document.getElementById('wolf-dropdown').classList.remove('hidden');
                             document.getElementById('wolf-target-select').value = gameState.wolfTarget;
                         }
                     }
@@ -2276,7 +2284,7 @@
                         const bgCb = document.getElementById('bg-cb');
                         if (bgCb) {
                             bgCb.checked = true;
-                            toggleBgDropdown();
+                            document.getElementById('bg-dropdown').classList.remove('hidden');
                             document.getElementById('bg-target-select').value = gameState.bodyguardTarget;
                         }
                     }
@@ -2311,7 +2319,7 @@
                 let hunterCheckHtml = '';
                 const wolf = gameState.wolfTarget;
                 const bg = gameState.bodyguardTarget;
-                const isHunterKilled = wolf && (gameState.rolePlayerMap[wolf] === 'hunter') && (!(bg && wolf === bg && !isPoisoned(getPlayerByRole('bodyguard'))));
+                const isHunterKilled = wolf && (effectiveRole(wolf) === 'hunter') && (!(bg && wolf === bg && !isPoisoned(getPlayerByRole('bodyguard'))));
 
                 if (isHunterKilled && isPoisoned(wolf)) {
                     hunterCheckHtml = `
@@ -2441,6 +2449,10 @@
                     statusBtnClass = 'bg-amber-950 text-amber-400 border-amber-800';
                 }
 
+                if (status.alive && isBedridden(p)) {
+                    statusBtnText = '🛌 <span>ติดเตียง</span>';
+                    statusBtnClass = 'bg-purple-950 text-purple-400 border-purple-800';
+                }
                 const isLover = gameState.lovers.includes(p);
                 const loverBadge = isLover ? '<span class="text-rose-400 font-bold ml-1" title="Lovers (คู่รัก)">❤️</span>' : '';
 
@@ -2466,8 +2478,8 @@
                             </div>
                             <input type="text" placeholder="จดโน้ตย่อ..." class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-0.5 text-[11px] text-slate-300 focus:outline-none focus:border-amber-500" value="${status.note}" onchange="updatePlayerNote('${p}', this.value)">
                         </div>
-                        <button onclick="toggleLife('${p}')" class="text-[11px] font-semibold px-2.5 py-1 rounded border ${statusBtnClass} transition ml-2">
-                            ${statusBtnText}
+                        <button onclick="toggleLife('${p}')" class="w-24 h-8 shrink-0 whitespace-nowrap inline-flex items-center justify-center gap-1 text-[11px] font-semibold px-2 rounded border ${statusBtnClass} transition ml-2">
+                            <span class="inline-block whitespace-nowrap">${statusBtnText}</span>
                         </button>
                     </div>
                 `;
@@ -2475,6 +2487,7 @@
         }
 
         function toggleCupidDropdown() {
+            if (!roleAvailable('cupid')) return;
             const cb = document.getElementById('cupid-cb');
             const dropdowns = document.getElementById('cupid-dropdowns');
             if (cb.checked) {
@@ -2488,6 +2501,7 @@
         }
 
         function updateLovers() {
+            if (!roleAvailable('cupid')) return;
             const cb = document.getElementById('cupid-cb');
             if (cb && cb.checked) {
                 const l1 = document.getElementById('lover-1').value;
@@ -2499,6 +2513,7 @@
         }
 
         function toggleWolfDropdown() {
+            if (!roleAvailable('werewolf') && !roleAvailable('wolf_cub') && !gameState.cursedTurned.some(p => !isBedridden(p))) return;
             const cb = document.getElementById('wolf-cb');
             const dropdown = document.getElementById('wolf-dropdown');
             if (cb.checked) {
@@ -2512,12 +2527,14 @@
         }
 
         function updateWolfTarget() {
+            if (!roleAvailable('werewolf') && !roleAvailable('wolf_cub') && !gameState.cursedTurned.some(p => !isBedridden(p))) return;
             const select = document.getElementById('wolf-target-select');
             gameState.wolfTarget = select ? select.value : '';
             calculateNightResult();
         }
 
         function toggleBgDropdown() {
+            if (!roleAvailable('bodyguard')) return;
             const cb = document.getElementById('bg-cb');
             const dropdown = document.getElementById('bg-dropdown');
             if (cb.checked) {
@@ -2531,12 +2548,14 @@
         }
 
         function updateBgTarget() {
+            if (!roleAvailable('bodyguard')) return;
             const select = document.getElementById('bg-target-select');
             gameState.bodyguardTarget = select ? select.value : '';
             calculateNightResult();
         }
 
         function toggleSeerDropdown() {
+            if (!roleAvailable('seer')) return;
             const cb = document.getElementById('seer-cb');
             const dropdown = document.getElementById('seer-dropdown');
             if (cb && dropdown) {
@@ -2549,6 +2568,7 @@
         }
 
         function inspectSeerTarget() {
+            if (!roleAvailable('seer')) return;
             const sel = document.getElementById('seer-target-select');
             const disp = document.getElementById('seer-result-display');
             if (!sel || !disp) return;
@@ -2560,7 +2580,7 @@
             disp.classList.remove('hidden');
             const roleId = gameState.rolePlayerMap[target];
             const isTurnedWolf = gameState.cursedTurned && gameState.cursedTurned.includes(target);
-            const isLycan = roleId === 'lycan';
+            const isLycan = roleId === 'lycan' && !isBedridden(target);
             let isWolfRole = roleId === 'werewolf' || roleId === 'wolf_cub' || isTurnedWolf;
 
             const seerPlayer = getPlayerByRole('seer');
@@ -2594,6 +2614,82 @@
         }
 
         // ---------------- Sorcerer2 (Poison) helpers ----------------
+        // Bedridden: one first would-be death, first night only. Preview is reversible.
+        function resetBedridden() {
+            gameState.bedridden = { closed: false, player: '', voteUsed: false, bombSpent: false, preview: null };
+        }
+        function bedriddenState() {
+            return gameState.bedridden || (gameState.bedridden = { closed: false, player: '', voteUsed: false, bombSpent: false, preview: null });
+        }
+        function isBedridden(player) { return !!player && bedriddenState().player === player; }
+        function effectiveRole(player) {
+            return isBedridden(player) ? '__bedridden__' : gameState.rolePlayerMap[player];
+        }
+        function roleAvailable(role) {
+            const owners = gameState.players.filter(p => gameState.rolePlayerMap[p] === role);
+            return owners.length ? owners.some(p => !isBedridden(p)) : gameState.selectedRoles.includes(role);
+        }
+        function offerBedridden(player, preview) {
+            const b = bedriddenState();
+            if (b.closed || gameState.gamePhase !== 'night' || gameState.dayCount !== 1 || !gameState.playerStatus[player]?.alive) return false;
+            if (preview) b.preview = { closed: b.closed, player: b.player, poisonedTarget: gameState.poisonedTarget, silencedTarget: gameState.silencedTarget, bodyguardTarget: gameState.bodyguardTarget, toughGuyInjured: gameState.toughGuyInjured };
+            b.closed = true; // Lovers consume the opportunity too; never pass to next victim.
+            if (gameState.lovers.includes(player)) return false;
+            b.player = player;
+            const role = gameState.rolePlayerMap[player];
+            if (role === 'sorcerer2') gameState.poisonedTarget = '';
+            if (role === 'spellcaster') gameState.silencedTarget = '';
+            if (role === 'bodyguard') gameState.bodyguardTarget = '';
+            if (gameState.toughGuyInjured?.player === player) gameState.toughGuyInjured = null;
+            gameState.lastNightResultText = '🛏️ ' + player + ' เป็น Bedridden — ยังมีชีวิต หลับตามปกติ ไม่มีความสามารถเดิม และเหลือสิทธิ์โหวตประหารปกติครั้งสุดท้าย 1 ครั้ง';
+            return true;
+        }
+        function undoBedriddenPreview() {
+            const b = bedriddenState();
+            if (!b.preview) return;
+            const snapshot = b.preview;
+            b.closed = snapshot.closed; b.player = snapshot.player; b.preview = null;
+            for (const key of ['poisonedTarget', 'silencedTarget', 'bodyguardTarget', 'toughGuyInjured']) gameState[key] = snapshot[key];
+        }
+        function confirmBedriddenVote(kind) {
+            const b = bedriddenState(), p = b.player;
+            // Exile is intentionally not wired to execution or the bomb modal.
+            if (kind !== 'normal' || gameState.gamePhase !== 'day' || !p || b.voteUsed || !gameState.playerStatus[p]?.alive || activeMadBomber) return;
+            if (!confirm('ยืนยันว่า ' + p + ' ใช้สิทธิ์โหวตประหารปกติครั้งสุดท้ายแล้ว? (ไม่ใช่ Exile) ผู้เล่นจะเสียชีวิตทันที')) return;
+            b.voteUsed = true;
+            gameState.playerStatus[p].alive = false;
+            if (gameState.rolePlayerMap[p] === 'mad_bomber' && !b.bombSpent && !isPoisoned(p)) {
+                openMadBomberModal(p, 'bedridden-vote');
+            } else {
+                b.bombSpent = true;
+                renderGameplay();
+            }
+        }
+        function renderBedriddenControls() {
+            document.getElementById('bedridden-controls')?.remove();
+            const rolePrefixes = { cupid: 'cupid', bodyguard: 'bg', seer: 'seer', sorcerer2: 'sorcerer2', spellcaster: 'spellcaster' };
+            for (const [role, prefix] of Object.entries(rolePrefixes)) {
+                const available = roleAvailable(role);
+                const cb = document.getElementById(prefix + '-cb');
+                if (cb) cb.disabled = !available;
+                const dropdown = document.getElementById(prefix === 'cupid' ? 'cupid-dropdowns' : prefix + '-dropdown');
+                if (dropdown && !available) dropdown.classList.add('hidden');
+            }
+            const b = bedriddenState();
+            if (!b.player) return;
+            const panel = document.createElement('div'); panel.id = 'bedridden-controls';
+            panel.className = 'p-3 border border-amber-700 rounded-xl space-y-2 text-xs';
+            const note = document.createElement('p');
+            note.textContent = '🛏️ ' + b.player + ' — Bedridden: หลับตามปกติ ร่วมอภิปรายได้ ไม่มีความสามารถเดิม • Exile ไม่ใช้สิทธิ์สุดท้าย ไม่ทำให้ตายหรือระเบิด';
+            panel.append(note);
+            const button = document.createElement('button');
+            button.textContent = b.voteUsed ? 'บันทึกใช้สิทธิ์สุดท้ายแล้ว' : 'Mod: ยืนยันใช้โหวตประหารปกติครั้งสุดท้าย';
+            button.className = 'bg-amber-700 rounded p-2 disabled:opacity-40';
+            button.disabled = gameState.gamePhase !== 'day' || b.voteUsed || !gameState.playerStatus[b.player]?.alive || !!activeMadBomber;
+            button.onclick = () => confirmBedriddenVote('normal'); panel.append(button);
+            document.getElementById('player-status-list')?.after(panel);
+        }
+
         function getPlayerByRole(roleId) {
             return gameState.players.find(p => gameState.rolePlayerMap[p] === roleId) || '';
         }
@@ -2603,6 +2699,7 @@
         }
 
         function toggleSorcerer2Dropdown() {
+            if (!roleAvailable('sorcerer2')) return;
             const cb = document.getElementById('sorcerer2-cb');
             const dropdown = document.getElementById('sorcerer2-dropdown');
             if (!cb || !dropdown) return;
@@ -2617,6 +2714,7 @@
         }
 
         function updateSorcerer2Target() {
+            if (!roleAvailable('sorcerer2')) return;
             const sel = document.getElementById('sorcerer2-target-select');
             gameState.poisonedTarget = sel ? sel.value : '';
             calculateNightResult();
@@ -2624,6 +2722,7 @@
         }
 
         function toggleSpellcasterDropdown() {
+            if (!roleAvailable('spellcaster')) return;
             const cb = document.getElementById('spellcaster-cb');
             const dropdown = document.getElementById('spellcaster-dropdown');
             if (cb && dropdown) {
@@ -2637,6 +2736,7 @@
         }
 
         function updateSpellcasterTarget() {
+            if (!roleAvailable('spellcaster')) return;
             const sel = document.getElementById('spellcaster-target-select');
             gameState.silencedTarget = sel ? sel.value : '';
         }
@@ -2695,7 +2795,8 @@
                 return;
             }
 
-            const roleId = gameState.rolePlayerMap[victim];
+            if (!gameState.playerStatus[victim]?.alive || activeMadBomber) return;
+            const roleId = isBedridden(victim) && gameState.rolePlayerMap[victim] === 'mad_bomber' ? 'mad_bomber' : effectiveRole(victim);
 
             // 1. Tanner Victory check!
             if (roleId === 'tanner') {
@@ -2706,7 +2807,7 @@
             }
 
             // 2. Mad Bomber check! -> Mod chooses the real left/right neighbours
-            if (roleId === 'mad_bomber') {
+            if (roleId === 'mad_bomber' && !(isBedridden(victim) && bedriddenState().bombSpent)) {
                 if (isPoisoned(victim)) {
                     alert(`🧪 "${victim}" คือ Mad Bomber แต่ถูก Sorcerer2 วางยาไว้!\nระเบิดไม่ทำงาน — เสียชีวิตเพียงคนเดียว`);
                     killWithLover(victim);
@@ -2742,6 +2843,7 @@
         }
 
         function killWithLover(player) {
+            if (offerBedridden(player, false)) return null;
             if (gameState.playerStatus[player]) gameState.playerStatus[player].alive = false;
             if (gameState.lovers.includes(player)) {
                 const partner = gameState.lovers.find(p => p !== player);
@@ -2756,14 +2858,16 @@
         function nightKill(player) {
             if (!player || !gameState.playerStatus[player]) return;
             if (gameState.playerStatus[player].alive) {
+                if (offerBedridden(player, true)) return;
                 gameState.playerStatus[player].alive = false;
                 gameState.nightKilled.push(player);
             }
         }
 
         function calculateNightResult() {
-            const wolf = gameState.wolfTarget;
-            const bg = gameState.bodyguardTarget;
+            undoBedriddenPreview();
+            const wolf = (roleAvailable('werewolf') || roleAvailable('wolf_cub') || gameState.cursedTurned.some(p => !isBedridden(p))) ? gameState.wolfTarget : '';
+            const bg = roleAvailable('bodyguard') ? gameState.bodyguardTarget : ''; 
 
             // Undo any provisional kills from a previous calculation this night
             (gameState.nightKilled || []).forEach(p => {
@@ -2783,7 +2887,7 @@
                 return;
             }
 
-            const targetRole = gameState.rolePlayerMap[wolf];
+            const targetRole = effectiveRole(wolf);
             const isLoverTarget = gameState.lovers.includes(wolf);
             const targetPoisoned = isPoisoned(wolf);
             const bgPlayer = getPlayerByRole('bodyguard');
@@ -2811,6 +2915,12 @@
             // Poisoned target: special on-death abilities are blocked -> normal death
             const effRole = targetPoisoned ? '__poisoned__' : targetRole;
 
+            // Resolve conversion before any on-death passive effect. Cursed/Tough Guy do not die yet.
+            if (!['cursed', 'tough_guy'].includes(effRole) && offerBedridden(wolf, true)) {
+                renderPlayerStatusList();
+                return;
+            }
+
             // 3. Target is Disease: dies, wolves get infected for next night
             if (effRole === 'disease') {
                 gameState.wolvesInfectedNext = true;
@@ -2835,7 +2945,7 @@
             }
 
             // 5. Target is Mad Bomber: dies; Mod picks the real neighbours in the morning
-            if (effRole === 'mad_bomber') {
+            if (effRole === 'mad_bomber' || (isBedridden(wolf) && gameState.rolePlayerMap[wolf] === 'mad_bomber' && !targetPoisoned && !bedriddenState().bombSpent)) {
                 nightKill(wolf);
                 if (isLoverTarget) nightKill(gameState.lovers.find(p => p !== wolf));
                 gameState.pendingMadBomber = wolf;
@@ -2874,11 +2984,15 @@
         }
 
         function toggleLife(playerName) {
+            if (activeMadBomber) return;
+            // Lock an existing preview before recording an independent manual death.
+            bedriddenState().preview = null;
+            gameState.nightKilled = [];
             const currentStatus = gameState.playerStatus[playerName].alive;
             const newStatus = !currentStatus;
 
             if (!newStatus) {
-                const roleId = gameState.rolePlayerMap[playerName];
+                const roleId = isBedridden(playerName) && gameState.rolePlayerMap[playerName] === 'mad_bomber' ? 'mad_bomber' : effectiveRole(playerName);
 
                 // If Cursed is being killed, check if it's a wolf bite to transform them instead
                 if (roleId === 'cursed' && !gameState.cursedTurned.includes(playerName) && !isPoisoned(playerName)) {
@@ -2890,6 +3004,8 @@
                         return; // Stop here, they do not die
                     }
                 }
+
+                if (offerBedridden(playerName, false)) { renderGameplay(); return; }
 
                 // If Tanner dies during day phase, check if voted out
                 if (roleId === 'tanner' && gameState.gamePhase === 'day') {
@@ -2905,7 +3021,7 @@
                 // If Mad Bomber dies, open target selection modal
                 if (roleId === 'mad_bomber' && isPoisoned(playerName)) {
                     alert(`🧪 ${playerName} (Mad Bomber) ถูกวางยาไว้ — ระเบิดไม่ทำงาน`);
-                } else if (roleId === 'mad_bomber') {
+                } else if (roleId === 'mad_bomber' && !(isBedridden(playerName) && bedriddenState().bombSpent)) {
                     openMadBomberModal(playerName, 'manual');
                     return; // Stop here, modal will handle the status update
                 }
@@ -2927,6 +3043,8 @@
         let madBomberContext = 'manual'; // 'manual' | 'vote' | 'night'
 
         function openMadBomberModal(playerName, context) {
+            if (activeMadBomber || (isBedridden(playerName) && bedriddenState().bombSpent)) return;
+            if (offerBedridden(playerName, false)) { renderGameplay(); return; }
             activeMadBomber = playerName;
             madBomberContext = context || 'manual';
             
@@ -2954,6 +3072,12 @@
         }
 
         function closeMadBomberModal() {
+            if (!activeMadBomber) return;
+            if (madBomberContext === 'bedridden-vote') {
+                alert('ระเบิดที่เก็บไว้ต้องทำงาน: เลือกเป้าหมายซ้าย–ขวา แล้วกดยืนยันระเบิด (เลือกไม่มีได้หากไม่มีเป้าหมาย)');
+                return;
+            }
+            if (isBedridden(activeMadBomber)) bedriddenState().bombSpent = true;
             if (activeMadBomber) {
                 // Kill ONLY the mad bomber, skip bomb
                 gameState.playerStatus[activeMadBomber].alive = false;
@@ -2979,11 +3103,17 @@
             madBomberContext = 'manual';
             document.getElementById('modal-mad-bomber').classList.add('hidden');
             renderPlayerStatusList();
-            if (ctx === 'vote' || ctx === 'night') renderGameplay();
+            if (ctx === 'vote' || ctx === 'night' || ctx === 'bedridden-vote') renderGameplay();
         }
 
         function triggerMadBomberBlast() {
             if (!activeMadBomber) return;
+            if (isBedridden(activeMadBomber)) {
+                if (bedriddenState().bombSpent) return;
+                bedriddenState().bombSpent = true;
+            }
+            // Blast victims are never candidates, even on night one.
+            bedriddenState().closed = true;
             
             const leftTarget = document.getElementById('mad-bomber-target-left').value;
             const rightTarget = document.getElementById('mad-bomber-target-right').value;
@@ -3022,8 +3152,11 @@
         }
 
         function nextPhase() {
+            if (activeMadBomber) return;
             let openBomberFor = null;
             if (gameState.gamePhase === 'night') {
+                bedriddenState().closed = true;
+                bedriddenState().preview = null;
                 gameState.gamePhase = 'day';
                 gameState.wolvesInfected = false; // Disease infection consumed this night
                 gameState.nightKilled = [];       // Lock in tonight's kills
@@ -3051,7 +3184,7 @@
                 gameState.bodyguardTarget = '';
 
                 // ตรวจสอบเงื่อนไข Tough Guy เสียชีวิตในวันถัดไป
-                if (gameState.toughGuyInjured && gameState.dayCount > gameState.toughGuyInjured.night) {
+                if (gameState.toughGuyInjured && !isBedridden(gameState.toughGuyInjured.player) && gameState.dayCount > gameState.toughGuyInjured.night) {
                     const tgPlayer = gameState.toughGuyInjured.player;
                     if (gameState.playerStatus[tgPlayer] && gameState.playerStatus[tgPlayer].alive) {
                         gameState.playerStatus[tgPlayer].alive = false;
@@ -3277,8 +3410,13 @@
             panel.append(hint);
             (draft || gameState.players).forEach((key, index, order) => {
                 const row = document.createElement('div');
-                row.className = 'flex flex-wrap items-center gap-2';
+                row.className = 'grid items-center gap-2';
+                row.style.gridTemplateColumns = draft
+                    ? 'minmax(0, 1fr) 28px 28px 64px 48px'
+                    : 'minmax(0, 1fr)';
                 const name = document.createElement('span');
+                name.style.minWidth = '0';
+                name.style.overflowWrap = 'anywhere';
                 name.textContent = (index + 1) + '. ' + key + (gameState.playerStatus[key]?.alive === false ? ' (ตาย)' : '');
                 row.append(name);
                 if (draft) {
@@ -3313,11 +3451,12 @@
                 });
                 button(actions, 'ยกเลิก', () => { draft = null; renderSeats(); });
             }
-            list.after(panel);
+            document.getElementById('gameplay-screen').append(panel);
         }
         renderPlayerStatusList = function () {
             originalRender();
             renderSeats();
+            renderBedriddenControls();
         };
     })();
     
