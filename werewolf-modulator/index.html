@@ -76,6 +76,37 @@
         .animate-pulse-ring {
             animation: pulse-ring 2.5s infinite ease-in-out;
         }
+
+        /* Traveler controls: aligned tracks, like the seating controls. UI only. */
+        #traveler-controls { font-size: .875rem; overflow-wrap: anywhere; }
+        #traveler-controls > div {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .5rem;
+            padding: .75rem 0;
+            border-top: 1px solid #334155;
+        }
+        #traveler-controls > div > p,
+        #traveler-controls .traveler-summary { grid-column: 1 / -1; min-width: 0; }
+        #traveler-controls button, #traveler-controls select {
+            width: 100%; min-width: 0; min-height: 44px;
+            padding: .5rem; border-radius: .5rem;
+            font-size: .75rem; line-height: 1.5;
+        }
+        #traveler-controls button { white-space: normal; overflow-wrap: anywhere; }
+        #traveler-controls button:disabled { opacity: .4; cursor: not-allowed; }
+        #traveler-controls button:focus-visible, #traveler-controls select:focus-visible {
+            outline: 2px solid #c084fc; outline-offset: 2px;
+        }
+        #traveler-controls > div > select { grid-column: 1; }
+        #traveler-controls > div > select + button { grid-column: 2; }
+        #traveler-game-overlay > input,
+        #traveler-game-overlay > select,
+        #traveler-game-overlay > button {
+            display: block; box-sizing: border-box; width: 100%; max-width: 24rem;
+            min-width: 0; min-height: 44px; margin: .75rem auto !important;
+            border-radius: .5rem; white-space: normal; overflow-wrap: anywhere;
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-amber-500 selection:text-slate-950">
@@ -3634,7 +3665,8 @@
             const add = document.createElement('button'); add.id='btn-add-traveler'; add.textContent='➕ Add Traveler / เพิ่ม Traveler'; add.className='block w-full p-3 bg-purple-900 rounded'; add.onclick=openAddTraveler; panel.append(add);
             state.pending.forEach(p => {
                 const row = document.createElement('div');
-                row.textContent = p.name + ' — ' + travelerRole(p.kind).name + (gameState.gamePhase === 'day' ? '' : ' (รอเช้า)');
+                const summary = document.createElement('span'); summary.className = 'traveler-summary';
+                summary.textContent = p.name + ' — ' + travelerRole(p.kind).name + (gameState.gamePhase === 'day' ? '' : ' (รอเช้า)'); row.append(summary);
                 const select = document.createElement('select');
                 [['good','ฝ่ายชาวบ้าน'],['wolf','ฝ่ายหมาป่า']].forEach(([value,label]) => { const o = document.createElement('option'); o.value=value; o.textContent=label; select.append(o); });
                 select.value=p.team || 'good'; select.className='bg-slate-800 p-1'; row.append(select);
@@ -3643,7 +3675,8 @@
             });
             Object.entries(state.admitted).forEach(([name,p]) => {
                 const row=document.createElement('div'); const role=travelerRole(p.kind);
-                row.textContent=name+' — '+role.icon+' '+role.name+' / ฝ่ายลับ: '+p.team+(p.exiled?' / ถูกขับไล่':'')+' — '+role.desc;
+                const summary=document.createElement('span'); summary.className='traveler-summary';
+                summary.textContent=name+' — '+role.icon+' '+role.name+' / ฝ่ายลับ: '+p.team+(p.exiled?' / ถูกขับไล่':'')+' — '+role.desc; row.append(summary);
                 if (gameState.offlineGame) { const preview=document.createElement('button');preview.textContent='ดูการ์ดส่วนตัว';preview.className='p-2 bg-slate-700 rounded';preview.onclick=()=>previewLocalTraveler(name);row.append(preview); }
                 const alive=gameState.playerStatus[name]?.alive && !p.exiled;
                 if (p.kind === 'bureaucrat' && p.used) {
