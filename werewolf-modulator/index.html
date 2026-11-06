@@ -311,7 +311,7 @@
                 </div>
 
                 <!-- Live Member Tags -->
-                <div id="mod-players-list" class="space-y-1.5 max-h-56 overflow-y-auto">
+                <div id="mod-players-list" class="space-y-1.5">
                     <!-- Populated via JS -->
                 </div>
             </div>
@@ -355,9 +355,10 @@
 
                 <div class="space-y-3 pt-2">
                     <input type="text" id="player-name-input-field" placeholder="พิมพ์ชื่อเล่นของคุณ..." maxlength="20" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-100 text-center font-semibold focus:outline-none focus:border-amber-500 transition shadow-inner">
-                    <button onclick="submitPlayerJoin()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl transition shadow-lg shadow-amber-500/20 text-sm active:scale-95">
+                    <button id="btn-player-join" onclick="submitPlayerJoin()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl transition shadow-lg shadow-amber-500/20 text-sm active:scale-95">
                         เข้าร่วมห้อง & รอรับการ์ด 🃏
                     </button>
+                    <button onclick="leavePlayerWaitingRoom()" class="text-xs text-slate-400 p-2">ยกเลิกคำขอ / แก้ไขชื่อ</button>
                 </div>
             </div>
         </section>
@@ -770,6 +771,7 @@
         } catch(e){}
         let myPlayerName = '';
         let myAssignedRole = null;
+        let lastCardDelivery = null; // In-memory only: a new connection must start hidden.
         let isMod = false;
         let isGameStarted = false;
         let autoStartTimer = null;
@@ -782,6 +784,8 @@
         let peerInstance = null;
         let connectedPeers = {}; // Mod: { [peerId]: conn }
         let playerModConn = null; // Player: DataConnection to Mod
+        let joinIntent = false, joinAdmitted = false, joinRequestId = '';
+        let reconnectTimer = null, connectDeadline = null, joinDeadline = null;
         let currentModPeerId = ''; // Mod's active assigned Peer ID
 
         // Mod Gameplay State
@@ -879,6 +883,7 @@
                 if (savedRoom === activeRoomCode && savedRole && savedName) {
                     try {
                         myPlayerName = savedName;
+                        beginJoinIntent();
                         myAssignedRole = JSON.parse(savedRole);
                         renderPlayerCard(myAssignedRole);
                         showScreen('screen-player-card');
@@ -890,9 +895,11 @@
                 // If player already submitted name and was waiting in this same room (e.g. browser refresh)
                 if (savedRoom === activeRoomCode && savedJoined === 'true' && savedName) {
                     myPlayerName = savedName;
+                    beginJoinIntent();
                     document.getElementById('waiting-room-tag').innerText = activeRoomCode;
                     document.getElementById('player-my-name-display').innerText = myPlayerName;
-                    showScreen('screen-player-waiting');
+                    showScreen('screen-player-join');
+                    document.getElementById('player-name-input-field').value = myPlayerName;
                     setupRealtimeListener(activeRoomCode, false);
                     return;
                 }
@@ -965,6 +972,9 @@
                 localChannel.onmessage = (event) => handleIncomingMessage(event.data);
             } catch (e) {}
 
+            clearTimeout(reconnectTimer); reconnectTimer = null;
+            clearTimeout(connectDeadline); connectDeadline = null;
+            playerModConn = null;
             // Cleanup previous peer
             if (peerInstance) {
                 try { peerInstance.destroy(); } catch(e) {}
@@ -1041,7 +1051,7 @@
                         });
 
                         conn.on('data', (data) => {
-                            console.log('Mod received data:', data);
+                            if (connectedPeers[conn.peer] !== conn) return;
                             handleIncomingMessage(data, conn);
                             setTimeout(() => sendRoomStateToConn(conn), 200);
                             setTimeout(() => sendRoomStateToConn(conn), 800);
@@ -1049,12 +1059,12 @@
 
                         conn.on('close', () => {
                             console.log('Player disconnected:', conn.peer);
-                            delete connectedPeers[conn.peer];
+                            if (connectedPeers[conn.peer] === conn) delete connectedPeers[conn.peer];
                         });
 
                         conn.on('error', (err) => {
                             console.warn('Player connection error:', err);
-                            delete connectedPeers[conn.peer];
+                            if (connectedPeers[conn.peer] === conn) delete connectedPeers[conn.peer];
                         });
                     });
 
@@ -1092,26 +1102,25 @@
                         return;
                     }
 
+                    const playerPeer = peerInstance;
                     peerInstance.on('open', (id) => {
+                        if (peerInstance !== playerPeer) return;
                         console.log('Player Peer opened with ID:', id);
                         connectPlayerToMod(roomCode);
                     });
 
                     // Fast trigger fallback if open is delayed on iOS Safari
                     setTimeout(() => {
-                        if (!isMod && activeRoomCode === roomCode && (!playerModConn || !playerModConn.open)) {
+                        if (peerInstance === playerPeer && !isMod && activeRoomCode === roomCode && !playerModConn) {
                             connectPlayerToMod(roomCode);
                         }
                     }, 500);
 
                     peerInstance.on('error', (err) => {
+                        if (peerInstance !== playerPeer) return;
                         console.warn('Player Peer error:', err);
                         updatePlayerConnBadge(false, '🟡 สัญญาณขัดข้อง กำลังลองใหม่...');
-                        setTimeout(() => {
-                            if (!isMod && activeRoomCode === roomCode && (!playerModConn || !playerModConn.open)) {
-                                connectPlayerToMod(roomCode);
-                            }
-                        }, 1500);
+                        schedulePlayerReconnect(roomCode);
                     });
                 };
 
@@ -1121,71 +1130,108 @@
             startSyncHeartbeat();
         }
 
+        function beginJoinIntent() {
+            joinIntent = true; joinAdmitted = false;
+            joinRequestId = myDeviceId + '-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+            try { sessionStorage.removeItem('ww_joined_room'); } catch(e) {}
+            document.getElementById('btn-player-join').disabled = true;
+            updatePlayerConnBadge(false, 'กำลังเข้าร่วมห้อง…');
+            clearTimeout(joinDeadline);
+            joinDeadline = setTimeout(() => {
+                if (joinIntent && !joinAdmitted) showJoinError('ยังเชื่อมต่อเข้าห้องไม่สำเร็จ กรุณาลองอีกครั้ง');
+            }, 15000);
+        }
+
+        function stopJoinIntent() {
+            joinIntent = false; joinAdmitted = false; joinRequestId = '';
+            clearTimeout(joinDeadline); joinDeadline = null;
+            clearTimeout(reconnectTimer); reconnectTimer = null;
+            document.getElementById('btn-player-join').disabled = false;
+            try { sessionStorage.removeItem('ww_joined_room'); } catch(e) {}
+        }
+
+        function acknowledgeJoin(conn) {
+            const p = joinedPlayers.find(p => p.id === conn.wwPlayerId);
+            if (conn.open && p) conn.send({type:'JOIN_ACK', room:activeRoomCode,
+                id:p.id, name:p.name, requestId:conn.wwJoinRequestId, joinedCount:joinedPlayers.length});
+        }
+
+        function acceptJoin(name) {
+            joinAdmitted = true;
+            clearTimeout(joinDeadline); joinDeadline = null;
+            myPlayerName = name || myPlayerName;
+            try {
+                sessionStorage.setItem('ww_player_name', myPlayerName);
+                sessionStorage.setItem('ww_room_code', activeRoomCode);
+                sessionStorage.setItem('ww_joined_room', 'true');
+            } catch(e) {}
+            updatePlayerConnBadge(true, 'เข้าร่วมห้องสำเร็จ');
+            document.getElementById('waiting-room-tag').innerText = activeRoomCode;
+            document.getElementById('player-my-name-display').innerText = myPlayerName;
+            if (!myAssignedRole) showScreen('screen-player-waiting');
+        }
+
+        function schedulePlayerReconnect(roomCode) {
+            if (reconnectTimer || isMod || !joinIntent || roomCode !== activeRoomCode) return;
+            reconnectTimer = setTimeout(() => {
+                reconnectTimer = null;
+                if (joinIntent && !isMod && roomCode === activeRoomCode) connectPlayerToMod(roomCode);
+            }, 2000);
+        }
+
+        function moveLobbyPlayer(playerId, direction) {
+            if (!isMod || isGameStarted || ![-1, 1].includes(direction)) return;
+            const index = joinedPlayers.findIndex(p => p.id === playerId);
+            const next = index + direction;
+            if (index < 0 || next < 0 || next >= joinedPlayers.length) return;
+            [joinedPlayers[index], joinedPlayers[next]] = [joinedPlayers[next], joinedPlayers[index]];
+            updateModLobbyUI(); broadcastRoomStateUpdate();
+        }
+
         function sendPlayerJoinMessage() {
-            if (!myPlayerName || !activeRoomCode) return;
+            if (!joinIntent || !myPlayerName || !activeRoomCode) return;
             broadcastMessage({
                 type: 'PLAYER_JOIN',
                 room: activeRoomCode,
                 id: myDeviceId,
-                name: myPlayerName
+                name: myPlayerName, requestId: joinRequestId
             });
         }
 
         function connectPlayerToMod(roomCode, targetId) {
-            if (!peerInstance || peerInstance.destroyed) return;
+            if (isMod || roomCode !== activeRoomCode || !peerInstance || peerInstance.destroyed || playerModConn) return;
+            clearTimeout(reconnectTimer); reconnectTimer = null;
             const params = new URLSearchParams(window.location.search);
-            const midParam = params.get('mid');
-            const targetModId = targetId || midParam || currentModPeerId || getModPeerId(roomCode);
-
-            console.log('Player connecting to Mod ID:', targetModId);
-            updatePlayerConnBadge(false, '🟡 กำลังจับคู่กับ Game Master...');
-
+            const targetModId = targetId || params.get('mid') || currentModPeerId || getModPeerId(roomCode);
+            updatePlayerConnBadge(false, 'กำลังเชื่อมต่อเข้าห้อง…');
             try {
-                if (playerModConn) {
-                    try { playerModConn.close(); } catch(e) {}
-                }
-                playerModConn = peerInstance.connect(targetModId, { serialization: 'json' });
-
-                playerModConn.on('open', () => {
-                    console.log('Player successfully connected to Mod!');
-                    updatePlayerConnBadge(true, '🟢 เชื่อมต่อห้องสำเร็จ');
-
+                const conn = peerInstance.connect(targetModId, { serialization: 'json' });
+                playerModConn = conn;
+                const current = () => playerModConn === conn && activeRoomCode === roomCode && !isMod;
+                const failed = () => {
+                    if (!current()) return;
+                    playerModConn = null;
+                    clearTimeout(connectDeadline); connectDeadline = null;
+                    joinAdmitted = false;
+                    try { sessionStorage.removeItem('ww_joined_room'); conn.close(); } catch(e) {}
+                    updatePlayerConnBadge(false, 'ออฟไลน์ / กำลังเชื่อมต่อใหม่');
+                    schedulePlayerReconnect(roomCode);
+                };
+                connectDeadline = setTimeout(failed, 12000);
+                conn.on('open', () => {
+                    if (!current()) return;
+                    clearTimeout(connectDeadline); connectDeadline = null;
+                    updatePlayerConnBadge(false, joinIntent ? 'กำลังเข้าร่วมห้อง…' : 'กรอกชื่อแล้วกดเข้าร่วม');
                     sendPlayerJoinMessage();
-                    setTimeout(sendPlayerJoinMessage, 400);
-                    setTimeout(sendPlayerJoinMessage, 1200);
                 });
-
-                playerModConn.on('data', (data) => {
-                    handleIncomingMessage(data, playerModConn);
-                });
-
-                playerModConn.on('close', () => {
-                    console.warn('DataChannel to Mod closed, auto-reconnecting in 2s...');
-                    updatePlayerConnBadge(false, '🟡 สัญญาณหลุด กำลังเชื่อมต่อใหม่...');
-                    setTimeout(() => {
-                        if (!isMod && activeRoomCode === roomCode) {
-                            connectPlayerToMod(roomCode, targetModId);
-                        }
-                    }, 2000);
-                });
-
-                playerModConn.on('error', (err) => {
-                    console.warn('DataChannel error:', err);
-                    updatePlayerConnBadge(false, '🟡 กำลังเชื่อมต่อใหม่...');
-                    setTimeout(() => {
-                        if (!isMod && activeRoomCode === roomCode) {
-                            connectPlayerToMod(roomCode, targetModId);
-                        }
-                    }, 2000);
-                });
-            } catch(e) {
-                console.error('Error connecting to Mod:', e);
-            }
+                conn.on('data', data => { if (current()) handleIncomingMessage(data, conn); });
+                conn.on('close', failed); conn.on('error', failed);
+            } catch(e) { playerModConn = null; schedulePlayerReconnect(roomCode); }
         }
 
         // iOS WebKit Lifecycle Listeners for instant wake-up
         const triggerPlayerReconnect = () => {
-            if (!isMod && activeRoomCode && myPlayerName && !myAssignedRole) {
+            if (!isMod && activeRoomCode && joinIntent) {
                 if (!playerModConn || !playerModConn.open) {
                     connectPlayerToMod(activeRoomCode);
                 } else {
@@ -1210,7 +1256,7 @@
                         broadcastRoomStateUpdate();
                     }
                 } else {
-                    if (myPlayerName && !myAssignedRole) {
+                    if (joinIntent) {
                         if (!playerModConn || !playerModConn.open) {
                             connectPlayerToMod(activeRoomCode);
                         } else {
@@ -1257,24 +1303,27 @@
 
         function handleIncomingMessage(data, conn) {
             if (!data || data.room !== activeRoomCode) return;
-            if (!isMod && ['GAME_STARTED_ASSIGNMENTS','TRAVELER_OFFER','JOIN_ERROR'].includes(data.type) && (!conn || conn !== playerModConn)) return;
+            if (!isMod && ['GAME_STARTED_ASSIGNMENTS','TRAVELER_OFFER','JOIN_ERROR','JOIN_ACK','PLAYER_KICKED'].includes(data.type) && (!conn || conn !== playerModConn)) return;
+            if (!isMod && ['JOIN_ACK','JOIN_ERROR','TRAVELER_OFFER','GAME_STARTED_ASSIGNMENTS'].includes(data.type) && (!joinIntent || data.requestId !== joinRequestId)) return;
+            if (!isMod && data.type === 'JOIN_ACK') { if (data.id === myDeviceId) acceptJoin(data.name); return; }
             if (!isMod && data.type === 'JOIN_ERROR') { showJoinError(data.message); return; }
             if (isMod && data.type === 'TRAVELER_REQUEST') { receiveTravelerRequest(data, conn); return; }
-            if (!isMod && data.type === 'TRAVELER_OFFER') { renderTravelerChoice(); return; }
+            if (!isMod && data.type === 'TRAVELER_OFFER') { clearTimeout(joinDeadline); joinDeadline = null; renderTravelerChoice(); return; }
 
             // MOD RECEIVES PLAYER JOIN
             if (isMod && data.type === 'PLAYER_JOIN') {
                 if (!conn || typeof data.id !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(data.id) || ['__proto__','constructor','prototype'].includes(data.id)) return;
                 if (conn.wwPlayerId && conn.wwPlayerId !== data.id) return;
                 conn.wwPlayerId = data.id;
+                conn.wwJoinRequestId = data.requestId;
                 if (!activeRoleAssignments[data.id]) {
                     const error = joinNameError(typeof data.name === 'string' ? data.name.trim() : '', data.id, isGameStarted);
                     if (error) { rejectJoin(conn, error); return; }
                 }
                 if (isGameStarted) {
                     // Reconnect gets only its own card; new arrivals choose a Traveler.
-                    if (activeRoleAssignments[data.id]) sendPrivateAssignment(conn);
-                    else if (!travelerState().pending.some(p => p.id === data.id)) offerTraveler(conn);
+                    if (activeRoleAssignments[data.id]) { acknowledgeJoin(conn); sendPrivateAssignment(conn); }
+                    else offerTraveler(conn);
                     return;
                 }
 
@@ -1292,6 +1341,7 @@
                 } else {
                     joinedPlayers.push({ id: data.id, name: uniqueName });
                 }
+                acknowledgeJoin(conn);
                 updateModLobbyUI();
 
                 // Broadcast current room state back to all players
@@ -1341,7 +1391,7 @@
                 }
 
                 const friendsEl = document.getElementById('player-friends-preview');
-                if (friendsEl && data.playersList && data.playersList.length > 0) {
+                if (friendsEl && Array.isArray(data.playersList)) {
                     friendsEl.innerHTML = `<span class="text-slate-400">เพื่อนในห้อง: </span>` + data.playersList.map(n => `<span class="px-1.5 py-0.5 rounded bg-slate-800 text-amber-300 mr-1 inline-block text-[10px]">${n}</span>`).join('');
                 }
 
@@ -1364,6 +1414,13 @@
                 let myAssignment = data.assignments[myDeviceId];
 
                 if (myAssignment) {
+                    const cardKey = JSON.stringify([activeRoomCode, data.gameSessionId || '',
+                        myAssignment.playerId, myAssignment.playerName, myAssignment.roleId,
+                        myAssignment.roleName, myAssignment.roleThai, myAssignment.roleIcon,
+                        myAssignment.team, myAssignment.desc, myAssignment.wolfDisclosure || []]);
+                    const repeatedCard = myAssignedRole && lastCardDelivery &&
+                        lastCardDelivery.conn === conn && lastCardDelivery.key === cardKey;
+                    acceptJoin(myAssignment.playerName);
                     myAssignedRole = myAssignment;
                     try {
                         sessionStorage.setItem('ww_assigned_role', JSON.stringify(myAssignment));
@@ -1373,7 +1430,8 @@
                     } catch(e) {}
 
                     closeTravelerModal();
-                    renderPlayerCard(myAssignment);
+                    if (!repeatedCard) renderPlayerCard(myAssignment);
+                    lastCardDelivery = { conn, key: cardKey };
                     showScreen('screen-player-card');
                 }
             }
@@ -1392,6 +1450,7 @@
             // PLAYERS RECEIVE KICK
             if (!isMod && data.type === 'PLAYER_KICKED') {
                 if (data.targetId === myDeviceId) {
+                    stopJoinIntent(); myAssignedRole = null; closeTravelerModal();
                     try {
                         sessionStorage.removeItem('ww_joined_room');
                         sessionStorage.removeItem('ww_assigned_role');
@@ -1706,13 +1765,15 @@
             joinedPlayers.forEach((p, idx) => {
                 listContainer.innerHTML += `
                     <div class="flex items-center justify-between bg-slate-950/60 px-3 py-1.5 rounded-lg border border-slate-800 text-xs">
-                        <div class="flex items-center space-x-2">
+                        <div class="flex items-center space-x-2 min-w-0">
                             <span class="text-amber-400 font-mono text-[10px]">#${idx+1}</span>
-                            <span class="font-semibold text-slate-200">${p.name}</span>
+                            <span class="font-semibold text-slate-200 truncate" title="${p.name}">${p.name}</span>
                         </div>
                         <div class="flex items-center space-x-1.5">
+                            <button onclick="moveLobbyPlayer('${p.id}', -1)" ${!isMod || isGameStarted || idx === 0 ? 'disabled' : ''} aria-label="เลื่อน ${p.name} ขึ้น" style="width:32px;height:32px;flex-shrink:0" class="inline-flex items-center justify-center rounded bg-slate-800 disabled:opacity-30">↑</button>
+                            <button onclick="moveLobbyPlayer('${p.id}', 1)" ${!isMod || isGameStarted || idx === joinedPlayers.length - 1 ? 'disabled' : ''} aria-label="เลื่อน ${p.name} ลง" style="width:32px;height:32px;flex-shrink:0" class="inline-flex items-center justify-center rounded bg-slate-800 disabled:opacity-30">↓</button>
                             <span class="text-[10px] text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-900">พร้อม</span>
-                            <button onclick="removePlayerFromLobby('${p.id}')" title="ลบผู้เล่นนี้ออกจากห้อง" class="text-xs text-slate-500 hover:text-rose-400 p-1 hover:bg-slate-800 rounded transition">❌</button>
+                            <button ${!isMod || isGameStarted ? 'disabled' : ''} onclick="removePlayerFromLobby('${p.id}')" title="ลบผู้เล่นนี้ออกจากห้อง" style="width:32px;height:32px;flex-shrink:0" class="text-xs text-slate-500 hover:text-rose-400 p-1 hover:bg-slate-800 rounded transition">❌</button>
                         </div>
                     </div>
                 `;
@@ -1720,6 +1781,10 @@
         }
 
         function removePlayerFromLobby(playerId) {
+            if (!isMod || isGameStarted) return;
+            const player = joinedPlayers.find(p => p.id === playerId);
+            if (!player || !confirm('นำ ' + player.name + ' ออกจากห้อง? เข้าร่วมใหม่ได้')) return;
+            if (!isMod || isGameStarted) return;
             joinedPlayers = joinedPlayers.filter(p => p.id !== playerId);
             updateModLobbyUI();
             broadcastMessage({
@@ -1774,33 +1839,16 @@
         }
 
         function submitPlayerJoin() {
-            const nameInput = document.getElementById('player-name-input-field');
-            const name = nameInput.value.trim();
-            if (!name) {
-                alert('กรุณากรอกชื่อของคุณ');
-                return;
-            }
-            myPlayerName = name;
-            try {
-                sessionStorage.setItem('ww_player_name', myPlayerName);
-                sessionStorage.setItem('ww_room_code', activeRoomCode);
-                sessionStorage.setItem('ww_joined_room', 'true');
-            } catch(e) {}
-
-            // Broadcast join message to Mod
-            broadcastMessage({
-                type: 'PLAYER_JOIN',
-                id: myDeviceId,
-                name: myPlayerName
-            });
-
-            // Update Waiting Room Screen UI
-            document.getElementById('waiting-room-tag').innerText = activeRoomCode;
-            document.getElementById('player-my-name-display').innerText = myPlayerName;
-            showScreen('screen-player-waiting');
+            if (joinIntent) return;
+            const name = document.getElementById('player-name-input-field').value.trim();
+            if (!name) { alert('กรุณากรอกชื่อของคุณ'); return; }
+            myPlayerName = name; beginJoinIntent();
+            if (!playerModConn) connectPlayerToMod(activeRoomCode);
+            sendPlayerJoinMessage();
         }
 
         function leavePlayerWaitingRoom() {
+            stopJoinIntent(); closeTravelerModal();
             try {
                 sessionStorage.removeItem('ww_joined_room');
             } catch(e){}
@@ -1808,12 +1856,12 @@
         }
 
         function forceRetryConnection() {
-            if (activeRoomCode) {
-                updatePlayerConnBadge(false, '🟡 กำลังรีเฟรชการเชื่อมต่อ...');
-                setupRealtimeListener(activeRoomCode, false);
-                setTimeout(sendPlayerJoinMessage, 800);
-                setTimeout(sendPlayerJoinMessage, 2000);
-            }
+            if (!activeRoomCode || isMod) return;
+            const old = playerModConn; playerModConn = null;
+            clearTimeout(connectDeadline); connectDeadline = null;
+            clearTimeout(reconnectTimer); reconnectTimer = null;
+            if (old) { try { old.close(); } catch(e) {} }
+            connectPlayerToMod(activeRoomCode);
         }
 
         // ---------------------------------------------
@@ -3508,10 +3556,10 @@
             const card = {...a};
             if (card.team !== 'wolf' || !travelerKinds.includes(card.roleId)) delete card.wolfDisclosure;
             conn.send({ type: 'GAME_STARTED_ASSIGNMENTS', room: activeRoomCode,
-                gameSessionId: currentGameSessionId, assignments: { [conn.wwPlayerId]: card } });
+                requestId: conn.wwJoinRequestId, gameSessionId: currentGameSessionId, assignments: { [conn.wwPlayerId]: card } });
         }
         function offerTraveler(conn) {
-            if (conn && conn.open) conn.send({ type: 'TRAVELER_OFFER', room: activeRoomCode });
+            if (conn && conn.open) conn.send({ type: 'TRAVELER_OFFER', room: activeRoomCode, requestId: conn.wwJoinRequestId });
         }
         function chooseTraveler(kind) {
             if (isMod || !activeRoomCode || !travelerKinds.includes(kind)) return;
@@ -3521,7 +3569,7 @@
             document.getElementById('player-waiting-status-text').innerText = 'รอ Mod รับ Traveler เข้าหมู่บ้านตอนเช้า';
         }
         function renderTravelerChoice() {
-            if (myAssignedRole) return;
+            if (myAssignedRole || !joinIntent) return;
             const modal = document.getElementById('modal-traveler');
             modal.textContent = '';
             const box = document.createElement('div');
@@ -3550,9 +3598,10 @@
             return '';
         }
         function rejectJoin(conn, message) {
-            if (conn && conn.open) conn.send({type:'JOIN_ERROR', room:activeRoomCode, message});
+            if (conn && conn.open) conn.send({type:'JOIN_ERROR', room:activeRoomCode, requestId:conn.wwJoinRequestId, message});
         }
         function showJoinError(message) {
+            stopJoinIntent();
             closeTravelerModal();
             try { sessionStorage.removeItem('ww_joined_room'); } catch(e) {}
             showScreen('screen-player-join');
