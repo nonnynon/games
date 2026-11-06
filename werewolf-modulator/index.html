@@ -3578,7 +3578,7 @@
             const p = state.pending.find(p => p.id === id);
             if (!p || activeRoleAssignments[id] || gameState.players.some(n => n.toLowerCase() === p.name.toLowerCase())) return;
             const role = travelerRole(p.kind);
-            if (!role || !confirm('รับ ' + p.name + ' เป็น ' + role.name + ' ฝ่าย ' + team + '?')) return;
+            if (!role || !confirm('รับ ' + p.name + ' เป็น ' + role.name + ' ฝ่าย ' + (team === 'wolf' ? 'หมาป่า' : 'ชาวบ้าน') + '?')) return;
             // Snapshot assumption: Mod explicitly confirms disclosure at admission only.
             let wolfDisclosure = [];
             if (team === 'wolf') {
