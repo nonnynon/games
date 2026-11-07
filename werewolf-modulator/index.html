@@ -122,6 +122,22 @@
             min-width: 0; min-height: 44px; margin: .75rem auto !important;
             border-radius: .5rem; white-space: normal; overflow-wrap: anywhere;
         }
+    /* Remove only the role title panel background. */
+    #card-front-content > .my-auto {
+        background: transparent;
+    }
+    
+    /* Balance ability panel spacing; preserve long-text scrolling. */
+    #card-front-content > div:last-child {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        padding: 0.75rem;
+    }
+    #card-front-content > div:last-child > * {
+    margin-top: 0;
+    margin-bottom: 0;
+    }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-amber-500 selection:text-slate-950">
