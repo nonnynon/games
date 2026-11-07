@@ -2764,7 +2764,12 @@
         function offerBedridden(player, preview) {
             const b = bedriddenState();
             if (b.closed || gameState.gamePhase !== 'night' || gameState.dayCount !== 1 || !gameState.playerStatus[player]?.alive) return false;
-            if (preview) b.preview = { closed: b.closed, player: b.player, poisonedTarget: gameState.poisonedTarget, silencedTarget: gameState.silencedTarget, bodyguardTarget: gameState.bodyguardTarget, toughGuyInjured: gameState.toughGuyInjured };
+            if (preview) {
+                // Preview only: keep every role and its night action available until morning.
+                if (!b.preview) b.preview = { player };
+                gameState.lastNightResultText = '🛏️ ' + player + ' อาจเป็น Bedridden — รอสรุปการป้องกันและยืนยันเข้าสู่ช่วงเช้า';
+                return !gameState.lovers.includes(player);
+            }
             b.closed = true; // Lovers consume the opportunity too; never pass to next victim.
             if (gameState.lovers.includes(player)) return false;
             b.player = player;
@@ -2779,9 +2784,7 @@
         function undoBedriddenPreview() {
             const b = bedriddenState();
             if (!b.preview) return;
-            const snapshot = b.preview;
-            b.closed = snapshot.closed; b.player = snapshot.player; b.preview = null;
-            for (const key of ['poisonedTarget', 'silencedTarget', 'bodyguardTarget', 'toughGuyInjured']) gameState[key] = snapshot[key];
+            b.preview = null; // Discard the candidate, never restore or erase night actions.
         }
         function confirmBedriddenVote(kind) {
             const b = bedriddenState(), p = b.player;
@@ -3297,6 +3300,9 @@
             if (travelerState().votingOpen) { alert('กรุณากดจบรอบลงมติในแผง Traveler ก่อนเปลี่ยนช่วง'); return; }
             let openBomberFor = null;
             if (gameState.gamePhase === 'night') {
+                calculateNightResult(); // Resolve the final targets/protection before committing.
+                const candidate = bedriddenState().preview?.player;
+                if (candidate) offerBedridden(candidate, false);
                 bedriddenState().closed = true;
                 bedriddenState().preview = null;
                 gameState.gamePhase = 'day';
