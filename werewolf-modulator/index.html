@@ -2921,7 +2921,7 @@
             const roleId = isBedridden(victim) && gameState.rolePlayerMap[victim] === 'mad_bomber' ? 'mad_bomber' : effectiveRole(victim);
 
             // 1. Tanner Victory check!
-            if (roleId === 'tanner') {
+            if (gameState.rolePlayerMap[victim] === 'tanner') {
                 if (gameState.playerStatus[victim]) gameState.playerStatus[victim].alive = false;
                 renderPlayerStatusList();
                 alert(`🎉🏆 จบเกมทันที!\n\nผู้เล่น "${victim}" คือ Tanner (คนฟอกหนัง)!\nถูกชาวบ้านโหวตประหารชีวิตสำเร็จตามเป้าหมาย ทำให้ "Tanner เป็นฝ่ายชนะเกมทันที!" 🎭✨`);
@@ -3085,7 +3085,8 @@
             }
 
             // Poisoned target: special on-death abilities are blocked -> normal death
-            const effRole = targetPoisoned ? '__poisoned__' : targetRole;
+            // Disease infects on a bite, even if Bedridden prevents death.
+            if (gameState.rolePlayerMap[wolf] === 'disease' && !targetPoisoned) {     gameState.wolvesInfectedNext = true; }
 
             // Resolve conversion before any on-death passive effect. Cursed/Tough Guy do not die yet.
             if (!['cursed', 'tough_guy'].includes(effRole) && offerBedridden(wolf, true)) {
