@@ -2318,7 +2318,7 @@
                                                 ${playerOpts}
                                             </select>
                                         </div>
-                                        <p class="text-[10px] text-fuchsia-300/80 leading-relaxed">🧪 ผู้ถูกวางยาจะถูกบล็อกความสามารถทันทีจนถึงคืนถัดไป • Seer ส่องจะเห็นผลตรงข้าม • หากถูกหมาป่าฆ่า ความสามารถตอนตาย (เช่น Mad Bomber, Hunter, Disease, Cursed, Tough Guy) จะไม่ทำงาน</p>
+                                        <p class="text-[10px] text-fuchsia-300/80 leading-relaxed">🧪 ผู้ถูกวางยาจะถูกบล็อกความสามารถทันทีจนเริ่มช่วงกลางคืนถัดไป • Seer ส่องจะเห็นผลตรงข้าม • หากถูกหมาป่าฆ่า ความสามารถตอนตาย (เช่น Mad Bomber, Hunter, Disease, Cursed, Tough Guy) จะไม่ทำงาน</p>
                                     </div>
                                 </div>
                             `;
@@ -2442,34 +2442,8 @@
                 title.innerText = "ช่วงอภิปรายและโหวต (Day Phase)";
                 cardTitle.innerText = "ลำดับการทำงานตอนกลางวัน";
 
-                let hunterCheckHtml = '';
-                const wolf = gameState.wolfTarget;
-                const bg = gameState.bodyguardTarget;
-                const isHunterKilled = wolf && (effectiveRole(wolf) === 'hunter') && (!(bg && wolf === bg && !isPoisoned(getPlayerByRole('bodyguard'))));
-
-                if (isHunterKilled && isPoisoned(wolf)) {
-                    hunterCheckHtml = `
-                        <div class="bg-fuchsia-950/60 p-3 rounded-xl border border-fuchsia-800 space-y-1 shadow">
-                            <span class="text-fuchsia-300 font-bold text-xs flex items-center gap-1.5">
-                                <span>🧪</span> Hunter (${wolf}) ถูกหมาป่าสังหาร แต่ถูกวางยา!
-                            </span>
-                            <div class="text-[11px] text-slate-300">
-                                • ความสามารถถูกบล็อก <b>Hunter ไม่สามารถยิงใครได้</b>
-                            </div>
-                        </div>
-                    `;
-                } else if (isHunterKilled) {
-                    hunterCheckHtml = `
-                        <div class="bg-rose-950/70 p-3 rounded-xl border border-rose-800 space-y-1 shadow">
-                            <span class="text-rose-400 font-bold text-xs flex items-center gap-1.5">
-                                <span>⚠️</span> Hunter (${wolf}) ถูกหมาป่าสังหาร!
-                            </span>
-                            <div class="text-[11px] text-slate-300">
-                                • ให้ Mod สอบถาม Hunter เพื่อใช้ความสามารถ <b>ยิงผู้เล่น 1 คน</b> ให้ตายตามทันที
-                            </div>
-                        </div>
-                    `;
-                }
+                // Hunter powers follow committed deaths, never target previews.
+                const hunterCheckHtml = '';
 
                 let poisonCheckHtml = '';
                 if (gameState.poisonedTarget) {
@@ -2649,6 +2623,7 @@
             } else {
                 dropdown.classList.add('hidden');
                 gameState.wolfTarget = '';
+                gameState.wolfTarget2 = '';
                 calculateNightResult();
             }
         }
@@ -2657,6 +2632,7 @@
             if (!roleAvailable('werewolf') && !roleAvailable('wolf_cub') && !gameState.cursedTurned.some(p => !isBedridden(p))) return;
             const select = document.getElementById('wolf-target-select');
             gameState.wolfTarget = select ? select.value : '';
+            gameState.wolfTarget2 = document.getElementById('wolf-target-select-2')?.value || '';
             calculateNightResult();
         }
 
@@ -2747,6 +2723,11 @@
         // ---------------- Sorcerer2 (Poison) helpers ----------------
         // Bedridden: one first would-be death, first night only. Preview is reversible.
         function resetBedridden() {
+            gameState.deathPowers = {};
+            gameState.bomberPowers = {};
+            gameState.cursedPreview = '';
+            gameState.wolfCubNight = 0;
+            gameState.wolfTarget2 = '';
             gameState.travelers = { pending: [], admitted: {} };
             gameState.bedridden = { closed: false, player: '', voteUsed: false, bombSpent: false, preview: null };
         }
@@ -2778,7 +2759,7 @@
             if (role === 'spellcaster') gameState.silencedTarget = '';
             if (role === 'bodyguard') gameState.bodyguardTarget = '';
             if (gameState.toughGuyInjured?.player === player) gameState.toughGuyInjured = null;
-            gameState.lastNightResultText = '🛏️ ' + player + ' เป็น Bedridden — ยังมีชีวิต หลับตามปกติ ไม่มีความสามารถเดิม และเหลือสิทธิ์โหวตประหารปกติครั้งสุดท้าย 1 ครั้ง';
+            gameState.lastNightResultText = '🛏️ ' + player + ' เป็น Bedridden — ยังมีชีวิต หลับตามปกติ ใช้ความสามารถระหว่างเกมไม่ได้ แต่ Hunter/Mad Bomber ยังใช้ความสามารถเมื่อตายจริงได้หากไม่ถูกวางยา และเหลือสิทธิ์โหวตประหารปกติครั้งสุดท้าย 1 ครั้ง';
             return true;
         }
         function undoBedriddenPreview() {
@@ -2815,7 +2796,7 @@
             const panel = document.createElement('div'); panel.id = 'bedridden-controls';
             panel.className = 'p-3 border border-amber-700 rounded-xl space-y-2 text-xs';
             const note = document.createElement('p');
-            note.textContent = '🛏️ ' + b.player + ' — Bedridden: หลับตามปกติ ร่วมอภิปรายได้ ไม่มีความสามารถเดิม • Exile ไม่ใช้สิทธิ์สุดท้าย ไม่ทำให้ตายหรือระเบิด';
+            note.textContent = '🛏️ ' + b.player + ' — Bedridden: หลับตามปกติ ร่วมอภิปรายได้ ใช้ความสามารถระหว่างเกมไม่ได้ แต่ Hunter/Mad Bomber ยังใช้ความสามารถเมื่อตายจริงได้หากไม่ถูกวางยา • Exile ไม่ใช้สิทธิ์สุดท้าย ไม่ทำให้ตายหรือระเบิด';
             panel.append(note);
             const button = document.createElement('button');
             button.textContent = b.voteUsed ? 'บันทึกใช้สิทธิ์สุดท้ายแล้ว' : 'Mod: ยืนยันใช้โหวตประหารปกติครั้งสุดท้าย';
@@ -2843,7 +2824,7 @@
                 updateSorcerer2Target();
             } else {
                 dropdown.classList.add('hidden');
-                gameState.poisonedTarget = '';
+                // Closing the controls is not a new poison use.
                 calculateNightResult();
             }
         }
@@ -2851,7 +2832,7 @@
         function updateSorcerer2Target() {
             if (!roleAvailable('sorcerer2')) return;
             const sel = document.getElementById('sorcerer2-target-select');
-            gameState.poisonedTarget = sel ? sel.value : '';
+            if (sel && sel.value) gameState.poisonedTarget = sel.value;
             calculateNightResult();
             inspectSeerTarget();
         }
@@ -2941,7 +2922,7 @@
             const roleId = isBedridden(victim) && gameState.rolePlayerMap[victim] === 'mad_bomber' ? 'mad_bomber' : effectiveRole(victim);
 
             // 1. Tanner Victory check!
-            if (roleId === 'tanner') {
+            if (gameState.rolePlayerMap[victim] === 'tanner') {
                 if (gameState.playerStatus[victim]) gameState.playerStatus[victim].alive = false;
                 renderPlayerStatusList();
                 alert(`🎉🏆 จบเกมทันที!\n\nผู้เล่น "${victim}" คือ Tanner (คนฟอกหนัง)!\nถูกชาวบ้านโหวตประหารชีวิตสำเร็จตามเป้าหมาย ทำให้ "Tanner เป็นฝ่ายชนะเกมทันที!" 🎭✨`);
@@ -2961,28 +2942,70 @@
                 return;
             }
 
-            // 3. Normal Vote Execution
-            if (gameState.playerStatus[victim]) gameState.playerStatus[victim].alive = false;
-
-            // Lover check
-            if (gameState.lovers.includes(victim)) {
-                const partner = gameState.lovers.find(p => p !== victim);
-                if (partner && gameState.playerStatus[partner]) {
-                    gameState.playerStatus[partner].alive = false;
-                    alert(`💘 เงื่อนไข Lover: ${partner} เสียชีวิตตาม ${victim} ทันที!`);
-                }
-            }
-
-            // Hunter check
-            if (roleId === 'hunter' && isPoisoned(victim)) {
-                alert(`🧪 Hunter (${victim}) ถูกโหวตประหารชีวิต แต่ถูกวางยาไว้!\nความสามารถถูกบล็อก — ไม่สามารถยิงใครได้`);
-            } else if (roleId === 'hunter') {
-                alert(`🏹 Hunter (${victim}) ถูกโหวตประหารชีวิต!\nให้ Mod สอบถาม Hunter เพื่อใช้สิทธิ์ยิงผู้เล่น 1 คนให้ตายตามทันที`);
-            }
+            killWithLover(victim);
 
             renderPlayerStatusList();
             renderGameplay();
             } finally { judgeExecutionPending = false; }
+        }
+
+        // Night preview deaths must not consume Hunter's once-per-game shot.
+        function recordDeathPowers() {
+            const recorded = gameState.deathPowers || (gameState.deathPowers = {});
+            const bombs = gameState.bomberPowers || (gameState.bomberPowers = {});
+            gameState.players.forEach(player => {
+                if (gameState.playerStatus[player]?.alive || (gameState.nightKilled || []).includes(player) || bombs[player] || gameState.rolePlayerMap[player] !== 'mad_bomber') return;
+                bombs[player] = isPoisoned(player) || (isBedridden(player) && bedriddenState().bombSpent) ? 'spent' : 'pending';
+            });
+            if (!activeMadBomber) {
+                const bomber = gameState.players.find(p => bombs[p] === 'pending');
+                if (bomber) openMadBomberModal(bomber, 'death');
+            }
+            gameState.players.forEach(player => {
+                if (gameState.playerStatus[player]?.alive || (gameState.nightKilled || []).includes(player) || recorded[player]) return;
+                recorded[player] = gameState.rolePlayerMap[player] === 'hunter' && !isPoisoned(player) ? 'pending' : 'spent';
+                if (effectiveRole(player) === 'wolf_cub' && !isPoisoned(player)) gameState.wolfCubNight = gameState.dayCount + 1;
+            });
+        }
+        function renderWolfCubTarget() {
+            if (gameState.gamePhase !== 'night' || gameState.wolfCubNight !== gameState.dayCount) return;
+            const first = document.getElementById('wolf-target-select');
+            if (!first || document.getElementById('wolf-target-select-2')) return;
+            const second = first.cloneNode(true); second.id = 'wolf-target-select-2';
+            second.value = gameState.wolfTarget2 || '';
+            const label = document.createElement('p'); label.textContent = '🐺 Wolf Cub: เลือกเหยื่อคนที่ 2 (คนละคน)';
+            first.parentElement.after(label, second);
+        }
+        function renderHunterPowers() {
+            document.getElementById('hunter-powers')?.remove();
+            const pending = gameState.players.filter(p => gameState.deathPowers?.[p] === 'pending');
+            if (!pending.length) return;
+            const panel = document.createElement('div'); panel.id = 'hunter-powers';
+            panel.className = 'p-3 border border-rose-700 rounded-xl space-y-2 text-xs';
+            pending.forEach(player => {
+                const row = document.createElement('div');
+                row.className = 'grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 pl-6';
+                const label = document.createElement('p'); label.textContent = '🏹 ' + player + ': เลือกยิง 1 คน'; label.className = 'col-span-2 -ml-6 text-slate-300 font-semibold'; row.append(label);
+                const select = document.createElement('select'); select.className = 'w-full min-w-0 h-9 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100 text-xs';
+                gameState.players.filter(p => gameState.playerStatus[p]?.alive).forEach(p => {
+                    const option = document.createElement('option'); option.value = p; option.textContent = p; select.append(option);
+                });
+                row.append(select);
+                const button = document.createElement('button'); button.textContent = 'ยิง!'; button.className = 'h-9 px-4 rounded bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold whitespace-nowrap transition-colors disabled:opacity-40 disabled:cursor-not-allowed';
+                button.disabled = !!activeMadBomber || !select.options.length;
+                button.onclick = () => shootHunter(player, select.value); row.append(button); panel.append(row);
+            });
+            document.getElementById('player-status-list')?.after(panel);
+        }
+        function shootHunter(player, target) {
+            if (activeMadBomber || gameState.deathPowers?.[player] !== 'pending' || !gameState.playerStatus[target]?.alive) return;
+            if (!confirm(player + ' ยิง ' + target + '?')) return;
+            gameState.deathPowers[player] = 'spent';
+            const role = isBedridden(target) && gameState.rolePlayerMap[target] === 'mad_bomber' ? 'mad_bomber' : effectiveRole(target);
+            if (role === 'mad_bomber' && !isPoisoned(target) && !(isBedridden(target) && bedriddenState().bombSpent)) {
+                openMadBomberModal(target, 'manual');
+            } else killWithLover(target);
+            renderPlayerStatusList();
         }
 
         function killWithLover(player) {
@@ -3008,22 +3031,38 @@
         }
 
         function calculateNightResult() {
-            undoBedriddenPreview();
+            calculateWolfBite(false);
+            if (gameState.wolfCubNight === gameState.dayCount && gameState.wolfTarget2 && gameState.wolfTarget2 !== gameState.wolfTarget) {
+                const first = gameState.wolfTarget, text = gameState.lastNightResultText;
+                gameState.wolfTarget = gameState.wolfTarget2;
+                try { calculateWolfBite(true); } finally { gameState.wolfTarget = first; }
+                gameState.lastNightResultText = text + '<br>' + gameState.lastNightResultText;
+            }
+        }
+        function calculateWolfBite(additional) {
+            if (!additional) undoBedriddenPreview();
             const wolf = (roleAvailable('werewolf') || roleAvailable('wolf_cub') || gameState.cursedTurned.some(p => !isBedridden(p))) ? gameState.wolfTarget : '';
             const bg = roleAvailable('bodyguard') ? gameState.bodyguardTarget : ''; 
 
+            if (!additional) {
             // Undo any provisional kills from a previous calculation this night
             (gameState.nightKilled || []).forEach(p => {
                 if (gameState.playerStatus[p]) gameState.playerStatus[p].alive = true;
             });
             gameState.nightKilled = [];
-            gameState.cursedTurned = [];
+            if (gameState.cursedPreview) {
+                gameState.cursedTurned = gameState.cursedTurned.filter(p => p !== gameState.cursedPreview);
+                gameState.cursedPreview = '';
+            }
             gameState.wolvesInfectedNext = false;
             gameState.pendingMadBomber = null;
             if (gameState.toughGuyInjured && gameState.toughGuyInjured.night === gameState.dayCount) {
                 gameState.toughGuyInjured = null;
             }
 
+            }
+            if (additional && !gameState.playerStatus[wolf]?.alive) return;
+            if (wolf && !gameState.playerStatus[wolf]?.alive) return;
             if (!wolf) {
                 gameState.lastNightResultText = "- ยังไม่ได้เลือกเป้าหมายที่หมาป่าฆ่า -";
                 renderPlayerStatusList();
@@ -3058,6 +3097,9 @@
             // Poisoned target: special on-death abilities are blocked -> normal death
             const effRole = targetPoisoned ? '__poisoned__' : targetRole;
 
+            // Disease is triggered by an unblocked, unpoisoned bite, even if Bedridden prevents death.
+            if (gameState.rolePlayerMap[wolf] === 'disease' && !targetPoisoned) gameState.wolvesInfectedNext = true;
+
             // Resolve conversion before any on-death passive effect. Cursed/Tough Guy do not die yet.
             if (!['cursed', 'tough_guy'].includes(effRole) && offerBedridden(wolf, true)) {
                 renderPlayerStatusList();
@@ -3080,7 +3122,8 @@
             }
 
             // 4. Target is Cursed: turns into Werewolf!
-            if (effRole === 'cursed') {
+            if (effRole === 'cursed' && !gameState.cursedTurned.includes(wolf)) {
+                gameState.cursedPreview = wolf;
                 gameState.cursedTurned.push(wolf);
                 gameState.lastNightResultText = `🧑 Cursed (<b>${wolf}</b>) ถูกหมาป่าโจมตี<br>👉 <b>ผลลัพธ์: ไม่มีใครตาย และ Cursed กลายร่างเป็นหมาป่า 🐺</b>${bgFailNote}`;
                 renderPlayerStatusList();
@@ -3187,8 +3230,11 @@
         let madBomberContext = 'manual'; // 'manual' | 'vote' | 'night'
 
         function openMadBomberModal(playerName, context) {
-            if (activeMadBomber || (isBedridden(playerName) && bedriddenState().bombSpent)) return;
+            const bombs = gameState.bomberPowers || (gameState.bomberPowers = {});
+            if (activeMadBomber || bombs[playerName] === 'spent' || bombs[playerName] === 'resolving' || (isBedridden(playerName) && bedriddenState().bombSpent)) return;
             if (offerBedridden(playerName, false)) { renderGameplay(); return; }
+            if (isPoisoned(playerName)) { bombs[playerName] = 'spent'; killWithLover(playerName); renderPlayerStatusList(); return; }
+            bombs[playerName] = 'resolving';
             activeMadBomber = playerName;
             madBomberContext = context || 'manual';
             
@@ -3221,6 +3267,7 @@
                 alert('ระเบิดที่เก็บไว้ต้องทำงาน: เลือกเป้าหมายซ้าย–ขวา แล้วกดยืนยันระเบิด (เลือกไม่มีได้หากไม่มีเป้าหมาย)');
                 return;
             }
+            (gameState.bomberPowers || (gameState.bomberPowers = {}))[activeMadBomber] = 'spent';
             if (isBedridden(activeMadBomber)) bedriddenState().bombSpent = true;
             if (activeMadBomber) {
                 // Kill ONLY the mad bomber, skip bomb
@@ -3252,6 +3299,7 @@
 
         function triggerMadBomberBlast() {
             if (!activeMadBomber) return;
+            (gameState.bomberPowers || (gameState.bomberPowers = {}))[activeMadBomber] = 'spent';
             if (isBedridden(activeMadBomber)) {
                 if (bedriddenState().bombSpent) return;
                 bedriddenState().bombSpent = true;
@@ -3297,28 +3345,26 @@
 
         function nextPhase() {
             if (activeMadBomber) return;
+            if (Object.values(gameState.deathPowers || {}).includes('pending') && gameState.players.some(p => gameState.playerStatus[p]?.alive)) { alert('กรุณาให้ Hunter ยิงก่อนเปลี่ยนช่วง'); return; }
             if (travelerState().votingOpen) { alert('กรุณากดจบรอบลงมติในแผง Traveler ก่อนเปลี่ยนช่วง'); return; }
-            let openBomberFor = null;
             if (gameState.gamePhase === 'night') {
                 calculateNightResult(); // Resolve the final targets/protection before committing.
                 const candidate = bedriddenState().preview?.player;
                 if (candidate) offerBedridden(candidate, false);
                 bedriddenState().closed = true;
                 bedriddenState().preview = null;
+                gameState.cursedPreview = ''; // Commit this night's conversion.
                 gameState.gamePhase = 'day';
                 gameState.wolvesInfected = false; // Disease infection consumed this night
                 gameState.nightKilled = [];       // Lock in tonight's kills
-                if (gameState.pendingMadBomber) {
-                    openBomberFor = gameState.pendingMadBomber;
-                    gameState.pendingMadBomber = null;
-                }
+                gameState.pendingMadBomber = null;
             } else {
                 gameState.gamePhase = 'night';
                 gameState.dayCount++;
 
-                // Reset silenced / poisoned effect for the new night/day
-                gameState.silencedTarget = '';
+                // Poison expires when the next night begins.
                 gameState.poisonedTarget = '';
+                gameState.silencedTarget = '';
                 gameState.nightKilled = [];
 
                 // Activate wolf disease infection for this night if infected from earlier
@@ -3329,6 +3375,7 @@
 
                 // Reset night targets
                 gameState.wolfTarget = '';
+                gameState.wolfTarget2 = '';
                 gameState.bodyguardTarget = '';
 
                 // ตรวจสอบเงื่อนไข Tough Guy เสียชีวิตในวันถัดไป
@@ -3351,9 +3398,8 @@
             }
             renderGameplay();
             resetTimer();
-            if (openBomberFor) {
-                setTimeout(() => openMadBomberModal(openBomberFor, 'night'), 150);
-            }
+            // Committed Bomber deaths (including lovers) are serialized by recordDeathPowers.
+            // Do not schedule another modal after rendering: it could reopen a resolved blast.
         }
 
         function updateTimerRange(val) {
@@ -3900,7 +3946,10 @@
             document.getElementById('gameplay-screen').append(panel);
         }
         renderPlayerStatusList = function () {
+            recordDeathPowers();
             originalRender();
+            renderHunterPowers();
+            renderWolfCubTarget();
             renderSeats();
             renderBedriddenControls();
             renderTravelerControls();
