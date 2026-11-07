@@ -51,6 +51,19 @@
             transform: rotateY(180deg);
         }
 
+        /* Player artwork is mounted only while the private face is revealed. */
+        #screen-player-card .card-perspective { width: 100%; max-width: 300px; margin-inline: auto; aspect-ratio: 3 / 4.6; }
+        #card-front-content { position: absolute; padding: 1rem; }
+        #player-card-inner:not(.flipped) #card-front-content { visibility: hidden; }
+        .player-role-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; pointer-events: none; }
+        .player-role-shade { position: absolute; inset: 0; background: linear-gradient(#020617cc, #02061733 35%, #02061799 60%, #020617f2); pointer-events: none; }
+        #card-front-content > .relative { min-height: 0; flex-shrink: 0; }
+        #card-front-content > .my-auto { background: #020617b3; border-radius: .75rem; padding: .4rem; }
+        #card-role-icon { font-size: 2.5rem; }
+        #card-role-name { font-size: 1.35rem; overflow-wrap: anywhere; }
+        #card-player-name-tag { color: #e2e8f0; max-width: 50%; overflow-wrap: anywhere; }
+        #card-front-content > div:last-child { flex-shrink: 1; overflow-y: auto; }
+
         /* Pulsing Glow Animation for Waiting Room */
         @keyframes pulse-glow {
             0%, 100% {
@@ -448,10 +461,9 @@
 
                     <!-- Card Front (Revealed Role) -->
                     <div id="card-front-content" class="card-front border-2 border-amber-500/60 shadow-2xl bg-slate-900 rounded-2xl flex flex-col justify-between p-5 text-center relative overflow-hidden">
-                        <!-- Atmospheric background image for front of card (Optional, faded) -->
-                        <div class="absolute inset-0 z-0 opacity-20 pointer-events-none">
-                            <img src="./design/WWCARD.png" alt="Card BG" class="w-full h-full object-cover">
-                        </div>
+                        <!-- Missing artwork keeps the existing slate/glow fallback. No source before reveal. -->
+                        <div id="player-role-artwork" aria-hidden="true"></div>
+                        <div class="player-role-shade" aria-hidden="true"></div>
                         
                         <!-- Atmospheric background glow -->
                         <div id="role-bg-glow" class="absolute -top-20 -left-20 w-56 h-56 rounded-full blur-3xl opacity-30 bg-amber-500 pointer-events-none"></div>
@@ -755,6 +767,51 @@
         ];
 
         // ---------------------------------------------
+        // Display-only aliases: never change role IDs, database records or wire payloads.
+        const ROLE_DISPLAY = {
+            villager: { icon: '👨‍🦰' },
+            sorcerer: { name: 'Sorceress', thai: 'แม่มดฝ่ายมืด', icon: '🧙🏾‍♀️' },
+            sorcerer2: { name: 'Sorcerer', thai: 'พ่อมดวางยา', icon: '🧪' }
+        };
+        function roleDisplay(role) { return { ...role, ...ROLE_DISPLAY[role.id] }; }
+        // Pending new artwork; role-only filenames, relative to this index.html.
+        const ROLE_ARTWORK = Object.freeze({
+            werewolf: './Assets/werewolf.webp',
+            wolf_cub: './Assets/wolf_cub.webp',
+            sorcerer: './Assets/sorceress.webp',
+            sorcerer2: './Assets/sorcerer.webp',
+            seer: './Assets/seer.webp',
+            apprentice_seer: './Assets/apprentice_seer.webp',
+            bodyguard: './Assets/bodyguard.webp',
+            hunter: './Assets/hunter.webp',
+            spellcaster: './Assets/spellcaster.webp',
+            tough_guy: './Assets/tough_guy.webp',
+            disease: './Assets/diseased.webp',
+            lycan: './Assets/lycan.webp',
+            cursed: './Assets/cursed.webp',
+            mad_bomber: './Assets/mad_bomber.webp',
+            tanner: './Assets/tanner.webp',
+            cupid: './Assets/cupid.webp',
+            villager: './Assets/villager.webp',
+            judge: './Assets/judge.webp',
+            gunslinger: './Assets/gunslinger.webp',
+            politician: './Assets/politician.webp',
+            bureaucrat: './Assets/bureaucrat.webp'
+        });
+        let playerCardRoleId = null;
+        function paintPlayerArtwork(revealed) {
+            const holder = document.getElementById('player-role-artwork');
+            holder.textContent = '';
+            document.getElementById('card-front-content').setAttribute('aria-hidden', String(!revealed));
+            const source = revealed && Object.prototype.hasOwnProperty.call(ROLE_ARTWORK, playerCardRoleId) && ROLE_ARTWORK[playerCardRoleId];
+            if (!source) return;
+            const image = document.createElement('img');
+            image.className = 'player-role-art'; image.alt = ''; image.setAttribute('aria-hidden', 'true');
+            image.onerror = () => image.remove();
+            image.src = source;
+            holder.append(image);
+        }
+
         // APPLICATION STATE
         // ---------------------------------------------
         let currentRoleCounts = {};
@@ -818,6 +875,10 @@
         // SCREEN ROUTING & INITIALIZATION
         // ---------------------------------------------
         function showScreen(screenId) {
+            if (screenId !== 'screen-player-card') {
+                document.getElementById('player-card-inner').classList.remove('flipped');
+                paintPlayerArtwork(false);
+            }
             const screens = [
                 'screen-home',
                 'screen-role-select',
@@ -1516,11 +1577,11 @@
                 container.innerHTML += `
                     <div class="p-2.5 rounded-xl border ${borderClass} flex items-center justify-between transition">
                         <div class="flex items-center space-x-3">
-                            <span class="text-2xl">${role.icon}</span>
+                            <span class="text-2xl">${roleDisplay(role).icon}</span>
                             <div>
                                 <div class="flex items-center gap-1.5">
-                                    <span class="text-xs font-bold text-slate-100">${role.name}</span>
-                                    <span class="text-[10px] text-slate-400">(${role.thai})</span>
+                                    <span class="text-xs font-bold text-slate-100">${roleDisplay(role).name}</span>
+                                    <span class="text-[10px] text-slate-400">(${roleDisplay(role).thai})</span>
                                 </div>
                                 <div class="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
                                     <span class="${teamColor} font-semibold">${role.team.toUpperCase()}</span>
@@ -1995,6 +2056,9 @@
             document.getElementById('btn-toggle-privacy-text').innerText = revealed ? 'ซ่อนฝ่าย / แสดงเฉพาะบทบาท' : 'เปิดดูฝ่ายส่วนตัว';
         }
         function renderPlayerCard(roleInfo) {
+            paintPlayerArtwork(false);
+            playerCardRoleId = roleInfo.roleId;
+            const display = ROLE_DISPLAY[roleInfo.roleId] || {};
             document.getElementById('player-card-inner').classList.remove('flipped');
             document.getElementById('btn-toggle-privacy-text').innerText = 'แตะเพื่อเปิดดูบทบาท 👁️';
             travelerCardInfo = travelerKinds.includes(roleInfo.roleId) ? roleInfo : null;
@@ -2015,9 +2079,9 @@
                 document.getElementById('traveler-wolf-disclosure').className = 'hidden';
             }
             document.getElementById('card-player-name-tag').innerText = myPlayerName;
-            document.getElementById('card-role-name').innerText = roleInfo.roleName;
-            document.getElementById('card-role-thai').innerText = roleInfo.roleThai;
-            document.getElementById('card-role-icon').innerText = roleInfo.roleIcon;
+            document.getElementById('card-role-name').innerText = display.name || roleInfo.roleName;
+            document.getElementById('card-role-thai').innerText = display.thai || roleInfo.roleThai;
+            document.getElementById('card-role-icon').innerText = display.icon || roleInfo.roleIcon;
             document.getElementById('card-role-desc').innerText = roleInfo.desc;
 
             const teamBadge = document.getElementById('card-team-badge');
@@ -2051,6 +2115,7 @@
             const cardInner = document.getElementById('player-card-inner');
             const isFlipped = cardInner.classList.contains('flipped');
             const btnText = document.getElementById('btn-toggle-privacy-text');
+            paintPlayerArtwork(!isFlipped);
             if (travelerCardInfo) {
                 if (isFlipped) cardInner.classList.remove('flipped');
                 else cardInner.classList.add('flipped');
@@ -2077,7 +2142,7 @@
                 container.innerHTML += `
                     <label class="flex items-center space-x-2 bg-slate-900/50 p-2.5 rounded-lg border border-slate-700 cursor-pointer hover:border-amber-500/50 transition">
                         <input type="checkbox" value="${r.id}" class="role-cb-offline w-4 h-4 text-amber-500 rounded bg-slate-900 border-slate-700" checked onchange="updateRequiredCountOffline()">
-                        <span class="text-xs font-medium">${r.icon} ${r.name}</span>
+                        <span class="text-xs font-medium">${roleDisplay(r).icon} ${roleDisplay(r).name}</span>
                     </label>
                 `;
             });
@@ -2156,7 +2221,7 @@
 
                     matchingContainer.innerHTML += `
                         <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-700 flex items-center justify-between">
-                            <span class="text-xs font-semibold text-amber-300 w-1/2">${roleObj.icon} ${roleObj.name}</span>
+                            <span class="text-xs font-semibold text-amber-300 w-1/2">${roleDisplay(roleObj).icon} ${roleDisplay(roleObj).name}</span>
                             <select class="match-select-offline w-1/2 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-100 focus:outline-none focus:border-amber-500" data-role="${roleId}">
                                 ${optionsHtml}
                             </select>
@@ -2251,11 +2316,11 @@
                 const nightSteps = [
                     { id: 'cupid', name: '1. Cupid เลือก Lovers (เฉพาะคืนแรก)', show: roleAvailable('cupid') && gameState.dayCount === 1 },
                     { id: 'wolf', name: '2. Werewolf เลือกเหยื่อสังหาร', show: roleAvailable('werewolf') || roleAvailable('wolf_cub') || gameState.cursedTurned.some(p => !isBedridden(p)) },
-                    { id: 'sorcerer2', name: '3. Sorcerer2 เลือกวางยา (บล็อกความสามารถ)', show: roleAvailable('sorcerer2') },
+                    { id: 'sorcerer2', name: '3. Sorcerer เลือกวางยา (บล็อกความสามารถ)', show: roleAvailable('sorcerer2') },
                     { id: 'bodyguard', name: '4. Bodyguard เลือกป้องกัน', show: roleAvailable('bodyguard') },
                     { id: 'seer', name: '5. Seer ส่องตรวจดูผู้เล่น', show: roleAvailable('seer') },
                     { id: 'spellcaster', name: '6. Spellcaster เลือกเสกใบ้ (ห้ามพูดวันรุ่งขึ้น)', show: roleAvailable('spellcaster') },
-                    { id: 'sorcerer', name: '7. Sorcerer ตรวจหา Seer', show: roleAvailable('sorcerer') },
+                    { id: 'sorcerer', name: '7. Sorceress ตรวจหา Seer', show: roleAvailable('sorcerer') },
                     { id: 'apprentice', name: '8. Apprentice Seer ทำงาน', show: roleAvailable('apprentice_seer') }
                 ];
 
@@ -2454,7 +2519,7 @@
                                 <span>🧪</span> ผู้เล่นถูกวางยา: <b>${gameState.poisonedTarget}</b> ${pRole ? '(' + pRole.icon + ' ' + pRole.name + ')' : ''}
                             </span>
                             <div class="text-[11px] text-slate-300">
-                                • ความสามารถของผู้เล่นนี้ถูก <b>Sorcerer2</b> บล็อกตลอดวันนี้ (หากถูกโหวตตาย ความสามารถตอนตายจะไม่ทำงาน)
+                                • ความสามารถของผู้เล่นนี้ถูก <b>Sorcerer</b> บล็อกตลอดวันนี้ (หากถูกโหวตตาย ความสามารถตอนตายจะไม่ทำงาน)
                             </div>
                         </div>
                     `;
@@ -2561,7 +2626,7 @@
                 const toughGuyBadge = isInjuredTG ? '<span class="text-rose-400 font-bold ml-1 animate-pulse" title="Tough Guy ได้รับบาดเจ็บ (จะเสียชีวิตในวันถัดไป)">🩸</span>' : '';
                 const isSilenced = gameState.silencedTarget === p && status.alive;
                 const isPoisonedP = gameState.poisonedTarget === p && status.alive;
-                const poisonBadge = isPoisonedP ? '<span class="text-fuchsia-400 font-bold ml-1 animate-pulse" title="ถูก Sorcerer2 วางยา (ความสามารถถูกบล็อก)">🧪</span>' : '';
+                const poisonBadge = isPoisonedP ? '<span class="text-fuchsia-400 font-bold ml-1 animate-pulse" title="ถูก Sorcerer วางยา (ความสามารถถูกบล็อก)">🧪</span>' : '';
                 const silencedBadge = isSilenced ? '<span class="text-purple-400 font-bold ml-1 animate-pulse" title="ถูก Spellcaster เสกใบ้ (ห้ามพูดในวันนี้)">🤐</span>' : '';
 
                 statusList.innerHTML += `
@@ -2574,7 +2639,7 @@
                                 ${toughGuyBadge}
                                 ${silencedBadge}
                                 ${poisonBadge}
-                                <span class="text-[10px] text-amber-400 bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-900/50">${roleObj ? (roleObj.icon + ' ' + roleObj.name) : role}</span>
+                                <span class="text-[10px] text-amber-400 bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-900/50">${roleObj ? (roleDisplay(roleObj).icon + ' ' + roleDisplay(roleObj).name) : role}</span>
                             </div>
                             <input type="text" placeholder="จดโน้ตย่อ..." class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-0.5 text-[11px] text-slate-300 focus:outline-none focus:border-amber-500" value="${status.note}" onchange="updatePlayerNote('${p}', this.value)">
                         </div>
@@ -2932,7 +2997,7 @@
             // 2. Mad Bomber check! -> Mod chooses the real left/right neighbours
             if (roleId === 'mad_bomber' && !(isBedridden(victim) && bedriddenState().bombSpent)) {
                 if (isPoisoned(victim)) {
-                    alert(`🧪 "${victim}" คือ Mad Bomber แต่ถูก Sorcerer2 วางยาไว้!\nระเบิดไม่ทำงาน — เสียชีวิตเพียงคนเดียว`);
+                    alert(`🧪 "${victim}" คือ Mad Bomber แต่ถูก Sorcerer วางยาไว้!\nระเบิดไม่ทำงาน — เสียชีวิตเพียงคนเดียว`);
                     killWithLover(victim);
                     renderPlayerStatusList();
                     renderGameplay();
@@ -3073,7 +3138,7 @@
             const isLoverTarget = gameState.lovers.includes(wolf);
             const targetPoisoned = isPoisoned(wolf);
             const bgPlayer = getPlayerByRole('bodyguard');
-            const poisonNote = targetPoisoned ? '<br>🧪 <b>เป้าหมายถูก Sorcerer2 วางยา</b> — ความสามารถถูกบล็อก' : '';
+            const poisonNote = targetPoisoned ? '<br>🧪 <b>เป้าหมายถูก Sorcerer วางยา</b> — ความสามารถถูกบล็อก' : '';
 
             // 1. Bodyguard protection (blocked if the Bodyguard is poisoned)
             if (bg && wolf === bg) {
@@ -3149,7 +3214,7 @@
                 gameState.lastNightResultText = `💪 Tough Guy (<b>${wolf}</b>) ถูกหมาป่ากัด<br>👉 <b>ผลลัพธ์: ยังไม่ตายในวันนี้</b> (จะตายในวันถัดไป)${bgFailNote}`;
             } else {
                 const roleObj = ROLES_DATABASE.find(r => r.id === targetRole);
-                const roleLabel = roleObj ? roleObj.name : (targetRole || 'unknown');
+                const roleLabel = roleObj ? roleDisplay(roleObj).name : (targetRole || 'unknown');
                 let blockedNote = '';
                 if (targetPoisoned && ['mad_bomber', 'disease', 'cursed', 'tough_guy', 'hunter'].includes(targetRole)) {
                     blockedNote = `<br>🧪 <b>${roleLabel}</b> ถูกวางยา — ความสามารถไม่ทำงาน${targetRole === 'mad_bomber' ? ' (ระเบิดไม่ทำงาน คนรอบข้างไม่ตาย)' : ''}`;
@@ -3247,7 +3312,7 @@
             livingPlayers.forEach(p => {
                 const role = gameState.rolePlayerMap[p] || 'unknown';
                 const roleObj = ROLES_DATABASE.find(r => r.id === role);
-                optionsHtml += `<option value="${p}">${p} (${roleObj ? roleObj.name : role})</option>`;
+                optionsHtml += `<option value="${p}">${p} (${roleObj ? roleDisplay(roleObj).name : role})</option>`;
             });
 
             leftSelect.innerHTML = optionsHtml;
@@ -3541,6 +3606,7 @@
             const card = document.getElementById('screen-player-card');
             if (modal.contains(card)) {
                 document.getElementById('player-card-inner').classList.remove('flipped');
+                paintPlayerArtwork(false);
                 paintTravelerPrivacy(false); travelerCardInfo = null;
                 card.classList.add('hidden');
                 const anchor = document.getElementById('traveler-card-anchor');
