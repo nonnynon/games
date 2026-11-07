@@ -373,8 +373,8 @@
                     <!-- Real-time Status Badge & Room Info -->
                     <div class="mt-2.5 flex flex-col items-center gap-1.5">
                         <span id="player-join-conn-status" class="px-2.5 py-1 rounded-full text-[11px] bg-slate-950 text-slate-400 border border-slate-800 flex items-center gap-1.5 inline-flex">
-                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-                            <span>กำลังเชื่อมต่อห้อง...</span>
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                            <span>กรอกชื่อแล้วกดเข้าร่วมห้อง</span>
                         </span>
                         <div id="player-join-room-info" class="text-[11px] text-amber-300 hidden">
                             👥 สมาชิกในห้อง: <span id="player-join-count" class="font-bold">0</span> / <span id="player-join-total">-</span> คน
@@ -858,6 +858,7 @@
         let connectedPeers = {}; // Mod: { [peerId]: conn }
         let playerModConn = null; // Player: DataConnection to Mod
         let joinIntent = false, joinAdmitted = false, joinRequestId = '';
+        let joinWasAdmitted = false, joinFailure = '', requestedTravelerKind = null;
         let reconnectTimer = null, connectDeadline = null, joinDeadline = null;
         let currentModPeerId = ''; // Mod's active assigned Peer ID
 
@@ -1021,19 +1022,32 @@
         };
 
         function updatePlayerConnBadge(isConnected, message) {
-            const badges = [
-                document.getElementById('player-conn-status-badge'),
-                document.getElementById('player-join-conn-status')
-            ];
-            badges.forEach(badge => {
+            // Transport preparation is not admission. Keep idle/error states stable.
+            const state = !joinIntent ? (joinFailure ? 'error' : 'idle') :
+                isConnected ? 'accepted' : joinWasAdmitted ? 'reconnecting' : 'pending';
+            const colors = {
+                idle: 'bg-slate-950 text-slate-400 border-slate-800',
+                error: 'bg-rose-950 text-rose-300 border-rose-800',
+                accepted: 'bg-emerald-950 text-emerald-400 border-emerald-800',
+                pending: 'bg-amber-950 text-amber-300 border-amber-800',
+                reconnecting: 'bg-amber-950 text-amber-300 border-amber-800'
+            };
+            const label = state === 'idle' ? 'กรอกชื่อแล้วกดเข้าร่วมห้อง' :
+                state === 'error' ? joinFailure + ' — กดเข้าร่วมเพื่อลองอีกครั้ง' :
+                state === 'accepted' ? 'เข้าร่วมห้องสำเร็จ' :
+                state === 'reconnecting' ? 'การเชื่อมต่อหลุด กำลังกลับเข้าห้องเดิม…' :
+                message || 'กำลังเข้าร่วมห้อง…';
+            ['player-conn-status-badge', 'player-join-conn-status'].forEach(id => {
+                const badge = document.getElementById(id);
                 if (!badge) return;
-                if (isConnected) {
-                    badge.className = "px-2.5 py-1 rounded-full text-[11px] bg-emerald-950 text-emerald-400 border border-emerald-800 flex items-center gap-1.5 inline-flex";
-                    badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>${message || '🟢 เชื่อมต่อห้องสำเร็จ'}</span>`;
-                } else {
-                    badge.className = "px-2.5 py-1 rounded-full text-[11px] bg-amber-950 text-amber-300 border border-amber-800 flex items-center gap-1.5 inline-flex";
-                    badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span><span>${message || '🟡 กำลังเชื่อมต่อห้อง...'}</span>`;
-                }
+                badge.className = 'px-2.5 py-1 rounded-full text-[11px] border flex items-center gap-1.5 inline-flex ' + colors[state];
+                badge.setAttribute('role', 'status');
+                badge.setAttribute('aria-live', 'polite');
+                const dot = document.createElement('span');
+                dot.className = 'w-1.5 h-1.5 rounded-full bg-current' +
+                    (state === 'pending' || state === 'reconnecting' ? ' animate-pulse' : '');
+                const text = document.createElement('span'); text.textContent = label;
+                badge.replaceChildren(dot, text);
             });
         }
 
@@ -1209,6 +1223,7 @@
 
         function beginJoinIntent() {
             joinIntent = true; joinAdmitted = false;
+            joinWasAdmitted = false; joinFailure = ''; requestedTravelerKind = null;
             joinRequestId = myDeviceId + '-' + Date.now() + '-' + Math.random().toString(36).slice(2);
             try { sessionStorage.removeItem('ww_joined_room'); } catch(e) {}
             document.getElementById('btn-player-join').disabled = true;
@@ -1221,6 +1236,8 @@
 
         function stopJoinIntent() {
             joinIntent = false; joinAdmitted = false; joinRequestId = '';
+            joinWasAdmitted = false; joinFailure = ''; requestedTravelerKind = null;
+            updatePlayerConnBadge(false);
             clearTimeout(joinDeadline); joinDeadline = null;
             clearTimeout(reconnectTimer); reconnectTimer = null;
             document.getElementById('btn-player-join').disabled = false;
@@ -1234,7 +1251,7 @@
         }
 
         function acceptJoin(name) {
-            joinAdmitted = true;
+            joinAdmitted = true; joinWasAdmitted = true; joinFailure = '';
             clearTimeout(joinDeadline); joinDeadline = null;
             myPlayerName = name || myPlayerName;
             try {
@@ -1385,7 +1402,14 @@
             if (!isMod && data.type === 'JOIN_ACK') { if (data.id === myDeviceId) acceptJoin(data.name); return; }
             if (!isMod && data.type === 'JOIN_ERROR') { showJoinError(data.message); return; }
             if (isMod && data.type === 'TRAVELER_REQUEST') { receiveTravelerRequest(data, conn); return; }
-            if (!isMod && data.type === 'TRAVELER_OFFER') { clearTimeout(joinDeadline); joinDeadline = null; renderTravelerChoice(); return; }
+            if (!isMod && data.type === 'TRAVELER_OFFER') {
+                clearTimeout(joinDeadline); joinDeadline = null;
+                if (requestedTravelerKind && !myAssignedRole) {
+                    // Retry the same choice if a connection dropped before Mod received it.
+                    broadcastMessage({ type: 'TRAVELER_REQUEST', id: myDeviceId, name: myPlayerName, kind: requestedTravelerKind });
+                } else renderTravelerChoice();
+                return;
+            }
 
             // MOD RECEIVES PLAYER JOIN
             if (isMod && data.type === 'PLAYER_JOIN') {
@@ -1498,6 +1522,9 @@
                     const repeatedCard = myAssignedRole && lastCardDelivery &&
                         lastCardDelivery.conn === conn && lastCardDelivery.key === cardKey;
                     acceptJoin(myAssignment.playerName);
+                    // Heartbeats acknowledge liveness, not a new card/UI event.
+                    if (repeatedCard) return;
+                    requestedTravelerKind = null;
                     myAssignedRole = myAssignment;
                     try {
                         sessionStorage.setItem('ww_assigned_role', JSON.stringify(myAssignment));
@@ -1515,7 +1542,8 @@
 
             // PLAYERS RECEIVE GAME RESET FROM MOD
             if (!isMod && data.type === 'GAME_RESET') {
-                myAssignedRole = null;
+                myAssignedRole = null; lastCardDelivery = null; requestedTravelerKind = null;
+                closeTravelerModal();
                 try {
                     sessionStorage.removeItem('ww_assigned_role');
                     sessionStorage.removeItem('ww_session_id');
@@ -3697,14 +3725,16 @@
         }
         function chooseTraveler(kind) {
             if (isMod || !activeRoomCode || !travelerKinds.includes(kind)) return;
+            requestedTravelerKind = kind;
             broadcastMessage({ type: 'TRAVELER_REQUEST', id: myDeviceId, name: myPlayerName, kind });
             closeTravelerModal();
             showScreen('screen-player-waiting');
             document.getElementById('player-waiting-status-text').innerText = 'รอ Mod รับ Traveler เข้าหมู่บ้านตอนเช้า';
         }
         function renderTravelerChoice() {
-            if (myAssignedRole || !joinIntent) return;
+            if (myAssignedRole || !joinIntent || requestedTravelerKind) return;
             const modal = document.getElementById('modal-traveler');
+            if (!modal.classList.contains('hidden')) return;
             modal.textContent = '';
             const box = document.createElement('div');
             box.className = 'bg-slate-900 p-4 rounded-xl space-y-3 max-w-sm';
@@ -3741,7 +3771,8 @@
             showScreen('screen-player-join');
             const input = document.getElementById('player-name-input-field');
             input.value = myPlayerName;
-            alert(message);
+            joinFailure = String(message || 'เข้าร่วมห้องไม่สำเร็จ');
+            updatePlayerConnBadge(false);
             input.focus();
         }
         function receiveTravelerRequest(data, conn) {
@@ -3751,6 +3782,7 @@
             if (error) { rejectJoin(conn, error); return; }
             const pending = travelerState().pending;
             const old = pending.find(p => p.id === data.id);
+            if (old && old.kind === data.kind && old.name === name) return;
             if (old) { old.kind = data.kind; old.name = name; }
             else pending.push({ id: data.id, name, kind: data.kind });
             renderTravelerControls();
