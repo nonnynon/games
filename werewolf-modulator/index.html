@@ -2974,13 +2974,14 @@
             panel.className = 'p-3 border border-rose-700 rounded-xl space-y-2 text-xs';
             pending.forEach(player => {
                 const row = document.createElement('div');
-                const label = document.createElement('p'); label.textContent = '🏹 ' + player + ': เลือกยิง 1 คน'; row.append(label);
-                const select = document.createElement('select'); select.className = 'bg-slate-800 p-2 rounded';
+                row.className = 'grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 pl-6';
+                const label = document.createElement('p'); label.textContent = '🏹 ' + player + ': เลือกยิง 1 คน'; label.className = 'col-span-2 -ml-6 text-slate-300 font-semibold'; row.append(label);
+                const select = document.createElement('select'); select.className = 'w-full min-w-0 h-9 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100 text-xs';
                 gameState.players.filter(p => gameState.playerStatus[p]?.alive).forEach(p => {
                     const option = document.createElement('option'); option.value = p; option.textContent = p; select.append(option);
                 });
                 row.append(select);
-                const button = document.createElement('button'); button.textContent = 'ยืนยันยิง';
+                const button = document.createElement('button'); button.textContent = 'ยิง!'; button.className = 'h-9 px-4 rounded bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold whitespace-nowrap transition-colors disabled:opacity-40 disabled:cursor-not-allowed';
                 button.disabled = !!activeMadBomber || !select.options.length;
                 button.onclick = () => shootHunter(player, select.value); row.append(button); panel.append(row);
             });
