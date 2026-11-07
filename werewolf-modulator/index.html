@@ -30,6 +30,7 @@
             width: 100%;
             height: 100%;
             transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            -webkit-transform-style: preserve-3d;
             transform-style: preserve-3d;
         }
         .card-inner.flipped {
@@ -65,7 +66,14 @@
         #card-front-content > div:last-child { flex-shrink: 1; overflow-y: auto; }
 
         /* Shared backs never encode a normal role or a Traveler's private faction. */
-        #player-card-back { background: #090909; border: 0; }
+        #player-card-back, .waiting-card { background: #191b29; border: 0; }
+        /* Non-secret fallback remains visible even when both image requests fail. */
+        #player-card-back::before, .waiting-card::before { content: 'WEREWOLF'; position: absolute; inset: 4%; display: grid; place-items: center; border: 2px solid #b99a55; border-radius: 1rem; color: #e8d9ac; background: repeating-linear-gradient(45deg, #191b29, #191b29 12px, #222638 12px, #222638 24px); font: 700 1rem Georgia, serif; letter-spacing: .15em; }
+        .waiting-card { position: relative; width: 100%; max-width: 300px; margin-inline: auto; aspect-ratio: 2 / 3; }
+        .waiting-card-overlay { position: absolute; inset: 8% 10%; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: .5rem; text-align: center; background: #020617b8; border-radius: .75rem; }
+        /* Explicit face visibility avoids Safari showing the wrong composited plane. */
+        #player-card-inner:not(.flipped) > .card-front, #player-card-inner.flipped > .card-back { visibility: hidden; pointer-events: none; }
+        #player-card-inner:not(.flipped) > .card-back, #player-card-inner.flipped > .card-front { visibility: visible; }
         .player-card-back-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
         .traveler-public-label { position: absolute; inset: 21% 14% 15%; display: flex; flex-direction: column; gap: .6rem; text-align: center; color: #f8fafc; }
         .traveler-public-title { margin: 0; flex-shrink: 0; font-size: clamp(1rem, 4.5vw, 1.35rem); line-height: 1.35; overflow-wrap: anywhere; }
@@ -145,6 +153,25 @@
     margin-top: 0;
     margin-bottom: 0;
     }
+    #screen-player-waiting .my-auto {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  width: 7rem;
+  height: 7rem;
+}
+#screen-player-waiting .my-auto > span {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+#screen-player-waiting .my-auto > .animate-pulse-glow {
+  line-height: 1;
+}
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-amber-500 selection:text-slate-950">
@@ -400,16 +427,16 @@
         </section>
 
         <!-- ========================================== -->
-        <!-- SCREEN 4: PLAYER WAITING ROOM (ไพ่ Werewolf2.png + นาฬิกาทรายเรืองแสง) -->
+        <!-- SCREEN 4: PLAYER WAITING ROOM (shared normal back + นาฬิกาทรายเรืองแสง) -->
         <!-- ========================================== -->
         <section id="screen-player-waiting" class="space-y-4 hidden">
             <!-- Card Container -->
-            <div class="max-w-[280px] sm:max-w-[300px] mx-auto aspect-[3/4.6] relative rounded-3xl overflow-hidden border-2 border-amber-500/40 shadow-2xl shadow-amber-500/20 bg-slate-900">
+            <div class="waiting-card mx-auto aspect-[2/3] relative rounded-3xl overflow-hidden shadow-2xl shadow-amber-500/20">
                 <!-- Werewolf Card Back Image -->
-                <img src="./design/WWCARD.png" alt="Werewolf Card Back" class="w-full h-full object-cover">
+                <img src="./Assets/card-backs/card-back-normal.webp" alt="Werewolf Card Back" class="player-card-back-art" onerror="retrySharedCardBack(this)">
                 
                 <!-- Dark Overlay Gradient -->
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-slate-950/70 flex flex-col items-center justify-between p-5 text-center">
+                <div class="waiting-card-overlay">
                     
                     <!-- Top Badge -->
                     <div class="px-3 py-1 rounded-full bg-slate-900/80 backdrop-blur border border-amber-500/40 text-[11px] text-amber-300 font-semibold flex items-center gap-1.5">
@@ -479,7 +506,7 @@
                     
                     <!-- Card Back (Shown initially before flip) -->
                     <div id="player-card-back" class="card-back border-2 border-amber-500/40 shadow-2xl bg-slate-900 rounded-2xl overflow-hidden">
-                        <img src="./Assets/card-backs/card-back-normal.webp" alt="Werewolf Card Back" class="player-card-back-art" onerror="this.remove()">
+                        <img src="./Assets/card-backs/card-back-normal.webp" alt="Werewolf Card Back" class="player-card-back-art" onerror="retrySharedCardBack(this)">
                     </div>
 
                     <!-- Card Front (Revealed Role) -->
@@ -2093,6 +2120,13 @@
         // ---------------------------------------------
         // PLAYER CARD REVEAL VIEW
         // ---------------------------------------------
+        // Local first, then pinned public artwork for HTML-only local installs.
+        function retrySharedCardBack(image) {
+            if (image.dataset.sharedBackRetried) { image.remove(); return; }
+            image.dataset.sharedBackRetried = '1';
+            const name = image.getAttribute('src').endsWith('card-back-traveler.webp') ? 'card-back-traveler.webp' : 'card-back-normal.webp';
+            image.src = 'https://raw.githubusercontent.com/nonnynon/games/3e154e56061018b82c0a1936fa999b5387b6b3fe/werewolf-modulator/Assets/card-backs/' + name;
+        }
         let travelerCardInfo = null;
         function paintTravelerPrivacy(revealed) {
             const info = travelerCardInfo;
@@ -2119,7 +2153,7 @@
             image.src = travelerCardInfo ? './Assets/card-backs/card-back-traveler.webp' : './Assets/card-backs/card-back-normal.webp';
             image.alt = travelerCardInfo ? '' : 'Werewolf Card Back';
             image.className = 'player-card-back-art';
-            image.onerror = () => image.remove();
+            image.onerror = () => retrySharedCardBack(image);
             back.append(image);
             if (travelerCardInfo) {
                 const label = document.createElement('div');
