@@ -30,6 +30,7 @@
             width: 100%;
             height: 100%;
             transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            -webkit-transform-style: preserve-3d;
             transform-style: preserve-3d;
         }
         .card-inner.flipped {
@@ -50,6 +51,33 @@
         .card-front {
             transform: rotateY(180deg);
         }
+
+        /* Player artwork is mounted only while the private face is revealed. */
+        #screen-player-card .card-perspective { width: 100%; max-width: 300px; margin-inline: auto; aspect-ratio: 2 / 3; }
+        #card-front-content { position: absolute; padding: 1rem; }
+        #player-card-inner:not(.flipped) #card-front-content { visibility: hidden; }
+        .player-role-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; pointer-events: none; }
+        .player-role-shade { position: absolute; inset: 0; background: linear-gradient(#020617cc, #02061733 35%, #02061799 60%, #020617f2); pointer-events: none; }
+        #card-front-content > .relative { min-height: 0; flex-shrink: 0; }
+        #card-front-content > .my-auto { background: #020617b3; border-radius: .75rem; padding: .4rem; }
+        #card-role-icon { font-size: 2.5rem; }
+        #card-role-name { font-size: 1.35rem; overflow-wrap: anywhere; }
+        #card-player-name-tag { color: #e2e8f0; max-width: 50%; overflow-wrap: anywhere; }
+        #card-front-content > div:last-child { flex-shrink: 1; overflow-y: auto; }
+
+        /* Shared backs never encode a normal role or a Traveler's private faction. */
+        #player-card-back, .waiting-card { background: #191b29; border: 0; }
+        /* Non-secret fallback remains visible even when both image requests fail. */
+        #player-card-back::before, .waiting-card::before { content: 'WEREWOLF'; position: absolute; inset: 4%; display: grid; place-items: center; border: 2px solid #b99a55; border-radius: 1rem; color: #e8d9ac; background: repeating-linear-gradient(45deg, #191b29, #191b29 12px, #222638 12px, #222638 24px); font: 700 1rem Georgia, serif; letter-spacing: .15em; }
+        .waiting-card { position: relative; width: 100%; max-width: 300px; margin-inline: auto; aspect-ratio: 2 / 3; }
+        .waiting-card-overlay { position: absolute; inset: 8% 10%; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: .5rem; text-align: center; background: #020617b8; border-radius: .75rem; }
+        /* Explicit face visibility avoids Safari showing the wrong composited plane. */
+        #player-card-inner:not(.flipped) > .card-front, #player-card-inner.flipped > .card-back { visibility: hidden; pointer-events: none; }
+        #player-card-inner:not(.flipped) > .card-back, #player-card-inner.flipped > .card-front { visibility: visible; }
+        .player-card-back-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+        .traveler-public-label { position: absolute; inset: 21% 14% 15%; display: flex; flex-direction: column; gap: .6rem; text-align: center; color: #f8fafc; }
+        .traveler-public-title { margin: 0; flex-shrink: 0; font-size: clamp(1rem, 4.5vw, 1.35rem); line-height: 1.35; overflow-wrap: anywhere; }
+        .traveler-public-desc { margin: 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; font-size: .8125rem; line-height: 1.7; overflow-wrap: anywhere; white-space: pre-line; text-align: start; background: #090909e6; border-radius: .4rem; padding: .25rem; }
 
         /* Pulsing Glow Animation for Waiting Room */
         @keyframes pulse-glow {
@@ -109,6 +137,41 @@
             min-width: 0; min-height: 44px; margin: .75rem auto !important;
             border-radius: .5rem; white-space: normal; overflow-wrap: anywhere;
         }
+    /* Remove only the role title panel background. */
+    #card-front-content > .my-auto {
+        background: transparent;
+    }
+    
+    /* Balance ability panel spacing; preserve long-text scrolling. */
+    #card-front-content > div:last-child {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        padding: 0.75rem;
+    }
+    #card-front-content > div:last-child > * {
+    margin-top: 0;
+    margin-bottom: 0;
+    }
+    #screen-player-waiting .my-auto {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  width: 7rem;
+  height: 7rem;
+}
+#screen-player-waiting .my-auto > span {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+#screen-player-waiting .my-auto > .animate-pulse-glow {
+  line-height: 1;
+}
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-amber-500 selection:text-slate-950">
@@ -344,8 +407,8 @@
                     <!-- Real-time Status Badge & Room Info -->
                     <div class="mt-2.5 flex flex-col items-center gap-1.5">
                         <span id="player-join-conn-status" class="px-2.5 py-1 rounded-full text-[11px] bg-slate-950 text-slate-400 border border-slate-800 flex items-center gap-1.5 inline-flex">
-                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-                            <span>กำลังเชื่อมต่อห้อง...</span>
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                            <span>กรอกชื่อแล้วกดเข้าร่วมห้อง</span>
                         </span>
                         <div id="player-join-room-info" class="text-[11px] text-amber-300 hidden">
                             👥 สมาชิกในห้อง: <span id="player-join-count" class="font-bold">0</span> / <span id="player-join-total">-</span> คน
@@ -364,16 +427,16 @@
         </section>
 
         <!-- ========================================== -->
-        <!-- SCREEN 4: PLAYER WAITING ROOM (ไพ่ Werewolf2.png + นาฬิกาทรายเรืองแสง) -->
+        <!-- SCREEN 4: PLAYER WAITING ROOM (shared normal back + นาฬิกาทรายเรืองแสง) -->
         <!-- ========================================== -->
         <section id="screen-player-waiting" class="space-y-4 hidden">
             <!-- Card Container -->
-            <div class="max-w-[280px] sm:max-w-[300px] mx-auto aspect-[3/4.6] relative rounded-3xl overflow-hidden border-2 border-amber-500/40 shadow-2xl shadow-amber-500/20 bg-slate-900">
+            <div class="waiting-card mx-auto aspect-[2/3] relative rounded-3xl overflow-hidden shadow-2xl shadow-amber-500/20">
                 <!-- Werewolf Card Back Image -->
-                <img src="./design/WWCARD.png" alt="Werewolf Card Back" class="w-full h-full object-cover">
+                <img src="./Assets/card-backs/card-back-normal.webp" alt="Werewolf Card Back" class="player-card-back-art" onerror="retrySharedCardBack(this)">
                 
                 <!-- Dark Overlay Gradient -->
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-slate-950/70 flex flex-col items-center justify-between p-5 text-center">
+                <div class="waiting-card-overlay">
                     
                     <!-- Top Badge -->
                     <div class="px-3 py-1 rounded-full bg-slate-900/80 backdrop-blur border border-amber-500/40 text-[11px] text-amber-300 font-semibold flex items-center gap-1.5">
@@ -438,20 +501,19 @@
         <!-- ========================================== -->
         <section id="screen-player-card" class="space-y-4 hidden">
             <!-- 3D Card Container -->
-            <div class="card-perspective max-w-[280px] sm:max-w-[300px] mx-auto aspect-[3/4.6]">
+            <div class="card-perspective max-w-[280px] sm:max-w-[300px] mx-auto aspect-[2/3]">
                 <div id="player-card-inner" class="card-inner">
                     
                     <!-- Card Back (Shown initially before flip) -->
                     <div id="player-card-back" class="card-back border-2 border-amber-500/40 shadow-2xl bg-slate-900 rounded-2xl overflow-hidden">
-                        <img src="./design/WWCARD.png" alt="Werewolf Card Back" class="w-full h-full object-cover">
+                        <img src="./Assets/card-backs/card-back-normal.webp" alt="Werewolf Card Back" class="player-card-back-art" onerror="retrySharedCardBack(this)">
                     </div>
 
                     <!-- Card Front (Revealed Role) -->
                     <div id="card-front-content" class="card-front border-2 border-amber-500/60 shadow-2xl bg-slate-900 rounded-2xl flex flex-col justify-between p-5 text-center relative overflow-hidden">
-                        <!-- Atmospheric background image for front of card (Optional, faded) -->
-                        <div class="absolute inset-0 z-0 opacity-20 pointer-events-none">
-                            <img src="./design/WWCARD.png" alt="Card BG" class="w-full h-full object-cover">
-                        </div>
+                        <!-- Missing artwork keeps the existing slate/glow fallback. No source before reveal. -->
+                        <div id="player-role-artwork" aria-hidden="true"></div>
+                        <div class="player-role-shade" aria-hidden="true"></div>
                         
                         <!-- Atmospheric background glow -->
                         <div id="role-bg-glow" class="absolute -top-20 -left-20 w-56 h-56 rounded-full blur-3xl opacity-30 bg-amber-500 pointer-events-none"></div>
@@ -755,6 +817,51 @@
         ];
 
         // ---------------------------------------------
+        // Display-only aliases: never change role IDs, database records or wire payloads.
+        const ROLE_DISPLAY = {
+            villager: { icon: '👨‍🦰' },
+            sorcerer: { name: 'Sorceress', thai: 'แม่มดฝ่ายมืด', icon: '🧙🏾‍♀️' },
+            sorcerer2: { name: 'Sorcerer', thai: 'พ่อมดวางยา', icon: '🧪' }
+        };
+        function roleDisplay(role) { return { ...role, ...ROLE_DISPLAY[role.id] }; }
+        // Pending new artwork; role-only filenames, relative to this index.html.
+        const ROLE_ARTWORK = Object.freeze({
+            werewolf: './Assets/werewolf.webp',
+            wolf_cub: './Assets/wolf_cub.webp',
+            sorcerer: './Assets/sorceress.webp',
+            sorcerer2: './Assets/sorcerer.webp',
+            seer: './Assets/seer.webp',
+            apprentice_seer: './Assets/apprentice_seer.webp',
+            bodyguard: './Assets/bodyguard.webp',
+            hunter: './Assets/hunter.webp',
+            spellcaster: './Assets/spellcaster.webp',
+            tough_guy: './Assets/tough_guy.webp',
+            disease: './Assets/diseased.webp',
+            lycan: './Assets/lycan.webp',
+            cursed: './Assets/cursed.webp',
+            mad_bomber: './Assets/mad_bomber.webp',
+            tanner: './Assets/tanner.webp',
+            cupid: './Assets/cupid.webp',
+            villager: './Assets/villager.webp',
+            judge: './Assets/judge.webp',
+            gunslinger: './Assets/gunslinger.webp',
+            politician: './Assets/politician.webp',
+            bureaucrat: './Assets/bureaucrat.webp'
+        });
+        let playerCardRoleId = null;
+        function paintPlayerArtwork(revealed) {
+            const holder = document.getElementById('player-role-artwork');
+            holder.textContent = '';
+            document.getElementById('card-front-content').setAttribute('aria-hidden', String(!revealed));
+            const source = revealed && Object.prototype.hasOwnProperty.call(ROLE_ARTWORK, playerCardRoleId) && ROLE_ARTWORK[playerCardRoleId];
+            if (!source) return;
+            const image = document.createElement('img');
+            image.className = 'player-role-art'; image.alt = ''; image.setAttribute('aria-hidden', 'true');
+            image.onerror = () => image.remove();
+            image.src = source;
+            holder.append(image);
+        }
+
         // APPLICATION STATE
         // ---------------------------------------------
         let currentRoleCounts = {};
@@ -785,6 +892,7 @@
         let connectedPeers = {}; // Mod: { [peerId]: conn }
         let playerModConn = null; // Player: DataConnection to Mod
         let joinIntent = false, joinAdmitted = false, joinRequestId = '';
+        let joinWasAdmitted = false, joinFailure = '', requestedTravelerKind = null;
         let reconnectTimer = null, connectDeadline = null, joinDeadline = null;
         let currentModPeerId = ''; // Mod's active assigned Peer ID
 
@@ -818,6 +926,10 @@
         // SCREEN ROUTING & INITIALIZATION
         // ---------------------------------------------
         function showScreen(screenId) {
+            if (screenId !== 'screen-player-card') {
+                document.getElementById('player-card-inner').classList.remove('flipped');
+                paintPlayerArtwork(false);
+            }
             const screens = [
                 'screen-home',
                 'screen-role-select',
@@ -944,19 +1056,32 @@
         };
 
         function updatePlayerConnBadge(isConnected, message) {
-            const badges = [
-                document.getElementById('player-conn-status-badge'),
-                document.getElementById('player-join-conn-status')
-            ];
-            badges.forEach(badge => {
+            // Transport preparation is not admission. Keep idle/error states stable.
+            const state = !joinIntent ? (joinFailure ? 'error' : 'idle') :
+                isConnected ? 'accepted' : joinWasAdmitted ? 'reconnecting' : 'pending';
+            const colors = {
+                idle: 'bg-slate-950 text-slate-400 border-slate-800',
+                error: 'bg-rose-950 text-rose-300 border-rose-800',
+                accepted: 'bg-emerald-950 text-emerald-400 border-emerald-800',
+                pending: 'bg-amber-950 text-amber-300 border-amber-800',
+                reconnecting: 'bg-amber-950 text-amber-300 border-amber-800'
+            };
+            const label = state === 'idle' ? 'กรอกชื่อแล้วกดเข้าร่วมห้อง' :
+                state === 'error' ? joinFailure + ' — กดเข้าร่วมเพื่อลองอีกครั้ง' :
+                state === 'accepted' ? 'เข้าร่วมห้องสำเร็จ' :
+                state === 'reconnecting' ? 'การเชื่อมต่อหลุด กำลังกลับเข้าห้องเดิม…' :
+                message || 'กำลังเข้าร่วมห้อง…';
+            ['player-conn-status-badge', 'player-join-conn-status'].forEach(id => {
+                const badge = document.getElementById(id);
                 if (!badge) return;
-                if (isConnected) {
-                    badge.className = "px-2.5 py-1 rounded-full text-[11px] bg-emerald-950 text-emerald-400 border border-emerald-800 flex items-center gap-1.5 inline-flex";
-                    badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>${message || '🟢 เชื่อมต่อห้องสำเร็จ'}</span>`;
-                } else {
-                    badge.className = "px-2.5 py-1 rounded-full text-[11px] bg-amber-950 text-amber-300 border border-amber-800 flex items-center gap-1.5 inline-flex";
-                    badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span><span>${message || '🟡 กำลังเชื่อมต่อห้อง...'}</span>`;
-                }
+                badge.className = 'px-2.5 py-1 rounded-full text-[11px] border flex items-center gap-1.5 inline-flex ' + colors[state];
+                badge.setAttribute('role', 'status');
+                badge.setAttribute('aria-live', 'polite');
+                const dot = document.createElement('span');
+                dot.className = 'w-1.5 h-1.5 rounded-full bg-current' +
+                    (state === 'pending' || state === 'reconnecting' ? ' animate-pulse' : '');
+                const text = document.createElement('span'); text.textContent = label;
+                badge.replaceChildren(dot, text);
             });
         }
 
@@ -1132,6 +1257,7 @@
 
         function beginJoinIntent() {
             joinIntent = true; joinAdmitted = false;
+            joinWasAdmitted = false; joinFailure = ''; requestedTravelerKind = null;
             joinRequestId = myDeviceId + '-' + Date.now() + '-' + Math.random().toString(36).slice(2);
             try { sessionStorage.removeItem('ww_joined_room'); } catch(e) {}
             document.getElementById('btn-player-join').disabled = true;
@@ -1144,6 +1270,8 @@
 
         function stopJoinIntent() {
             joinIntent = false; joinAdmitted = false; joinRequestId = '';
+            joinWasAdmitted = false; joinFailure = ''; requestedTravelerKind = null;
+            updatePlayerConnBadge(false);
             clearTimeout(joinDeadline); joinDeadline = null;
             clearTimeout(reconnectTimer); reconnectTimer = null;
             document.getElementById('btn-player-join').disabled = false;
@@ -1157,7 +1285,7 @@
         }
 
         function acceptJoin(name) {
-            joinAdmitted = true;
+            joinAdmitted = true; joinWasAdmitted = true; joinFailure = '';
             clearTimeout(joinDeadline); joinDeadline = null;
             myPlayerName = name || myPlayerName;
             try {
@@ -1308,7 +1436,14 @@
             if (!isMod && data.type === 'JOIN_ACK') { if (data.id === myDeviceId) acceptJoin(data.name); return; }
             if (!isMod && data.type === 'JOIN_ERROR') { showJoinError(data.message); return; }
             if (isMod && data.type === 'TRAVELER_REQUEST') { receiveTravelerRequest(data, conn); return; }
-            if (!isMod && data.type === 'TRAVELER_OFFER') { clearTimeout(joinDeadline); joinDeadline = null; renderTravelerChoice(); return; }
+            if (!isMod && data.type === 'TRAVELER_OFFER') {
+                clearTimeout(joinDeadline); joinDeadline = null;
+                if (requestedTravelerKind && !myAssignedRole) {
+                    // Retry the same choice if a connection dropped before Mod received it.
+                    broadcastMessage({ type: 'TRAVELER_REQUEST', id: myDeviceId, name: myPlayerName, kind: requestedTravelerKind });
+                } else renderTravelerChoice();
+                return;
+            }
 
             // MOD RECEIVES PLAYER JOIN
             if (isMod && data.type === 'PLAYER_JOIN') {
@@ -1421,6 +1556,9 @@
                     const repeatedCard = myAssignedRole && lastCardDelivery &&
                         lastCardDelivery.conn === conn && lastCardDelivery.key === cardKey;
                     acceptJoin(myAssignment.playerName);
+                    // Heartbeats acknowledge liveness, not a new card/UI event.
+                    if (repeatedCard) return;
+                    requestedTravelerKind = null;
                     myAssignedRole = myAssignment;
                     try {
                         sessionStorage.setItem('ww_assigned_role', JSON.stringify(myAssignment));
@@ -1438,7 +1576,8 @@
 
             // PLAYERS RECEIVE GAME RESET FROM MOD
             if (!isMod && data.type === 'GAME_RESET') {
-                myAssignedRole = null;
+                myAssignedRole = null; lastCardDelivery = null; requestedTravelerKind = null;
+                closeTravelerModal();
                 try {
                     sessionStorage.removeItem('ww_assigned_role');
                     sessionStorage.removeItem('ww_session_id');
@@ -1516,11 +1655,11 @@
                 container.innerHTML += `
                     <div class="p-2.5 rounded-xl border ${borderClass} flex items-center justify-between transition">
                         <div class="flex items-center space-x-3">
-                            <span class="text-2xl">${role.icon}</span>
+                            <span class="text-2xl">${roleDisplay(role).icon}</span>
                             <div>
                                 <div class="flex items-center gap-1.5">
-                                    <span class="text-xs font-bold text-slate-100">${role.name}</span>
-                                    <span class="text-[10px] text-slate-400">(${role.thai})</span>
+                                    <span class="text-xs font-bold text-slate-100">${roleDisplay(role).name}</span>
+                                    <span class="text-[10px] text-slate-400">(${roleDisplay(role).thai})</span>
                                 </div>
                                 <div class="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
                                     <span class="${teamColor} font-semibold">${role.team.toUpperCase()}</span>
@@ -1981,6 +2120,13 @@
         // ---------------------------------------------
         // PLAYER CARD REVEAL VIEW
         // ---------------------------------------------
+        // Local first, then pinned public artwork for HTML-only local installs.
+        function retrySharedCardBack(image) {
+            if (image.dataset.sharedBackRetried) { image.remove(); return; }
+            image.dataset.sharedBackRetried = '1';
+            const name = image.getAttribute('src').endsWith('card-back-traveler.webp') ? 'card-back-traveler.webp' : 'card-back-normal.webp';
+            image.src = 'https://raw.githubusercontent.com/nonnynon/games/3e154e56061018b82c0a1936fa999b5387b6b3fe/werewolf-modulator/Assets/card-backs/' + name;
+        }
         let travelerCardInfo = null;
         function paintTravelerPrivacy(revealed) {
             const info = travelerCardInfo;
@@ -1995,29 +2141,38 @@
             document.getElementById('btn-toggle-privacy-text').innerText = revealed ? 'ซ่อนฝ่าย / แสดงเฉพาะบทบาท' : 'เปิดดูฝ่ายส่วนตัว';
         }
         function renderPlayerCard(roleInfo) {
+            paintPlayerArtwork(false);
+            playerCardRoleId = roleInfo.roleId;
+            const display = ROLE_DISPLAY[roleInfo.roleId] || {};
             document.getElementById('player-card-inner').classList.remove('flipped');
             document.getElementById('btn-toggle-privacy-text').innerText = 'แตะเพื่อเปิดดูบทบาท 👁️';
             travelerCardInfo = travelerKinds.includes(roleInfo.roleId) ? roleInfo : null;
             const back = document.getElementById('player-card-back');
             back.textContent = '';
+            const image = document.createElement('img');
+            image.src = travelerCardInfo ? './Assets/card-backs/card-back-traveler.webp' : './Assets/card-backs/card-back-normal.webp';
+            image.alt = travelerCardInfo ? '' : 'Werewolf Card Back';
+            image.className = 'player-card-back-art';
+            image.onerror = () => retrySharedCardBack(image);
+            back.append(image);
             if (travelerCardInfo) {
                 const label = document.createElement('div');
-                label.className = 'h-full overflow-y-auto p-5 text-center text-purple-200 flex flex-col';
-                const icon = document.createElement('div'); icon.className = 'text-6xl mt-auto shrink-0'; icon.textContent = roleInfo.roleIcon;
-                const title = document.createElement('h2'); title.className = 'text-2xl font-bold break-words mt-3 shrink-0'; title.textContent = roleInfo.roleName;
-                const desc = document.createElement('p'); desc.className = 'text-xs text-slate-300 leading-relaxed text-center break-words mt-3 mb-auto shrink-0'; desc.textContent = roleInfo.desc;
-                label.append(icon); label.append(title); label.append(desc);
+                label.className = 'traveler-public-label';
+                const title = document.createElement('h2'); title.className = 'traveler-public-title'; title.textContent = roleInfo.roleName;
+                const desc = document.createElement('p'); desc.className = 'traveler-public-desc'; desc.textContent = roleInfo.desc;
+                desc.tabIndex = 0;
+                desc.setAttribute('aria-label', 'ความสามารถของ ' + roleInfo.roleName);
+                label.append(title); label.append(desc);
                 back.append(label);
                 document.getElementById('player-card-inner').classList.remove('flipped');
             } else {
-                const image = document.createElement('img'); image.src = './design/WWCARD.png'; image.alt = 'Werewolf Card Back'; image.className = 'w-full h-full object-cover'; back.append(image);
                 document.getElementById('traveler-wolf-disclosure').textContent = '';
                 document.getElementById('traveler-wolf-disclosure').className = 'hidden';
             }
             document.getElementById('card-player-name-tag').innerText = myPlayerName;
-            document.getElementById('card-role-name').innerText = roleInfo.roleName;
-            document.getElementById('card-role-thai').innerText = roleInfo.roleThai;
-            document.getElementById('card-role-icon').innerText = roleInfo.roleIcon;
+            document.getElementById('card-role-name').innerText = display.name || roleInfo.roleName;
+            document.getElementById('card-role-thai').innerText = display.thai || roleInfo.roleThai;
+            document.getElementById('card-role-icon').innerText = display.icon || roleInfo.roleIcon;
             document.getElementById('card-role-desc').innerText = roleInfo.desc;
 
             const teamBadge = document.getElementById('card-team-badge');
@@ -2051,6 +2206,7 @@
             const cardInner = document.getElementById('player-card-inner');
             const isFlipped = cardInner.classList.contains('flipped');
             const btnText = document.getElementById('btn-toggle-privacy-text');
+            paintPlayerArtwork(!isFlipped);
             if (travelerCardInfo) {
                 if (isFlipped) cardInner.classList.remove('flipped');
                 else cardInner.classList.add('flipped');
@@ -2077,7 +2233,7 @@
                 container.innerHTML += `
                     <label class="flex items-center space-x-2 bg-slate-900/50 p-2.5 rounded-lg border border-slate-700 cursor-pointer hover:border-amber-500/50 transition">
                         <input type="checkbox" value="${r.id}" class="role-cb-offline w-4 h-4 text-amber-500 rounded bg-slate-900 border-slate-700" checked onchange="updateRequiredCountOffline()">
-                        <span class="text-xs font-medium">${r.icon} ${r.name}</span>
+                        <span class="text-xs font-medium">${roleDisplay(r).icon} ${roleDisplay(r).name}</span>
                     </label>
                 `;
             });
@@ -2156,7 +2312,7 @@
 
                     matchingContainer.innerHTML += `
                         <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-700 flex items-center justify-between">
-                            <span class="text-xs font-semibold text-amber-300 w-1/2">${roleObj.icon} ${roleObj.name}</span>
+                            <span class="text-xs font-semibold text-amber-300 w-1/2">${roleDisplay(roleObj).icon} ${roleDisplay(roleObj).name}</span>
                             <select class="match-select-offline w-1/2 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-100 focus:outline-none focus:border-amber-500" data-role="${roleId}">
                                 ${optionsHtml}
                             </select>
@@ -2251,11 +2407,11 @@
                 const nightSteps = [
                     { id: 'cupid', name: '1. Cupid เลือก Lovers (เฉพาะคืนแรก)', show: roleAvailable('cupid') && gameState.dayCount === 1 },
                     { id: 'wolf', name: '2. Werewolf เลือกเหยื่อสังหาร', show: roleAvailable('werewolf') || roleAvailable('wolf_cub') || gameState.cursedTurned.some(p => !isBedridden(p)) },
-                    { id: 'sorcerer2', name: '3. Sorcerer2 เลือกวางยา (บล็อกความสามารถ)', show: roleAvailable('sorcerer2') },
+                    { id: 'sorcerer2', name: '3. Sorcerer เลือกวางยา (บล็อกความสามารถ)', show: roleAvailable('sorcerer2') },
                     { id: 'bodyguard', name: '4. Bodyguard เลือกป้องกัน', show: roleAvailable('bodyguard') },
                     { id: 'seer', name: '5. Seer ส่องตรวจดูผู้เล่น', show: roleAvailable('seer') },
                     { id: 'spellcaster', name: '6. Spellcaster เลือกเสกใบ้ (ห้ามพูดวันรุ่งขึ้น)', show: roleAvailable('spellcaster') },
-                    { id: 'sorcerer', name: '7. Sorcerer ตรวจหา Seer', show: roleAvailable('sorcerer') },
+                    { id: 'sorcerer', name: '7. Sorceress ตรวจหา Seer', show: roleAvailable('sorcerer') },
                     { id: 'apprentice', name: '8. Apprentice Seer ทำงาน', show: roleAvailable('apprentice_seer') }
                 ];
 
@@ -2454,7 +2610,7 @@
                                 <span>🧪</span> ผู้เล่นถูกวางยา: <b>${gameState.poisonedTarget}</b> ${pRole ? '(' + pRole.icon + ' ' + pRole.name + ')' : ''}
                             </span>
                             <div class="text-[11px] text-slate-300">
-                                • ความสามารถของผู้เล่นนี้ถูก <b>Sorcerer2</b> บล็อกตลอดวันนี้ (หากถูกโหวตตาย ความสามารถตอนตายจะไม่ทำงาน)
+                                • ความสามารถของผู้เล่นนี้ถูก <b>Sorcerer</b> บล็อกตลอดวันนี้ (หากถูกโหวตตาย ความสามารถตอนตายจะไม่ทำงาน)
                             </div>
                         </div>
                     `;
@@ -2561,7 +2717,7 @@
                 const toughGuyBadge = isInjuredTG ? '<span class="text-rose-400 font-bold ml-1 animate-pulse" title="Tough Guy ได้รับบาดเจ็บ (จะเสียชีวิตในวันถัดไป)">🩸</span>' : '';
                 const isSilenced = gameState.silencedTarget === p && status.alive;
                 const isPoisonedP = gameState.poisonedTarget === p && status.alive;
-                const poisonBadge = isPoisonedP ? '<span class="text-fuchsia-400 font-bold ml-1 animate-pulse" title="ถูก Sorcerer2 วางยา (ความสามารถถูกบล็อก)">🧪</span>' : '';
+                const poisonBadge = isPoisonedP ? '<span class="text-fuchsia-400 font-bold ml-1 animate-pulse" title="ถูก Sorcerer วางยา (ความสามารถถูกบล็อก)">🧪</span>' : '';
                 const silencedBadge = isSilenced ? '<span class="text-purple-400 font-bold ml-1 animate-pulse" title="ถูก Spellcaster เสกใบ้ (ห้ามพูดในวันนี้)">🤐</span>' : '';
 
                 statusList.innerHTML += `
@@ -2574,7 +2730,7 @@
                                 ${toughGuyBadge}
                                 ${silencedBadge}
                                 ${poisonBadge}
-                                <span class="text-[10px] text-amber-400 bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-900/50">${roleObj ? (roleObj.icon + ' ' + roleObj.name) : role}</span>
+                                <span class="text-[10px] text-amber-400 bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-900/50">${roleObj ? (roleDisplay(roleObj).icon + ' ' + roleDisplay(roleObj).name) : role}</span>
                             </div>
                             <input type="text" placeholder="จดโน้ตย่อ..." class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-0.5 text-[11px] text-slate-300 focus:outline-none focus:border-amber-500" value="${status.note}" onchange="updatePlayerNote('${p}', this.value)">
                         </div>
@@ -2932,7 +3088,7 @@
             // 2. Mad Bomber check! -> Mod chooses the real left/right neighbours
             if (roleId === 'mad_bomber' && !(isBedridden(victim) && bedriddenState().bombSpent)) {
                 if (isPoisoned(victim)) {
-                    alert(`🧪 "${victim}" คือ Mad Bomber แต่ถูก Sorcerer2 วางยาไว้!\nระเบิดไม่ทำงาน — เสียชีวิตเพียงคนเดียว`);
+                    alert(`🧪 "${victim}" คือ Mad Bomber แต่ถูก Sorcerer วางยาไว้!\nระเบิดไม่ทำงาน — เสียชีวิตเพียงคนเดียว`);
                     killWithLover(victim);
                     renderPlayerStatusList();
                     renderGameplay();
@@ -3073,7 +3229,7 @@
             const isLoverTarget = gameState.lovers.includes(wolf);
             const targetPoisoned = isPoisoned(wolf);
             const bgPlayer = getPlayerByRole('bodyguard');
-            const poisonNote = targetPoisoned ? '<br>🧪 <b>เป้าหมายถูก Sorcerer2 วางยา</b> — ความสามารถถูกบล็อก' : '';
+            const poisonNote = targetPoisoned ? '<br>🧪 <b>เป้าหมายถูก Sorcerer วางยา</b> — ความสามารถถูกบล็อก' : '';
 
             // 1. Bodyguard protection (blocked if the Bodyguard is poisoned)
             if (bg && wolf === bg) {
@@ -3149,7 +3305,7 @@
                 gameState.lastNightResultText = `💪 Tough Guy (<b>${wolf}</b>) ถูกหมาป่ากัด<br>👉 <b>ผลลัพธ์: ยังไม่ตายในวันนี้</b> (จะตายในวันถัดไป)${bgFailNote}`;
             } else {
                 const roleObj = ROLES_DATABASE.find(r => r.id === targetRole);
-                const roleLabel = roleObj ? roleObj.name : (targetRole || 'unknown');
+                const roleLabel = roleObj ? roleDisplay(roleObj).name : (targetRole || 'unknown');
                 let blockedNote = '';
                 if (targetPoisoned && ['mad_bomber', 'disease', 'cursed', 'tough_guy', 'hunter'].includes(targetRole)) {
                     blockedNote = `<br>🧪 <b>${roleLabel}</b> ถูกวางยา — ความสามารถไม่ทำงาน${targetRole === 'mad_bomber' ? ' (ระเบิดไม่ทำงาน คนรอบข้างไม่ตาย)' : ''}`;
@@ -3247,7 +3403,7 @@
             livingPlayers.forEach(p => {
                 const role = gameState.rolePlayerMap[p] || 'unknown';
                 const roleObj = ROLES_DATABASE.find(r => r.id === role);
-                optionsHtml += `<option value="${p}">${p} (${roleObj ? roleObj.name : role})</option>`;
+                optionsHtml += `<option value="${p}">${p} (${roleObj ? roleDisplay(roleObj).name : role})</option>`;
             });
 
             leftSelect.innerHTML = optionsHtml;
@@ -3541,6 +3697,7 @@
             const card = document.getElementById('screen-player-card');
             if (modal.contains(card)) {
                 document.getElementById('player-card-inner').classList.remove('flipped');
+                paintPlayerArtwork(false);
                 paintTravelerPrivacy(false); travelerCardInfo = null;
                 card.classList.add('hidden');
                 const anchor = document.getElementById('traveler-card-anchor');
@@ -3615,14 +3772,16 @@
         }
         function chooseTraveler(kind) {
             if (isMod || !activeRoomCode || !travelerKinds.includes(kind)) return;
+            requestedTravelerKind = kind;
             broadcastMessage({ type: 'TRAVELER_REQUEST', id: myDeviceId, name: myPlayerName, kind });
             closeTravelerModal();
             showScreen('screen-player-waiting');
             document.getElementById('player-waiting-status-text').innerText = 'รอ Mod รับ Traveler เข้าหมู่บ้านตอนเช้า';
         }
         function renderTravelerChoice() {
-            if (myAssignedRole || !joinIntent) return;
+            if (myAssignedRole || !joinIntent || requestedTravelerKind) return;
             const modal = document.getElementById('modal-traveler');
+            if (!modal.classList.contains('hidden')) return;
             modal.textContent = '';
             const box = document.createElement('div');
             box.className = 'bg-slate-900 p-4 rounded-xl space-y-3 max-w-sm';
@@ -3659,7 +3818,8 @@
             showScreen('screen-player-join');
             const input = document.getElementById('player-name-input-field');
             input.value = myPlayerName;
-            alert(message);
+            joinFailure = String(message || 'เข้าร่วมห้องไม่สำเร็จ');
+            updatePlayerConnBadge(false);
             input.focus();
         }
         function receiveTravelerRequest(data, conn) {
@@ -3669,6 +3829,7 @@
             if (error) { rejectJoin(conn, error); return; }
             const pending = travelerState().pending;
             const old = pending.find(p => p.id === data.id);
+            if (old && old.kind === data.kind && old.name === name) return;
             if (old) { old.kind = data.kind; old.name = name; }
             else pending.push({ id: data.id, name, kind: data.kind });
             renderTravelerControls();
