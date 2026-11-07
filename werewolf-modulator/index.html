@@ -52,7 +52,7 @@
         }
 
         /* Player artwork is mounted only while the private face is revealed. */
-        #screen-player-card .card-perspective { width: 100%; max-width: 300px; margin-inline: auto; aspect-ratio: 3 / 4.6; }
+        #screen-player-card .card-perspective { width: 100%; max-width: 300px; margin-inline: auto; aspect-ratio: 2 / 3; }
         #card-front-content { position: absolute; padding: 1rem; }
         #player-card-inner:not(.flipped) #card-front-content { visibility: hidden; }
         .player-role-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; pointer-events: none; }
@@ -63,6 +63,13 @@
         #card-role-name { font-size: 1.35rem; overflow-wrap: anywhere; }
         #card-player-name-tag { color: #e2e8f0; max-width: 50%; overflow-wrap: anywhere; }
         #card-front-content > div:last-child { flex-shrink: 1; overflow-y: auto; }
+
+        /* Shared backs never encode a normal role or a Traveler's private faction. */
+        #player-card-back { background: #090909; border: 0; }
+        .player-card-back-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+        .traveler-public-label { position: absolute; inset: 21% 14% 15%; display: flex; flex-direction: column; gap: .6rem; text-align: center; color: #f8fafc; }
+        .traveler-public-title { margin: 0; flex-shrink: 0; font-size: clamp(1rem, 4.5vw, 1.35rem); line-height: 1.35; overflow-wrap: anywhere; }
+        .traveler-public-desc { margin: 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; font-size: .8125rem; line-height: 1.7; overflow-wrap: anywhere; white-space: pre-line; text-align: start; background: #090909e6; border-radius: .4rem; padding: .25rem; }
 
         /* Pulsing Glow Animation for Waiting Room */
         @keyframes pulse-glow {
@@ -467,12 +474,12 @@
         <!-- ========================================== -->
         <section id="screen-player-card" class="space-y-4 hidden">
             <!-- 3D Card Container -->
-            <div class="card-perspective max-w-[280px] sm:max-w-[300px] mx-auto aspect-[3/4.6]">
+            <div class="card-perspective max-w-[280px] sm:max-w-[300px] mx-auto aspect-[2/3]">
                 <div id="player-card-inner" class="card-inner">
                     
                     <!-- Card Back (Shown initially before flip) -->
                     <div id="player-card-back" class="card-back border-2 border-amber-500/40 shadow-2xl bg-slate-900 rounded-2xl overflow-hidden">
-                        <img src="./design/WWCARD.png" alt="Werewolf Card Back" class="w-full h-full object-cover">
+                        <img src="./Assets/card-backs/card-back-normal.webp" alt="Werewolf Card Back" class="player-card-back-art" onerror="this.remove()">
                     </div>
 
                     <!-- Card Front (Revealed Role) -->
@@ -2108,17 +2115,23 @@
             travelerCardInfo = travelerKinds.includes(roleInfo.roleId) ? roleInfo : null;
             const back = document.getElementById('player-card-back');
             back.textContent = '';
+            const image = document.createElement('img');
+            image.src = travelerCardInfo ? './Assets/card-backs/card-back-traveler.webp' : './Assets/card-backs/card-back-normal.webp';
+            image.alt = travelerCardInfo ? '' : 'Werewolf Card Back';
+            image.className = 'player-card-back-art';
+            image.onerror = () => image.remove();
+            back.append(image);
             if (travelerCardInfo) {
                 const label = document.createElement('div');
-                label.className = 'h-full overflow-y-auto p-5 text-center text-purple-200 flex flex-col';
-                const icon = document.createElement('div'); icon.className = 'text-6xl mt-auto shrink-0'; icon.textContent = roleInfo.roleIcon;
-                const title = document.createElement('h2'); title.className = 'text-2xl font-bold break-words mt-3 shrink-0'; title.textContent = roleInfo.roleName;
-                const desc = document.createElement('p'); desc.className = 'text-xs text-slate-300 leading-relaxed text-center break-words mt-3 mb-auto shrink-0'; desc.textContent = roleInfo.desc;
-                label.append(icon); label.append(title); label.append(desc);
+                label.className = 'traveler-public-label';
+                const title = document.createElement('h2'); title.className = 'traveler-public-title'; title.textContent = roleInfo.roleName;
+                const desc = document.createElement('p'); desc.className = 'traveler-public-desc'; desc.textContent = roleInfo.desc;
+                desc.tabIndex = 0;
+                desc.setAttribute('aria-label', 'ความสามารถของ ' + roleInfo.roleName);
+                label.append(title); label.append(desc);
                 back.append(label);
                 document.getElementById('player-card-inner').classList.remove('flipped');
             } else {
-                const image = document.createElement('img'); image.src = './design/WWCARD.png'; image.alt = 'Werewolf Card Back'; image.className = 'w-full h-full object-cover'; back.append(image);
                 document.getElementById('traveler-wolf-disclosure').textContent = '';
                 document.getElementById('traveler-wolf-disclosure').className = 'hidden';
             }
