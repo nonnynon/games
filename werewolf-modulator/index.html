@@ -224,7 +224,7 @@
 .rg-entry:focus-visible { outline:3px solid #fbbf24; outline-offset:2px; }
 @media(min-width:640px) { .rg-list { grid-template-columns:repeat(4,minmax(0,1fr)); } #role-guide, #rg-art-viewer { padding:1.5rem; } }
 
-@media(max-width:479px) { .rg-list { grid-template-columns:minmax(0,1fr); } }
+@media(max-width:479px) and (orientation:landscape) { .rg-list { grid-template-columns:minmax(0,1fr); } }
     /* v5: dialog-local navigation, always-visible story and one-line action gap. */
 #role-guide { overscroll-behavior:contain; }
 #rg-detail { border-top:1px solid #475569; padding-top:1rem; margin-top:1.5rem; }
@@ -271,12 +271,27 @@
     #day-vote-target-select { flex-basis: 100%; }
     #actions-checklist div:has(> #day-vote-target-select) { flex-wrap: wrap; }
     #actions-checklist div:has(> #day-vote-target-select) > button { width: 100%; min-height: 44px; }
-    #player-status-list > div { flex-wrap: wrap; gap: .5rem; }
-    #player-status-list > div > div:first-child { flex-basis: 100%; }
-    #player-status-list > div > button { margin-left: 0; min-height: 44px; }
-    #mod-players-list > div { flex-wrap: wrap; gap: .5rem; }
-    #mod-players-list > div > div:first-child { flex-basis: 100%; }
-    #mod-players-list .truncate { white-space: normal; overflow-wrap: anywhere; }
+    /* Compact iPhone rows: reserve controls, let only the name shrink. */
+    #mod-players-list > div { gap: .375rem; padding-inline: .5rem; }
+    #mod-players-list > div > div:first-child { flex: 1; min-width: 0; }
+    #mod-players-list > div > div:first-child > span:first-child { flex-shrink: 0; }
+    #mod-players-list > div > div:last-child { flex-shrink: 0; }
+    #mod-players-list .truncate:focus { white-space: normal; overflow-wrap: anywhere; }
+    #player-status-list > div { gap: .375rem; padding: .5rem; }
+    #player-status-list > div > button { width: auto; min-width: 3.75rem; height: 32px; margin-left: 0; }
+    #player-status-list input { width: 8rem; max-width: 100%; }
+}
+/* Decorative guide thumbnails only; wolf crops and full artwork stay untouched. */
+.rg-role:not([data-role-id="werewolf"]):not([data-role-id="wolf_cub"]) .rg-thumb { object-position: center top; }
+@media (max-width: 479px) and (orientation: portrait) {
+    #role-guide .rg-role { padding: .5rem; }
+    .rg-role-label { grid-template-columns: 1.125rem minmax(0, 1fr); gap: .375rem; }
+    .rg-role-name { overflow-wrap: anywhere; word-break: normal; }
+}
+@media (max-width: 359px) and (orientation: portrait) {
+    /* Keep long English role names readable at the smallest phone width. */
+    .rg-role-label { display: flex; flex-wrap: wrap; gap: .125rem .25rem; }
+    .rg-role-name { flex: 0 1 auto; min-width: 0; }
 }
 </style>
 </head>
@@ -717,7 +732,6 @@
                 </div>
             </div>
         </section>
-
         <!-- ========================================== -->
         <!-- SCREEN 7: MOD DASHBOARD & GAMEPLAY (คืนแรกและกลางวัน) -->
         <!-- ========================================== -->
@@ -2025,7 +2039,7 @@
                     <div class="flex items-center justify-between bg-slate-950/60 px-3 py-1.5 rounded-lg border border-slate-800 text-xs">
                         <div class="flex items-center space-x-2 min-w-0">
                             <span class="text-amber-400 font-mono text-[10px]">#${idx+1}</span>
-                            <span class="font-semibold text-slate-200 truncate" title="${p.name}">${p.name}</span>                        </div>
+                            <span class="font-semibold text-slate-200 truncate" tabindex="0" title="${p.name}" aria-label="${p.name}">${p.name}</span>                        </div>
                         <div class="flex items-center space-x-1.5">
                             <button onclick="moveLobbyPlayer('${p.id}', -1)" ${!isMod || isGameStarted || idx === 0 ? 'disabled' : ''} aria-label="เลื่อน ${p.name} ขึ้น" style="width:32px;height:32px;flex-shrink:0" class="inline-flex items-center justify-center rounded bg-slate-800 disabled:opacity-30">↑</button>
                             <button onclick="moveLobbyPlayer('${p.id}', 1)" ${!isMod || isGameStarted || idx === joinedPlayers.length - 1 ? 'disabled' : ''} aria-label="เลื่อน ${p.name} ลง" style="width:32px;height:32px;flex-shrink:0" class="inline-flex items-center justify-center rounded bg-slate-800 disabled:opacity-30">↓</button>
@@ -2520,7 +2534,9 @@
                 playerOpts += `<option value="${p}">${p}</option>`;
             });
 
-            const loverOpts = gameState.players.filter(p => !isTraveler(p)).map(p => '<option value="' + p + '">' + p + '</option>').join('');
+            const loverOpts = '<option value="">-- เลือกผู้เล่น --</option>' + gameState.players.filter(eligibleLover).map(p => '<option value="' + p + '">' + p + '</option>').join('');
+            const poisonOpts = gameState.players.map(p => '<option value="' + p + '"' + (poisonTargetAllowed(p) ? '' : ' disabled') + '>' + p + (poisonTargetAllowed(p) ? '' : ' (เลือกคืนก่อนแล้ว)') + '</option>').join('');
+            const bodyguardOpts = gameState.players.map(p => '<option value="' + p + '"' + (bodyguardTargetAllowed(p) ? '' : ' disabled') + '>' + p + (bodyguardTargetAllowed(p) ? '' : ' (เลือกคืนก่อนแล้ว)') + '</option>').join('');
             let livingPlayerOpts = '';
             gameState.players.forEach(p => {
                 if (gameState.playerStatus[p] && gameState.playerStatus[p].alive) {
@@ -2538,14 +2554,14 @@
                 cardTitle.innerText = "ลำดับการทำงานตอนกลางคืน";
 
                 const nightSteps = [
-                    { id: 'cupid', name: '1. Cupid เลือก Lovers (เฉพาะคืนแรก)', show: roleAvailable('cupid') && gameState.dayCount === 1 },
-                    { id: 'wolf', name: '2. Werewolf เลือกเหยื่อสังหาร', show: roleAvailable('werewolf') || roleAvailable('wolf_cub') || gameState.cursedTurned.some(p => !isBedridden(p)) },
-                    { id: 'sorcerer2', name: '3. Sorcerer เลือกวางยา (บล็อกความสามารถ)', show: roleAvailable('sorcerer2') },
-                    { id: 'bodyguard', name: '4. Bodyguard เลือกป้องกัน', show: roleAvailable('bodyguard') },
-                    { id: 'seer', name: '5. Seer ส่องตรวจดูผู้เล่น', show: roleAvailable('seer') },
-                    { id: 'spellcaster', name: '6. Spellcaster เลือกเสกใบ้ (ห้ามพูดวันรุ่งขึ้น)', show: roleAvailable('spellcaster') },
-                    { id: 'sorcerer', name: '7. Sorceress ตรวจหา Seer', show: roleAvailable('sorcerer') },
-                    { id: 'apprentice', name: '8. Apprentice Seer ทำงาน', show: roleAvailable('apprentice_seer') }
+                    { id: 'cupid', name: '1. Cupid เลือก Lovers (เฉพาะคืนแรก)', show: assignedNightRole('cupid') && gameState.dayCount === 1 },
+                    { id: 'wolf', name: '2. Werewolf เลือกเหยื่อสังหาร', show: assignedNightRole('werewolf') || assignedNightRole('wolf_cub') || gameState.cursedTurned.some(p => gameState.rolePlayerMap[p] === 'cursed') },
+                    { id: 'sorcerer2', name: '3. Sorcerer เลือกวางยา (บล็อกความสามารถ)', show: assignedNightRole('sorcerer2') },
+                    { id: 'bodyguard', name: '4. Bodyguard เลือกป้องกัน', show: assignedNightRole('bodyguard') },
+                    { id: 'seer', name: '5. Seer / Apprentice Seer ส่องตรวจดูผู้เล่น', show: assignedNightRole('seer') },
+                    { id: 'spellcaster', name: '6. Spellcaster เลือกเสกใบ้ (ห้ามพูดวันรุ่งขึ้น)', show: assignedNightRole('spellcaster') },
+                    { id: 'sorcerer', name: '7. Sorceress ตรวจหา Seer', show: assignedNightRole('sorcerer') },
+                    { id: 'apprentice', name: '8. Apprentice Seer ทำงาน', show: assignedNightRole('apprentice_seer') }
                 ];
 
                 checklistContainer.innerHTML = '';
@@ -2555,7 +2571,7 @@
                             checklistContainer.innerHTML += `
                                 <div class="bg-slate-900/40 p-2.5 rounded border border-slate-700/50 space-y-2">
                                     <label class="flex items-center space-x-2 cursor-pointer">
-                                        <input type="checkbox" id="cupid-cb" class="w-4 h-4 text-indigo-500 rounded bg-slate-900 border-slate-700" onchange="toggleCupidDropdown()">
+                                        <input type="checkbox" id="cupid-cb" class="w-4 h-4 text-indigo-500 rounded bg-slate-900 border-slate-700" >
                                         <span class="text-slate-300 font-semibold">${step.name}</span>
                                     </label>
                                     <div id="cupid-dropdowns" class="hidden pl-6 space-y-1.5">
@@ -2571,6 +2587,7 @@
                                                 ${loverOpts}
                                             </select>
                                         </div>
+                                        <p id="lover-validation" class="text-[10px] text-amber-300" aria-live="polite"></p>
                                     </div>
                                 </div>
                             `;
@@ -2578,7 +2595,7 @@
                             checklistContainer.innerHTML += `
                                 <div class="bg-slate-900/40 p-2.5 rounded border border-slate-700/50 space-y-2">
                                     <label class="flex items-center space-x-2 cursor-pointer">
-                                        <input type="checkbox" id="wolf-cb" class="w-4 h-4 text-indigo-500 rounded bg-slate-900 border-slate-700" onchange="toggleWolfDropdown()">
+                                        <input type="checkbox" id="wolf-cb" class="w-4 h-4 text-indigo-500 rounded bg-slate-900 border-slate-700" >
                                         <span class="text-slate-300 font-semibold">${step.name}</span>
                                     </label>
                                     <div id="wolf-dropdown" class="hidden pl-6">
@@ -2596,7 +2613,7 @@
                             checklistContainer.innerHTML += `
                                 <div class="bg-fuchsia-950/30 p-2.5 rounded border border-fuchsia-800/60 space-y-2">
                                     <label class="flex items-center space-x-2 cursor-pointer">
-                                        <input type="checkbox" id="sorcerer2-cb" class="w-4 h-4 text-fuchsia-500 rounded bg-slate-900 border-slate-700" onchange="toggleSorcerer2Dropdown()">
+                                        <input type="checkbox" id="sorcerer2-cb" class="w-4 h-4 text-fuchsia-500 rounded bg-slate-900 border-slate-700" >
                                         <span class="text-fuchsia-200 font-semibold">${step.name}</span>
                                     </label>
                                     <div id="sorcerer2-dropdown" class="hidden pl-6 space-y-1.5">
@@ -2604,7 +2621,7 @@
                                             <span class="text-slate-400">เลือกคนที่ถูกวางยา:</span>
                                             <select id="sorcerer2-target-select" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100" onchange="updateSorcerer2Target()">
                                                 <option value="">-- ไม่วางยา / ข้าม --</option>
-                                                ${playerOpts}
+                                                ${poisonOpts}
                                             </select>
                                         </div>
                                         <p class="text-[10px] text-fuchsia-300/80 leading-relaxed">🧪 ผู้ถูกวางยาจะถูกบล็อกความสามารถทันทีจนเริ่มช่วงกลางคืนถัดไป • Seer ส่องจะเห็นผลตรงข้าม • หากถูกหมาป่าฆ่า ความสามารถตอนตาย (เช่น Mad Bomber, Hunter, Diseased, Cursed, Tough Guy) จะไม่ทำงาน</p>
@@ -2615,7 +2632,7 @@
                             checklistContainer.innerHTML += `
                                 <div class="bg-slate-900/40 p-2.5 rounded border border-slate-700/50 space-y-2">
                                     <label class="flex items-center space-x-2 cursor-pointer">
-                                        <input type="checkbox" id="bg-cb" class="w-4 h-4 text-indigo-500 rounded bg-slate-900 border-slate-700" onchange="toggleBgDropdown()">
+                                        <input type="checkbox" id="bg-cb" class="w-4 h-4 text-indigo-500 rounded bg-slate-900 border-slate-700" >
                                         <span class="text-slate-300 font-semibold">${step.name}</span>
                                     </label>
                                     <div id="bg-dropdown" class="hidden pl-6">
@@ -2623,7 +2640,7 @@
                                             <span class="text-slate-400">เลือกคนที่จะป้องกัน:</span>
                                             <select id="bg-target-select" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100" onchange="updateBgTarget()">
                                                 <option value="">-- เลือกผู้เล่น --</option>
-                                                ${playerOpts}
+                                                ${bodyguardOpts}
                                             </select>
                                         </div>
                                     </div>
@@ -2633,7 +2650,7 @@
                             checklistContainer.innerHTML += `
                                 <div class="bg-slate-900/40 p-2.5 rounded border border-slate-700/50 space-y-2">
                                     <label class="flex items-center space-x-2 cursor-pointer">
-                                        <input type="checkbox" id="seer-cb" class="w-4 h-4 text-indigo-500 rounded bg-slate-900 border-slate-700" onchange="toggleSeerDropdown()">
+                                        <input type="checkbox" id="seer-cb" class="w-4 h-4 text-indigo-500 rounded bg-slate-900 border-slate-700" >
                                         <span class="text-slate-300 font-semibold">${step.name}</span>
                                     </label>
                                     <div id="seer-dropdown" class="hidden pl-6 space-y-2">
@@ -2652,7 +2669,7 @@
                             checklistContainer.innerHTML += `
                                 <div class="bg-slate-900/40 p-2.5 rounded border border-slate-700/50 space-y-2">
                                     <label class="flex items-center space-x-2 cursor-pointer">
-                                        <input type="checkbox" id="spellcaster-cb" class="w-4 h-4 text-indigo-500 rounded bg-slate-900 border-slate-700" onchange="toggleSpellcasterDropdown()">
+                                        <input type="checkbox" id="spellcaster-cb" class="w-4 h-4 text-indigo-500 rounded bg-slate-900 border-slate-700" >
                                         <span class="text-slate-300 font-semibold">${step.name}</span>
                                     </label>
                                     <div id="spellcaster-dropdown" class="hidden pl-6">
@@ -2669,7 +2686,7 @@
                         } else {
                             checklistContainer.innerHTML += `
                                 <label class="flex items-center space-x-2 bg-slate-900/40 p-2 rounded border border-slate-700/50 cursor-pointer">
-                                    <input type="checkbox" class="w-4 h-4 text-indigo-500 rounded bg-slate-900 border-slate-700">
+                                    <input type="checkbox" id="${step.id}-cb" class="w-4 h-4 text-indigo-500 rounded bg-slate-900 border-slate-700">
                                     <span class="text-slate-300">${step.name}</span>
                                 </label>
                             `;
@@ -2678,10 +2695,9 @@
                 });
 
                 setTimeout(() => {
-                    if (gameState.lovers.length === 2) {
+                    if (validLovers(gameState.lovers)) {
                         const cupidCb = document.getElementById('cupid-cb');
                         if (cupidCb) {
-                            cupidCb.checked = true;
                             document.getElementById('cupid-dropdowns').classList.remove('hidden');
                             document.getElementById('lover-1').value = gameState.lovers[0];
                             document.getElementById('lover-2').value = gameState.lovers[1];
@@ -2690,7 +2706,6 @@
                     if (gameState.wolfTarget) {
                         const wolfCb = document.getElementById('wolf-cb');
                         if (wolfCb) {
-                            wolfCb.checked = true;
                             document.getElementById('wolf-dropdown').classList.remove('hidden');
                             document.getElementById('wolf-target-select').value = gameState.wolfTarget;
                         }
@@ -2698,7 +2713,6 @@
                     if (gameState.bodyguardTarget) {
                         const bgCb = document.getElementById('bg-cb');
                         if (bgCb) {
-                            bgCb.checked = true;
                             document.getElementById('bg-dropdown').classList.remove('hidden');
                             document.getElementById('bg-target-select').value = gameState.bodyguardTarget;
                         }
@@ -2706,7 +2720,6 @@
                     if (gameState.poisonedTarget) {
                         const s2Cb = document.getElementById('sorcerer2-cb');
                         if (s2Cb) {
-                            s2Cb.checked = true;
                             document.getElementById('sorcerer2-dropdown').classList.remove('hidden');
                             const s2Sel = document.getElementById('sorcerer2-target-select');
                             if (s2Sel) s2Sel.value = gameState.poisonedTarget;
@@ -2715,12 +2728,12 @@
                     if (gameState.silencedTarget) {
                         const spCb = document.getElementById('spellcaster-cb');
                         if (spCb) {
-                            spCb.checked = true;
-                            toggleSpellcasterDropdown();
+                            document.getElementById('spellcaster-dropdown').classList.remove('hidden');
                             const spSel = document.getElementById('spellcaster-target-select');
                             if (spSel) spSel.value = gameState.silencedTarget;
                         }
                     }
+                    renderNightNarrationControls();
                 }, 50);
 
             } else {
@@ -2891,10 +2904,18 @@
         function updateLovers() {
             if (!roleAvailable('cupid')) return;
             const cb = document.getElementById('cupid-cb');
-            if (cb && cb.checked) {
+            if (cb) {
                 const l1 = document.getElementById('lover-1').value;
                 const l2 = document.getElementById('lover-2').value;
-                if (isTraveler(l1) || isTraveler(l2)) return;
+                if (!validLovers([l1, l2])) {
+
+                    gameState.lovers = [];
+                    document.getElementById('lover-validation').textContent = 'กรุณาเลือกผู้เล่นที่มีสิทธิ์ 2 คนที่ไม่ซ้ำกัน (ไม่ใช่ Traveler)';
+                    calculateNightResult();
+                    return;
+                }
+
+                document.getElementById('lover-validation').textContent = '';
                 gameState.lovers = [l1, l2];
                 renderPlayerStatusList();
                 calculateNightResult();
@@ -2902,7 +2923,7 @@
         }
 
         function toggleWolfDropdown() {
-            if (!roleAvailable('werewolf') && !roleAvailable('wolf_cub') && !gameState.cursedTurned.some(p => !isBedridden(p))) return;
+            if (!roleAvailable('werewolf') && !roleAvailable('wolf_cub') && !gameState.cursedTurned.some(p => gameState.rolePlayerMap[p] === 'cursed' && actorAvailable(p))) return;
             const cb = document.getElementById('wolf-cb');
             const dropdown = document.getElementById('wolf-dropdown');
             if (cb.checked) {
@@ -2917,7 +2938,7 @@
         }
 
         function updateWolfTarget() {
-            if (!roleAvailable('werewolf') && !roleAvailable('wolf_cub') && !gameState.cursedTurned.some(p => !isBedridden(p))) return;
+            if (!roleAvailable('werewolf') && !roleAvailable('wolf_cub') && !gameState.cursedTurned.some(p => gameState.rolePlayerMap[p] === 'cursed' && actorAvailable(p))) return;
             const select = document.getElementById('wolf-target-select');
             gameState.wolfTarget = select ? select.value : '';
             gameState.wolfTarget2 = document.getElementById('wolf-target-select-2')?.value || '';
@@ -2941,12 +2962,14 @@
         function updateBgTarget() {
             if (!roleAvailable('bodyguard')) return;
             const select = document.getElementById('bg-target-select');
-            gameState.bodyguardTarget = select ? select.value : '';
+            const target = select ? select.value : '';
+            gameState.bodyguardTarget = bodyguardTargetAllowed(target) ? target : '';
+            if (select) select.value = gameState.bodyguardTarget;
             calculateNightResult();
         }
 
         function toggleSeerDropdown() {
-            if (!roleAvailable('seer')) return;
+            if (!inspectionOwner()) return;
             const cb = document.getElementById('seer-cb');
             const dropdown = document.getElementById('seer-dropdown');
             if (cb && dropdown) {
@@ -2959,7 +2982,7 @@
         }
 
         function inspectSeerTarget() {
-            if (!roleAvailable('seer')) return;
+            if (!inspectionOwner()) return;
             const sel = document.getElementById('seer-target-select');
             const disp = document.getElementById('seer-result-display');
             if (!sel || !disp) return;
@@ -2969,8 +2992,12 @@
                 return;
             }
             disp.classList.remove('hidden');
+            const seerPlayer = inspectionOwner();
+            const seerPoisonWarn = isPoisoned(seerPlayer)
+                ? `<div class="text-[10px] text-fuchsia-300 mt-1">⚠️ Seer (${seerPlayer}) ถูกวางยาในคืนนี้ — ผู้ดำเนินเกมอาจแจ้งผลตามจริงหรือกลับด้านได้ตามดุลยพินิจเพื่อสมดุลของเกม</div>`
+                : '';
             if (isTraveler(target)) {
-                disp.textContent = 'Traveler: Mod ตัดสินผลการส่องเองตามกติกาที่ตกลง';
+                disp.innerHTML = 'Traveler: Mod ตัดสินผลการส่องเองตามกติกาที่ตกลง' + seerPoisonWarn;
                 return;
             }
             const roleId = gameState.rolePlayerMap[target];
@@ -2978,10 +3005,7 @@
             const isLycan = roleId === 'lycan' && !isBedridden(target);
             let isWolfRole = roleId === 'werewolf' || roleId === 'wolf_cub' || isTurnedWolf;
 
-            const seerPlayer = getPlayerByRole('seer');
-            const seerPoisonWarn = isPoisoned(seerPlayer)
-                ? `<div class="text-[10px] text-fuchsia-300 mt-1">⚠️ Seer (${seerPlayer}) ถูกวางยาในคืนนี้ — ความสามารถถูกบล็อก (Mod พิจารณาไม่ให้ผล หรือให้ผลหลอกได้)</div>`
-                : '';
+
 
             if (isPoisoned(target)) {
                 // Poisoned target: Seer sees the OPPOSITE result
@@ -3011,6 +3035,9 @@
         // ---------------- Sorcerer2 (Poison) helpers ----------------
         // Bedridden: one first would-be death, first night only. Preview is reversible.
         function resetBedridden() {
+            gameState.nightNarration = null;
+            gameState.poisonLastChoice = null;
+            gameState.bodyguardLastChoice = null;
             gameState.deathPowers = {};
             gameState.bomberPowers = {};
             gameState.cursedPreview = '';
@@ -3026,9 +3053,76 @@
         function effectiveRole(player) {
             return isBedridden(player) ? '__bedridden__' : gameState.rolePlayerMap[player];
         }
+        // Night deaths are previews until dawn; prior committed deaths cannot act.
+        function actorAvailable(player) {
+            return !!gameState.playerStatus[player] && !isBedridden(player) &&
+                (gameState.playerStatus[player].alive || (gameState.gamePhase === 'night' && (gameState.nightKilled || []).includes(player)));
+        }
+        // Calling cadence follows assigned identities, never survival or succession.
+        function assignedNightRole(role) {
+            return Object.values(gameState.rolePlayerMap).includes(role);
+        }
+        function nightNarrationState() {
+            if (!gameState.nightNarration || gameState.nightNarration.night !== gameState.dayCount) {
+                gameState.nightNarration = { night: gameState.dayCount, done: {} };
+            }
+            return gameState.nightNarration.done;
+        }
+        function renderNightNarrationControls() {
+            if (gameState.gamePhase !== 'night') return;
+            const done = nightNarrationState();
+            const roles = { cupid: ['cupid'], wolf: ['werewolf', 'wolf_cub'], sorcerer2: ['sorcerer2'], bg: ['bodyguard'], seer: ['seer'], spellcaster: ['spellcaster'], sorcerer: ['sorcerer'], apprentice: ['apprentice_seer'] };
+            document.querySelectorAll('#actions-checklist input[type="checkbox"]').forEach(cb => {
+                const prefix = cb.id.replace('-cb', '');
+                const owners = gameState.players.filter(p => roles[prefix]?.includes(gameState.rolePlayerMap[p]) ||
+                    (prefix === 'wolf' && gameState.rolePlayerMap[p] === 'cursed' && gameState.cursedTurned.includes(p)));
+                const available = prefix === 'seer' ? !!inspectionOwner() : owners.some(actorAvailable);
+                cb.disabled = false;
+                cb.checked = !!done[prefix];
+                cb.onchange = () => { nightNarrationState()[prefix] = cb.checked; };
+                const dropdown = document.getElementById(prefix === 'cupid' ? 'cupid-dropdowns' : prefix + '-dropdown');
+                if (dropdown) {
+                    dropdown.classList.remove('hidden');
+                    dropdown.querySelectorAll('select, button, input').forEach(control => { control.disabled = !available; });
+                }
+                let note = cb.closest('label').querySelector('[data-night-availability]');
+                if (!note) {
+                    note = document.createElement('span');
+                    note.dataset.nightAvailability = prefix;
+                    note.className = 'text-[10px] text-amber-300';
+                    cb.closest('label').append(note);
+                }
+                const dead = owners.length && owners.every(p => gameState.playerStatus[p]?.alive === false && !(gameState.nightKilled || []).includes(p));
+                note.textContent = !available ? (dead ? 'เสียชีวิตแล้ว — ใช้พลังไม่ได้' : 'ยังใช้พลังไม่ได้ — เรียกตามลำดับปกติ') :
+                    (prefix === 'seer' && gameState.rolePlayerMap[inspectionOwner()] === 'apprentice_seer' ? 'Apprentice Seer รับช่วงส่อง' :
+                    prefix === 'apprentice' && gameState.rolePlayerMap[inspectionOwner()] === 'apprentice_seer' ? 'ใช้พลังในขั้นส่องด้านบน' : '');
+            });
+        }
         function roleAvailable(role) {
-            const owners = gameState.players.filter(p => gameState.rolePlayerMap[p] === role);
-            return owners.length ? owners.some(p => !isBedridden(p)) : gameState.selectedRoles.includes(role);
+            return gameState.players.some(p => gameState.rolePlayerMap[p] === role && actorAvailable(p));
+        }
+        function inspectionOwner() {
+            const seers = gameState.players.filter(p => gameState.rolePlayerMap[p] === 'seer');
+            const seer = seers.find(actorAvailable);
+            if (seer) return seer;
+            // Missing or merely Bedridden/provisionally dead Seers do not trigger succession.
+            if (!seers.length || !seers.every(p => gameState.playerStatus[p] && !gameState.playerStatus[p].alive && !(gameState.nightKilled || []).includes(p))) return '';
+            return gameState.players.find(p => gameState.rolePlayerMap[p] === 'apprentice_seer' && actorAvailable(p)) || '';
+        }
+        function poisonTargetAllowed(target) {
+            const last = gameState.poisonLastChoice;
+            return !!target && gameState.players.includes(target) && !(last && last.night === gameState.dayCount - 1 && last.target === target);
+        }
+        function bodyguardTargetAllowed(target) {
+            const last = gameState.bodyguardLastChoice;
+            return !!target && gameState.players.includes(target) && !(last && last.night === gameState.dayCount - 1 && last.target === target);
+        }
+        function eligibleLover(player) {
+            return gameState.players.includes(player) && !isTraveler(player) &&
+                (gameState.playerStatus[player]?.alive || (gameState.nightKilled || []).includes(player));
+        }
+        function validLovers(pair) {
+            return pair.length === 2 && pair[0] !== pair[1] && pair.every(eligibleLover);
         }
         function offerBedridden(player, preview) {
             const b = bedriddenState();
@@ -3071,14 +3165,7 @@
         }
         function renderBedriddenControls() {
             document.getElementById('bedridden-controls')?.remove();
-            const rolePrefixes = { cupid: 'cupid', bodyguard: 'bg', seer: 'seer', sorcerer2: 'sorcerer2', spellcaster: 'spellcaster' };
-            for (const [role, prefix] of Object.entries(rolePrefixes)) {
-                const available = roleAvailable(role);
-                const cb = document.getElementById(prefix + '-cb');
-                if (cb) cb.disabled = !available;
-                const dropdown = document.getElementById(prefix === 'cupid' ? 'cupid-dropdowns' : prefix + '-dropdown');
-                if (dropdown && !available) dropdown.classList.add('hidden');
-            }
+            renderNightNarrationControls();
             const b = bedriddenState();
             if (!b.player) return;
             const panel = document.createElement('div'); panel.id = 'bedridden-controls';
@@ -3120,7 +3207,9 @@
         function updateSorcerer2Target() {
             if (!roleAvailable('sorcerer2')) return;
             const sel = document.getElementById('sorcerer2-target-select');
-            if (sel && sel.value) gameState.poisonedTarget = sel.value;
+            const target = sel ? sel.value : '';
+            gameState.poisonedTarget = poisonTargetAllowed(target) ? target : '';
+            if (sel) sel.value = gameState.poisonedTarget;
             calculateNightResult();
             inspectSeerTarget();
         }
@@ -3318,6 +3407,8 @@
         }
 
         function calculateNightResult() {
+            // Only validate this night's editable poison; daytime poison lasts until next night.
+            if (gameState.gamePhase === 'night' && !poisonTargetAllowed(gameState.poisonedTarget)) gameState.poisonedTarget = '';
             calculateWolfBite(false);
             if (gameState.wolfCubNight === gameState.dayCount && gameState.wolfTarget2 && gameState.wolfTarget2 !== gameState.wolfTarget) {
                 const first = gameState.wolfTarget, text = gameState.lastNightResultText;
@@ -3328,8 +3419,8 @@
         }
         function calculateWolfBite(additional) {
             if (!additional) undoBedriddenPreview();
-            const wolf = (roleAvailable('werewolf') || roleAvailable('wolf_cub') || gameState.cursedTurned.some(p => !isBedridden(p))) ? gameState.wolfTarget : '';
-            const bg = roleAvailable('bodyguard') ? gameState.bodyguardTarget : ''; 
+            const wolf = (roleAvailable('werewolf') || roleAvailable('wolf_cub') || gameState.cursedTurned.some(p => gameState.rolePlayerMap[p] === 'cursed' && actorAvailable(p))) ? gameState.wolfTarget : '';
+            const bg = roleAvailable('bodyguard') && bodyguardTargetAllowed(gameState.bodyguardTarget) ? gameState.bodyguardTarget : ''; 
 
             if (!additional) {
             // Undo any provisional kills from a previous calculation this night
@@ -3429,7 +3520,7 @@
 
             // 6. Target is Tough Guy: delayed death
             if (effRole === 'tough_guy') {
-                gameState.toughGuyInjured = {
+                if (!gameState.toughGuyInjured) gameState.toughGuyInjured = {
                     player: wolf,
                     night: gameState.dayCount
                 };
@@ -3635,6 +3726,11 @@
             if (travelerState().votingOpen) { alert('กรุณากดจบรอบลงมติในแผง Traveler ก่อนเปลี่ยนช่วง'); return; }
             if (gameState.gamePhase === 'night') {
                 calculateNightResult(); // Resolve the final targets/protection before committing.
+                // A poisoned choice still counts; a skipped night breaks consecutiveness.
+                gameState.bodyguardLastChoice = roleAvailable('bodyguard') && bodyguardTargetAllowed(gameState.bodyguardTarget)
+                    ? { target: gameState.bodyguardTarget, night: gameState.dayCount } : null;
+                gameState.poisonLastChoice = roleAvailable('sorcerer2') && poisonTargetAllowed(gameState.poisonedTarget)
+                    ? { target: gameState.poisonedTarget, night: gameState.dayCount } : null;
                 const candidate = bedriddenState().preview?.player;
                 if (candidate) offerBedridden(candidate, false);
                 bedriddenState().closed = true;
@@ -3644,6 +3740,14 @@
                 gameState.wolvesInfected = false; // Diseased infection consumed this night
                 gameState.nightKilled = [];       // Lock in tonight's kills
                 gameState.pendingMadBomber = null;
+                const injury = gameState.toughGuyInjured;
+                if (injury && gameState.dayCount > injury.night) {
+                    gameState.toughGuyInjured = null;
+                    if (!isBedridden(injury.player) && gameState.playerStatus[injury.player]?.alive) {
+                        killWithLover(injury.player);
+                        alert('💪 Tough Guy (' + injury.player + ') เสียชีวิตในเช้านี้จากบาดเจ็บคืนก่อนหน้า');
+                    }
+                }
             } else {
                 gameState.gamePhase = 'night';
                 gameState.dayCount++;
@@ -3664,23 +3768,7 @@
                 gameState.wolfTarget2 = '';
                 gameState.bodyguardTarget = '';
 
-                // ตรวจสอบเงื่อนไข Tough Guy เสียชีวิตในวันถัดไป
-                if (gameState.toughGuyInjured && !isBedridden(gameState.toughGuyInjured.player) && gameState.dayCount > gameState.toughGuyInjured.night) {
-                    const tgPlayer = gameState.toughGuyInjured.player;
-                    if (gameState.playerStatus[tgPlayer] && gameState.playerStatus[tgPlayer].alive) {
-                        gameState.playerStatus[tgPlayer].alive = false;
-                        let msg = `💪 Tough Guy (${tgPlayer}) เสียชีวิตแล้วตามเงื่อนไข (บาดเจ็บสะสมจากคืนก่อนหน้า)`;
-                        if (gameState.lovers.includes(tgPlayer)) {
-                            const partner = gameState.lovers.find(p => p !== tgPlayer);
-                            if (partner && gameState.playerStatus[partner] && gameState.playerStatus[partner].alive) {
-                                gameState.playerStatus[partner].alive = false;
-                                msg += `\n💘 คู่รัก (${partner}) เสียชีวิตตามทันที!`;
-                            }
-                        }
-                        alert(msg);
-                    }
-                    gameState.toughGuyInjured = null;
-                }
+
             }
             renderGameplay();
             resetTimer();
@@ -4329,7 +4417,7 @@ const ROLE_GUIDE_COPY = {
     "ความสามารถ": "เลือกวางยาผู้เล่น 1 คน เพื่อระงับความสามารถของเป้าหมายระหว่างที่ยาพิษมีผล",
     "ช่วงเวลาและข้อจำกัด": "ทุกคืน หลังหมาป่าเลือกเหยื่อ คืนละ 1 คน ยาพิษหมดฤทธิ์เมื่อเริ่มคืนถัดไป",
     "เป้าหมายของคุณ": "ขัดขวางพลังของฝ่ายชาวบ้าน และช่วยฝ่ายมนุษย์หมาป่ายึดครองหมู่บ้าน",
-    "ข้อยกเว้น": "Seer ที่ถูกวางยาจะได้รับผลตรวจตรงข้าม พลังตอนตายจะไม่ทำงานหากเสียชีวิตขณะติดยาพิษ แต่ยาพิษไม่ระงับเงื่อนไขชนะของ Tanner"
+    "ข้อยกเว้น": "เมื่อ Seer ถูกวางยา ผู้ดำเนินเกมอาจแจ้งผลตามจริงหรือกลับด้านได้ตามดุลยพินิจเพื่อสมดุลของเกม พลังตอนตายจะไม่ทำงานหากเสียชีวิตขณะติดยาพิษ แต่ยาพิษไม่ระงับเงื่อนไขชนะของ Tanner"
   },
   "seer": {
     "ฝ่าย": "ชาวบ้าน",
