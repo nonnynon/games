@@ -958,28 +958,28 @@
         }
         function roleDisplay(role) { return { ...role, ...ROLE_DISPLAY[role.id] }; }
         // Pending new artwork; role-only filenames, relative to this index.html.
-        const ROLE_ARTWORK = Object.freeze({
-            werewolf: './Assets/werewolf.webp',
-            wolf_cub: './Assets/wolf_cub.webp',
-            sorcerer: './Assets/sorceress.webp',
-            sorcerer2: './Assets/sorcerer.webp',
-            seer: './Assets/seer.webp',
-            apprentice_seer: './Assets/apprentice_seer.webp',
-            bodyguard: './Assets/bodyguard.webp',
-            hunter: './Assets/hunter.webp',
-            spellcaster: './Assets/spellcaster.webp',
-            tough_guy: './Assets/tough_guy.webp',
-            diseased: './Assets/diseased.webp',
-            lycan: './Assets/lycan.webp',
-            cursed: './Assets/cursed.webp',
-            mad_bomber: './Assets/mad_bomber.webp',
-            tanner: './Assets/tanner.webp',
-            cupid: './Assets/cupid.webp',
-            villager: './Assets/villager.webp',
-            judge: './Assets/judge.webp',
-            gunslinger: './Assets/gunslinger.webp',
-            politician: './Assets/politician.webp',
-            bureaucrat: './Assets/bureaucrat.webp'
+        const ROLE_ARTWORK = Object.freeze({beholder: './Assets/role-card/beholder.webp',direwolf: './Assets/role-card/direwolf.webp',doppelganger: './Assets/role-card/doppelganger.webp',pi: './Assets/role-card/pi.webp',priest: './Assets/role-card/priest.webp',witch: './Assets/role-card/witch.webp',cult_leader: './Assets/role-card/cult_leader.webp',prince: './Assets/role-card/prince.webp',persian_prince: './Assets/role-card/persian_prince.webp',drunk: './Assets/role-card/drunk.webp',insomniac: './Assets/role-card/insomniac.webp',
+            werewolf: './Assets/role-card/werewolf.webp',
+            wolf_cub: './Assets/role-card/wolf_cub.webp',
+            sorcerer: './Assets/role-card/sorceress.webp',
+            sorcerer2: './Assets/role-card/sorcerer.webp',
+            seer: './Assets/role-card/seer.webp',
+            apprentice_seer: './Assets/role-card/apprentice_seer.webp',
+            bodyguard: './Assets/role-card/bodyguard.webp',
+            hunter: './Assets/role-card/hunter.webp',
+            spellcaster: './Assets/role-card/spellcaster.webp',
+            tough_guy: './Assets/role-card/tough_guy.webp',
+            diseased: './Assets/role-card/diseased.webp',
+            lycan: './Assets/role-card/lycan.webp',
+            cursed: './Assets/role-card/cursed.webp',
+            mad_bomber: './Assets/role-card/mad_bomber.webp',
+            tanner: './Assets/role-card/tanner.webp',
+            cupid: './Assets/role-card/cupid.webp',
+            villager: './Assets/role-card/villager.webp',
+            judge: './Assets/role-card/judge.webp',
+            gunslinger: './Assets/role-card/gunslinger.webp',
+            politician: './Assets/role-card/politician.webp',
+            bureaucrat: './Assets/role-card/bureaucrat.webp'
         });
         let playerCardRoleId = null;
         function paintPlayerArtwork(revealed) {
@@ -994,6 +994,140 @@
             image.src = source;
             holder.append(image);
         }
+
+function renderDrunkSetup(containerId){
+ const host=document.getElementById(containerId);if(!host)return;const existing=host.querySelector('[data-drunk-setup]');if(existing){existing.querySelector('select').value=gameState.pendingDrunkRole||'';return;}
+ const box=document.createElement('label');box.dataset.drunkSetup='1';box.className='block p-3 text-sm';box.textContent='Drunk: บทบาทจริงก่อนเริ่ม (Mod เท่านั้น) ';
+ const select=document.createElement('select');select.className='bg-slate-800 p-2 rounded';const blank=document.createElement('option');blank.value='';blank.textContent='-- เลือกเมื่อใช้ Drunk --';select.append(blank);
+ ROLES_DATABASE.filter(r=>!['drunk','beholder','direwolf','doppelganger','cupid'].includes(r.id)).forEach(r=>{const o=document.createElement('option');o.value=r.id;o.textContent=r.name;select.append(o);});select.value=gameState.pendingDrunkRole||'';select.onchange=()=>{if(!travelerGameActive())gameState.pendingDrunkRole=select.value;};box.append(select);host.append(box);
+}
+// Normal additions: moderator-local state, never included in ROOM_STATE.
+const NORMAL_ADDITIONS = [
+ ['beholder','Beholder','ผู้มีตาทิพย์','👁️','good',2,'คืนแรก รู้ว่าใครคือ Seer'],
+ ['direwolf','Direwolf','หมาป่าโลกันตร์','🐺','wolf',-4,'ร่วมล่ากับหมาป่า เลือกเพื่อนร่วมชะตาคืนแรก หากเขาตายคุณตายตาม'],
+ ['doppelganger','Doppelganger','ผู้สวมรอย','🪞','good',-2,'เลือกคนคืนแรก รับบทบาทและฝ่ายเมื่อเขาตาย ได้พลังใหม่ยกเว้นพลังเฉพาะคืนแรก'],
+ ['pi','P.I.','นักสืบเหนือธรรมชาติ','🔎','good',3,'หนึ่งครั้ง ตรวจเป้าหมายและเพื่อนบ้านที่นั่งเดิม ว่ามีหมาป่าหรือไม่'],
+ ['priest','Priest','บาทหลวง','✝️','good',3,'หนึ่งครั้ง ให้พรคงอยู่จนป้องกันการตายกลางคืนหนึ่งครั้ง'],
+ ['witch','Witch','แม่มด','🧙‍♀️','good',4,'หนึ่งครั้ง ช่วยเหยื่อหมาป่าหรือฆ่าคนอื่น เมื่อใช้แล้วไม่รู้เหยื่ออีก'],
+ ['cult_leader','Cult Leader','ผู้นำลัทธิ','🗿','special',1,'รับสมาชิกคืนละคน สมาชิกไม่รู้ตัวและไม่เปลี่ยนฝ่าย ชนะเมื่อทุกคนที่ยังมีชีวิตเป็นสมาชิก'],
+ ['prince','Prince','เจ้าชาย','🫅🏼','good',3,'เปิดเผยตัวและรอดจากการลงคะแนนประหาร ไม่รอดจากการตายอื่น'],
+ ['persian_prince','Persian Prince','เจ้าชายเปอร์เซีย','🫅🏽','good',3,'หนึ่งครั้ง เปิดเผยตัวยกเลิกประหารคนอื่นก่อนเปิดบทบาท จบวันไม่มีโหวตใหม่'],
+ ['drunk','Drunk','คนเมา','🍺','good',4,'Mod กำหนดบทบาทจริงก่อนเริ่ม คืนสามรับบทบาทและฝ่าย Seer เห็นบทบาทจริงตั้งแต่แรก'],
+ ['insomniac','Insomniac','หน่องนอนไม่หลับ','👀','good',3,'รู้เพียงว่ามีใครเยี่ยมบ้านคุณหรือเพื่อนบ้านที่นั่งเดิมหรือไม่']
+].map(([id,name,thai,icon,team,points,desc])=>({id,name,thai,icon,team,points,desc,multi:false,defaultCount:0}));
+ROLES_DATABASE.push(...NORMAL_ADDITIONS);
+function normalState() {
+ return gameState.normal || (gameState.normal={original:{...gameState.rolePlayerMap},seats:[...gameState.players],used:{},links:{},trueRoles:Object.fromEntries(gameState.players.filter(p=>gameState.rolePlayerMap[p]==='drunk'&&gameState.pendingDrunkRole).map(p=>[p,gameState.pendingDrunkRole])),blessings:{},cult:{},visits:[],night:gameState.dayCount,witch:null,blessSpent:[],endedDay:0});
+}
+function normalNight() {
+ const n=normalState();
+ if(n.night!==gameState.dayCount){n.night=gameState.dayCount;n.visits=[];n.witch=null;n.witches={};n.actions={};n.blessSpent=[];}
+ return n;
+}
+function fixedNeighbors(p){const a=normalState().seats,i=a.indexOf(p);return i<0?[]:[...new Set([a[(i+a.length-1)%a.length],a[(i+1)%a.length]])].filter(x=>x!==p);}
+function normalVisit(actor,targets,key){const n=normalNight();n.visits=n.visits.filter(v=>v.key!==key);if(actor)targets.filter(Boolean).forEach(target=>n.visits.push({actor,target,key}));}
+function normalVisits(){const n=normalNight();const houses=[...n.visits];const add=(actor,target)=>{if(actor&&target)houses.push({actor,target});};
+ const cupid=getPlayerByRole('cupid');if(gameState.dayCount===1&&!normalState().inherited?.[cupid])gameState.lovers.forEach(t=>add(cupid,t));
+ add(getPlayerByRole('bodyguard'),gameState.bodyguardTarget);add(getPlayerByRole('sorcerer2'),gameState.poisonedTarget);add(getPlayerByRole('spellcaster'),gameState.silencedTarget);
+ const wolves=gameState.players.filter(p=>['werewolf','wolf_cub','direwolf'].includes(effectiveRole(p))&&actorAvailable(p));wolves.forEach(p=>{add(p,gameState.wolfTarget);add(p,gameState.wolfTarget2);});return houses;
+}
+function insomniacResult(p,invert=false){const houses=[p,...fixedNeighbors(p)];const truth=normalVisits().some(v=>v.actor!==p&&houses.includes(v.target));return isPoisoned(p)&&invert?!truth:truth;}
+function actualWolf(p){return ['werewolf','wolf_cub','direwolf'].includes(effectiveRole(p))||gameState.cursedTurned.includes(p);}
+function normalCan(p){return isMod&&gameState.gamePhase==='night'&&actorAvailable(p)&&!isPoisoned(p);}
+function validDrunkRole(id){return ROLES_DATABASE.some(r=>r.id===id)&&!['drunk','beholder','direwolf','doppelganger','cupid'].includes(id);}
+function awakenDrunks(){if(gameState.gamePhase!=='night'||gameState.dayCount<3)return;const n=normalState();gameState.players.filter(p=>gameState.rolePlayerMap[p]==='drunk'&&actorAvailable(p)&&validDrunkRole(n.trueRoles[p])).forEach(p=>normalAcquire(p,n.trueRoles[p]));}
+function normalAcquire(p,id){const n=normalState(),r=ROLES_DATABASE.find(r=>r.id===id);if(!r)return;
+ gameState.rolePlayerMap[p]=id;n.used[p]={};(n.inherited||(n.inherited={}))[p]=true;delete gameState.deathPowers?.[p];delete gameState.bomberPowers?.[p];
+ const device=Object.keys(activeRoleAssignments).find(k=>activeRoleAssignments[k].playerName===p);
+ if(device){gameState.rolePlayerMap[device]=id;const old=activeRoleAssignments[device];activeRoleAssignments[device]={...old,roleId:id,roleName:r.name,roleThai:r.thai,roleIcon:r.icon,team:r.team,desc:'บทบาทใหม่ของคุณคือ '+r.name+' — '+r.desc+(['cupid','beholder','direwolf','doppelganger'].includes(id)?' (พลังเฉพาะคืนแรกใช้ไม่ได้หลังรับบทบาท)':''),originalRoleId:n.original[p]};Object.values(connectedPeers).forEach(sendPrivateAssignment);}
+}
+function normalCommittedDeaths(){const n=normalState();let changed=true,pass=0;
+ while(changed&&pass++<=gameState.players.length){changed=false;for(const p of gameState.players){const link=n.links[p];if(!link||gameState.playerStatus[link]?.alive||(gameState.nightKilled||[]).includes(link)||!gameState.playerStatus[p]?.alive)continue;
+ const role=gameState.rolePlayerMap[p];if(role==='doppelganger'&&!isPoisoned(p)){normalAcquire(p,actualRoleForCopy(link));delete n.links[p];changed=true;}
+ else if(role==='direwolf'&&!isPoisoned(p)){killWithLover(p);changed=true;}}
+ }
+ markApprenticeSuccession();
+ for(const leader of Object.keys(n.cult)){if(!gameState.playerStatus[leader]?.alive&&!(gameState.nightKilled||[]).includes(leader)){delete n.cult[leader];if(n.cultWinner===leader)delete n.cultWinner;continue;}if(gameState.playerStatus[leader]?.alive&&gameState.players.every(p=>p===leader||(!gameState.playerStatus[p]?.alive&&!(gameState.nightKilled||[]).includes(p))||n.cult[leader].includes(p)))n.cultWinner=leader;}
+}
+function normalAct(p,kind,target){const n=normalNight(),role=gameState.rolePlayerMap[p];if(!isMod||gameState.gamePhase!=='night'||!actorAvailable(p))return false;
+ if(target&&actorAvailable(target))normalVisit(p,[target],p+':attempt:'+kind);
+ if(isPoisoned(p))return null;const used=n.used[p]||(n.used[p]={});
+ if(['beholder','direwolf','doppelganger'].includes(role)&&(gameState.dayCount!==1||n.inherited?.[p]))return false;
+ if(kind==='beholder'&&role==='beholder'){if(used.beholder)return 'รับข้อมูลไปแล้ว';used.beholder=true;return gameState.players.filter(x=>gameState.rolePlayerMap[x]==='seer').join(', ')||'ไม่มี Seer';}
+ if(!gameState.playerStatus[target]||!actorAvailable(target))return null;
+ if(kind==='link'&&['direwolf','doppelganger'].includes(role)&&target!==p&&!n.links[p]){n.links[p]=target;normalVisit(p,[target],p+':link');return true;}
+ if(kind==='pi'&&role==='pi'&&!used.pi){used.pi=true;normalVisit(p,[target],p+':pi');return [target,...fixedNeighbors(target)].some(actualWolf);}
+ if(kind==='priest'&&role==='priest'&&!used.priest){used.priest=true;n.blessings[target]=true;normalVisit(p,[target],p+':priest');return true;}
+ if(role==='witch'&&!used.witch&&['save','kill'].includes(kind)){if(kind==='save'&&![gameState.wolfTarget,gameState.wolfTarget2].includes(target))return false;used.witch=true;(n.witches||(n.witches={}))[p]={actor:p,kind,target};normalVisit(p,[target],p+':witch');calculateNightResult();return true;}
+ if(role==='cult_leader'&&kind==='cult'&&used.cult!==gameState.dayCount&&target!==p){used.cult=gameState.dayCount;(n.cult[p]||(n.cult[p]=[])).push(target);normalVisit(p,[target],p+':cult');return true;}return false;
+}
+function normalBlessBlock(p){const n=normalNight();if(gameState.gamePhase!=='night'||!n.blessings[p]||isPoisoned(p))return false;delete n.blessings[p];n.blessSpent.push(p);return true;}
+function normalPanel(){document.getElementById('normal-controls')?.remove();if(!isMod)return;const n=normalNight();
+ // Awakening occurs before checklist construction.
+ const panel=document.createElement('section');panel.id='normal-controls';panel.className='p-3 border border-slate-700 rounded-xl space-y-3 text-xs';
+ const title=document.createElement('h3');title.textContent='Normal roles — เฉพาะผู้ดำเนินเกม';panel.append(title);
+ for(const p of gameState.players){const role=gameState.rolePlayerMap[p];if(!NORMAL_ADDITIONS.some(r=>r.id===role||r.id===n.original[p])&&!['sorcerer','seer','apprentice_seer'].includes(role))continue;const row=document.createElement('div');row.className='space-y-2';const label=document.createElement('p');label.textContent=p+' — '+role+(actorAvailable(p)?'':' (เสียชีวิตแล้ว / ใช้พลังไม่ได้)');row.append(label);
+ if(gameState.gamePhase==='night'){const done=nightNarrationState(),key='normal:'+p;const call=document.createElement('label'),cb=document.createElement('input');cb.type='checkbox';cb.dataset.normalNarration='true';cb.checked=!!done[key];cb.onchange=()=>{done[key]=cb.checked;};call.append(cb,document.createTextNode(' เรียก '+(n.original[p]||role)+' แล้ว'));row.append(call);}
+ const select=document.createElement('select');select.className='w-full min-w-0 bg-slate-800 rounded p-2';gameState.players.filter(actorAvailable).forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;select.append(o);});row.append(select);
+ const result=document.createElement('p');result.className='break-words';
+ const button=(text,fn,enabled=isMod&&gameState.gamePhase==='night'&&actorAvailable(p))=>{const b=document.createElement('button');b.textContent=text;b.className='min-h-11 p-2 border rounded mr-2 disabled:opacity-40';b.disabled=!enabled;b.onclick=fn;row.append(b);};
+ if(role==='drunk'){select.remove();result.textContent='บทบาทจริง (Mod): '+(n.trueRoles[p]||'ไม่ได้กำหนดก่อนเกม');}
+
+ if(['sorcerer','seer','apprentice_seer'].includes(role)){button('ตรวจเป้าหมาย',()=>{const value=normalInspect(p,select.value);result.textContent=value===null?'ใช้ไม่ได้':value?'ใช่':'ไม่ใช่';},actorAvailable(p)&&gameState.gamePhase==='night'&&(role!=='apprentice_seer'||!!n.apprenticeAwakened?.[p]));if(isPoisoned(p)){button('แจ้งผลกลับด้าน',()=>{const value=normalInspect(p,select.value);result.textContent=value?'ไม่ใช่':'ใช่';},actorAvailable(p)&&gameState.gamePhase==='night');}}
+ if(role==='beholder')button('ดู Seer คืนแรก',()=>{result.textContent=normalAct(p,'beholder')||'ใช้ไม่ได้';});
+ if(['direwolf','doppelganger'].includes(role))button('เลือกคู่ชะตาคืนแรก',()=>{result.textContent=normalAct(p,'link',select.value)?'บันทึกแล้ว':'ใช้ไม่ได้';});
+ if(['pi','priest','cult_leader'].includes(role))button('ใช้พลัง',()=>{if(role==='pi'&&n.used[p]?.pi){result.textContent='ใช้พลังไปแล้ว';return;}const answer=normalAct(p,role==='cult_leader'?'cult':role,select.value);result.textContent=role==='pi'?(answer===null?'ถูกวางยา — บันทึกการเยี่ยมบ้านแล้ว':answer?'มีหมาป่า':'ไม่มีหมาป่า'):(answer?'บันทึกแล้ว':'ใช้ไม่ได้');},gameState.gamePhase==='night'&&actorAvailable(p)&&!(role==='pi'&&n.used[p]?.pi));
+ if(role==='witch'){if(actorAvailable(p)&&gameState.gamePhase==='night'&&!isPoisoned(p)&&!n.used[p]?.witch)result.textContent='เหยื่อหมาป่า: '+[gameState.wolfTarget,gameState.wolfTarget2].filter(Boolean).join(', ');button('ช่วยชีวิต',()=>{normalAct(p,'save',select.value);normalPanel();});button('สังหาร',()=>{normalAct(p,'kill',select.value);normalPanel();});}
+ if(role==='insomniac'){button('ผลตามจริง',()=>{result.textContent=insomniacResult(p)?'มีผู้มาเยือน':'ไม่มีผู้มาเยือน';},gameState.gamePhase==='night'&&actorAvailable(p));if(isPoisoned(p))button('ผลกลับด้าน',()=>{result.textContent=insomniacResult(p,true)?'มีผู้มาเยือน':'ไม่มีผู้มาเยือน';},gameState.gamePhase==='night'&&actorAvailable(p));}
+ if(role==='cult_leader'){const tracker=document.createElement('p');tracker.textContent='สมาชิก (Mod): '+(n.cult[p]||[]).join(', ');row.append(tracker);}row.append(result);panel.append(row);}
+ if(n.cultWinner){const won=document.createElement('p');won.textContent='ผู้นำลัทธิชนะ: '+n.cultWinner;panel.append(won);}document.getElementById('actions-checklist').append(panel);renderActorPowers();
+}
+
+// Central death gate: the cause, not the current UI phase, controls night protection.
+function deathAtNight(){return gameState.gamePhase==='night'||normalState().nightResolution===true||madBomberContext==='night';}
+function applyDeath(player,night=deathAtNight(),preview=false){
+ if(!gameState.playerStatus[player]?.alive)return false;
+ if(night&&normalBlessBlock(player,preview))return false;
+ gameState.playerStatus[player].alive=false;
+ if(preview&&!gameState.nightKilled.includes(player))gameState.nightKilled.push(player);
+ return true;
+}
+function normalBlessBlock(player,preview=false){const n=normalNight();if(!n.blessings[player]||isPoisoned(player))return false;
+ delete n.blessings[player];if(preview)n.blessSpent.push(player);return true;
+}
+function killWithLover(player){
+ if(deathAtNight()&&normalState().blessings[player]&&!isPoisoned(player)){normalBlessBlock(player);return null;}
+ if(offerBedridden(player,false))return null;
+ if(!applyDeath(player,false))return null;
+ const partner=gameState.lovers.includes(player)&&gameState.lovers.find(p=>p!==player);
+ return partner&&applyDeath(partner,deathAtNight())?partner:null;
+}
+function nightKill(player){if(!gameState.playerStatus[player]?.alive)return false;if(normalState().blessings[player]&&!isPoisoned(player)){normalBlessBlock(player,true);return false;}if(offerBedridden(player,true))return false;return applyDeath(player,false,true);}
+function actualRoleForCopy(player){const n=normalState();if(gameState.cursedTurned.includes(player))return 'werewolf';if(gameState.rolePlayerMap[player]==='drunk')return n.trueRoles[player]||'villager';if(gameState.rolePlayerMap[player]==='apprentice_seer'&&n.apprenticeAwakened?.[player])return 'seer';return gameState.rolePlayerMap[player];}
+function markApprenticeSuccession(){const n=normalState(),seers=gameState.players.filter(p=>gameState.rolePlayerMap[p]==='seer');if(seers.length&&seers.every(p=>!gameState.playerStatus[p]?.alive&&!gameState.nightKilled.includes(p))){n.apprenticeAwakened=n.apprenticeAwakened||{};gameState.players.filter(p=>gameState.rolePlayerMap[p]==='apprentice_seer'&&actorAvailable(p)).forEach(p=>n.apprenticeAwakened[p]=true);}}
+function normalRoleActors(role){return gameState.players.filter(p=>gameState.rolePlayerMap[p]===role&&actorAvailable(p));}
+function getPlayerByRole(role){return normalRoleActors(role).find(p=>!isPoisoned(p))||normalRoleActors(role)[0]||gameState.players.find(p=>gameState.rolePlayerMap[p]===role)||'';}
+function normalInspect(actor,target){if(!actorAvailable(actor)||!gameState.playerStatus[target])return null;normalVisit(actor,[target],actor+':inspect');const role=gameState.rolePlayerMap[actor];if(role==='sorcerer')return actualRoleForCopy(target)==='seer';const trueRole=gameState.rolePlayerMap[target]==='drunk'?normalState().trueRoles[target]:gameState.rolePlayerMap[target];const wolf=['werewolf','wolf_cub','direwolf','lycan'].includes(trueRole)||gameState.cursedTurned.includes(target);return isPoisoned(target)?!wolf:wolf;}
+
+// Per-actor supplemental powers for inherited/multiple owners. Pack hunting remains shared.
+function actorPowers(){const n=normalNight();return n.actions||(n.actions={});}
+function actorPowerChoice(actor,kind,target){
+ if(!isMod||gameState.gamePhase!=='night'||!actorAvailable(actor)||!actorAvailable(target))return false;
+ if(effectiveRole(actor)!==kind||!['bodyguard','sorcerer2','spellcaster'].includes(kind))return false;
+ const n=normalNight(),last=n.history?.[actor];if(['bodyguard','sorcerer2'].includes(kind)&&last?.night===gameState.dayCount-1&&last.target===target)return false;
+ if(actor===getPlayerByRole(kind)){if(kind==='bodyguard')gameState.bodyguardTarget='';if(kind==='sorcerer2')gameState.poisonedTarget='';if(kind==='spellcaster')gameState.silencedTarget='';}
+ actorPowers()[actor]={kind,target,night:gameState.dayCount};normalVisit(actor,[target],actor+':'+kind);calculateNightResult();normalPanel();return true;
+}
+function activeActorActions(kind){return Object.entries(actorPowers()).filter(([p,a])=>a.kind===kind&&a.night===gameState.dayCount&&actorAvailable(p)&&effectiveRole(p)===kind);}
+function actorPoisoned(p){return !!p&&(gameState.poisonedTarget===p||activeActorActions('sorcerer2').some(([actor,a])=>a.target===p));}
+function actorProtected(target){return activeActorActions('bodyguard').some(([p,a])=>a.target===target&&!actorPoisoned(p));}
+function commitActorHistory(){const n=normalNight();n.history=n.history||{};for(const p of gameState.players){const a=actorPowers()[p];if(a&&['bodyguard','sorcerer2'].includes(a.kind))n.history[p]={target:a.target,night:gameState.dayCount};else delete n.history[p];}}
+function renderActorPowers(){const host=document.getElementById('normal-controls');if(!host||gameState.gamePhase!=='night')return;
+ for(const p of gameState.players){const role=effectiveRole(p);if(!['bodyguard','sorcerer2','spellcaster'].includes(role))continue;
+ const row=document.createElement('div');const title=document.createElement('p');title.textContent=p+' — '+role+' (พลังแยกตามผู้เล่น)';const select=document.createElement('select');select.className='w-full min-w-0 bg-slate-800 p-2';gameState.players.filter(actorAvailable).forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;select.append(o);});const button=document.createElement('button');button.textContent='บันทึกเป้าหมาย';button.className='p-2 border rounded';button.disabled=!actorAvailable(p);select.disabled=!actorAvailable(p);button.onclick=()=>actorPowerChoice(p,role,select.value);row.append(title,select,button);host.append(row);
+ }
+ const silenced=activeActorActions('spellcaster').filter(([p])=>!actorPoisoned(p)).map(([,a])=>a.target);if(silenced.length){const label=document.createElement('p');label.textContent='ผู้ถูกใบ้ (Mod): '+silenced.join(', ');host.append(label);}
+}
 
         // APPLICATION STATE
         // ---------------------------------------------
@@ -1752,6 +1886,7 @@
         }
 
         function renderRolesBuilder() {
+            renderDrunkSetup('screen-role-select');
             normalizeLegacyRoles();
             const container = document.getElementById('roles-builder-list');
             container.innerHTML = '';
@@ -2147,6 +2282,7 @@
         }
 
         function triggerGameStart() {
+            if(gameState.selectedRoles.includes('drunk')&&!validDrunkRole(gameState.pendingDrunkRole)){alert('กรุณากำหนดบทบาทจริงของ Drunk ก่อนเริ่มเกม');return;}
             if (isGameStarted) {
                 console.warn('Game already started! Ignoring duplicate trigger.');
                 return;
@@ -2278,7 +2414,7 @@
         // Role-identity glow exceptions are independent of faction badges.
         function paintPrivateRoleGlow(info, revealed = true) {
             const roleId = canonicalRoleId(info.roleId);
-            const color = !revealed ? 'transparent' : roleId === 'cursed' ? '#a855f7'
+            const color = !revealed ? 'transparent' : ['cursed','drunk','doppelganger'].includes(roleId) ? '#a855f7'
                 : roleId === 'cupid' ? '#ec4899' : roleId === 'diseased' ? '#22c55e'
                 : roleId === 'tanner' ? '#858044' : info.team === 'wolf' ? '#ef4444' : '#3b82f6';
             const glow = document.getElementById('role-bg-glow');
@@ -2288,7 +2424,7 @@
         function renderPlayerCard(roleInfo) {
             roleInfo = normalizeRoleAssignment(roleInfo);
             paintPlayerArtwork(false);
-            playerCardRoleId = roleInfo.roleId;
+            playerCardRoleId = roleInfo.originalRoleId || roleInfo.roleId;
             document.getElementById('card-front-content').dataset.roleId = roleInfo.roleId;
             const display = ROLE_DISPLAY[roleInfo.roleId] || {};
             document.getElementById('player-card-inner').classList.remove('flipped');
@@ -2326,12 +2462,12 @@
             const glow = document.getElementById('role-bg-glow');
 
             if (travelerCardInfo) { paintTravelerPrivacy(false); return; }
-            teamBadge.dataset.faction = roleInfo.team === 'wolf' ? 'wolf' : roleInfo.roleId === 'tanner' ? 'independent' : 'good';
+            teamBadge.dataset.faction = roleInfo.team === 'wolf' ? 'wolf' : ['tanner','cult_leader'].includes(roleInfo.roleId) ? 'independent' : 'good';
             if (roleInfo.team === 'wolf') {
                 teamBadge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-950 text-rose-400 border border-rose-800";
                 teamBadge.innerText = "🐺 ฝ่ายมนุษย์หมาป่า";
                 glow.className = "absolute -top-20 -left-20 w-56 h-56 rounded-full blur-3xl opacity-30 bg-rose-500 pointer-events-none";
-            } else if (roleInfo.roleId === 'tanner') {
+            } else if (['tanner','cult_leader'].includes(roleInfo.roleId)) {
                 teamBadge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-950 text-purple-300 border border-purple-800";
                 teamBadge.innerText = "🎭 ฝ่ายอิสระ";
                 glow.className = "absolute -top-20 -left-20 w-56 h-56 rounded-full blur-3xl opacity-30 bg-purple-500 pointer-events-none";
@@ -2368,6 +2504,7 @@
         // OFFLINE / SINGLE-DEVICE PASS & PLAY FLOW
         // ---------------------------------------------
         function startSingleDeviceMode() {
+            renderDrunkSetup('screen-offline-setup');
             const container = document.getElementById('role-checkboxes-offline');
             if (container.children.length) {
                 updateRequiredCountOffline();
@@ -2470,6 +2607,7 @@
         }
 
         function startOfflineGame() {
+            if([...document.querySelectorAll('.match-select-offline')].some(s=>s.dataset.role==='drunk')&&!validDrunkRole(gameState.pendingDrunkRole)){alert('กรุณากำหนดบทบาทจริงของ Drunk ก่อนเริ่มเกม');return;}
             isMod = true;
             isGameStarted = false;
             gameState.offlineGame = true;
@@ -2522,6 +2660,7 @@
         // MOD GAMEPLAY ENGINE (NIGHT & DAY PHASES)
         // ---------------------------------------------
         function renderGameplay() {
+            awakenDrunks();
             normalizeLegacyRoles();
             const indicator = document.getElementById('day-night-indicator');
             const title = document.getElementById('phase-title');
@@ -2555,7 +2694,7 @@
 
                 const nightSteps = [
                     { id: 'cupid', name: '1. Cupid เลือก Lovers (เฉพาะคืนแรก)', show: assignedNightRole('cupid') && gameState.dayCount === 1 },
-                    { id: 'wolf', name: '2. Werewolf เลือกเหยื่อสังหาร', show: assignedNightRole('werewolf') || assignedNightRole('wolf_cub') || gameState.cursedTurned.some(p => gameState.rolePlayerMap[p] === 'cursed') },
+                    { id: 'wolf', name: '2. Werewolf เลือกเหยื่อสังหาร', show: assignedNightRole('werewolf') || assignedNightRole('wolf_cub') || assignedNightRole('direwolf') || gameState.cursedTurned.some(p => gameState.rolePlayerMap[p] === 'cursed') },
                     { id: 'sorcerer2', name: '3. Sorcerer เลือกวางยา (บล็อกความสามารถ)', show: assignedNightRole('sorcerer2') },
                     { id: 'bodyguard', name: '4. Bodyguard เลือกป้องกัน', show: assignedNightRole('bodyguard') },
                     { id: 'seer', name: '5. Seer / Apprentice Seer ส่องตรวจดูผู้เล่น', show: assignedNightRole('seer') },
@@ -2831,6 +2970,7 @@
             }
 
             renderPlayerStatusList();
+            normalPanel();
         }
 
         function renderPlayerStatusList() {
@@ -2923,7 +3063,7 @@
         }
 
         function toggleWolfDropdown() {
-            if (!roleAvailable('werewolf') && !roleAvailable('wolf_cub') && !gameState.cursedTurned.some(p => gameState.rolePlayerMap[p] === 'cursed' && actorAvailable(p))) return;
+            if (!roleAvailable('werewolf') && !roleAvailable('wolf_cub') && !roleAvailable('direwolf') && !gameState.cursedTurned.some(p => gameState.rolePlayerMap[p] === 'cursed' && actorAvailable(p))) return;
             const cb = document.getElementById('wolf-cb');
             const dropdown = document.getElementById('wolf-dropdown');
             if (cb.checked) {
@@ -2938,7 +3078,7 @@
         }
 
         function updateWolfTarget() {
-            if (!roleAvailable('werewolf') && !roleAvailable('wolf_cub') && !gameState.cursedTurned.some(p => gameState.rolePlayerMap[p] === 'cursed' && actorAvailable(p))) return;
+            if (!roleAvailable('werewolf') && !roleAvailable('wolf_cub') && !roleAvailable('direwolf') && !gameState.cursedTurned.some(p => gameState.rolePlayerMap[p] === 'cursed' && actorAvailable(p))) return;
             const select = document.getElementById('wolf-target-select');
             gameState.wolfTarget = select ? select.value : '';
             gameState.wolfTarget2 = document.getElementById('wolf-target-select-2')?.value || '';
@@ -2993,6 +3133,7 @@
             }
             disp.classList.remove('hidden');
             const seerPlayer = inspectionOwner();
+            normalVisit(seerPlayer,[target],seerPlayer+":seer");
             const seerPoisonWarn = isPoisoned(seerPlayer)
                 ? `<div class="text-[10px] text-fuchsia-300 mt-1">⚠️ Seer (${seerPlayer}) ถูกวางยาในคืนนี้ — ผู้ดำเนินเกมอาจแจ้งผลตามจริงหรือกลับด้านได้ตามดุลยพินิจเพื่อสมดุลของเกม</div>`
                 : '';
@@ -3000,10 +3141,10 @@
                 disp.innerHTML = 'Traveler: Mod ตัดสินผลการส่องเองตามกติกาที่ตกลง' + seerPoisonWarn;
                 return;
             }
-            const roleId = gameState.rolePlayerMap[target];
+            const roleId = gameState.rolePlayerMap[target] === 'drunk' ? normalState().trueRoles[target] : gameState.rolePlayerMap[target];
             const isTurnedWolf = gameState.cursedTurned && gameState.cursedTurned.includes(target);
             const isLycan = roleId === 'lycan' && !isBedridden(target);
-            let isWolfRole = roleId === 'werewolf' || roleId === 'wolf_cub' || isTurnedWolf;
+            let isWolfRole = roleId === 'werewolf' || roleId === 'wolf_cub' || roleId === 'direwolf' || isTurnedWolf;
 
 
 
@@ -3035,6 +3176,7 @@
         // ---------------- Sorcerer2 (Poison) helpers ----------------
         // Bedridden: one first would-be death, first night only. Preview is reversible.
         function resetBedridden() {
+            gameState.normal = null;
             gameState.nightNarration = null;
             gameState.poisonLastChoice = null;
             gameState.bodyguardLastChoice = null;
@@ -3060,7 +3202,7 @@
         }
         // Calling cadence follows assigned identities, never survival or succession.
         function assignedNightRole(role) {
-            return Object.values(gameState.rolePlayerMap).includes(role);
+            return Object.values(normalState().original).includes(role)||Object.values(gameState.rolePlayerMap).includes(role);
         }
         function nightNarrationState() {
             if (!gameState.nightNarration || gameState.nightNarration.night !== gameState.dayCount) {
@@ -3071,12 +3213,13 @@
         function renderNightNarrationControls() {
             if (gameState.gamePhase !== 'night') return;
             const done = nightNarrationState();
-            const roles = { cupid: ['cupid'], wolf: ['werewolf', 'wolf_cub'], sorcerer2: ['sorcerer2'], bg: ['bodyguard'], seer: ['seer'], spellcaster: ['spellcaster'], sorcerer: ['sorcerer'], apprentice: ['apprentice_seer'] };
+            const roles = { cupid: ['cupid'], wolf: ['werewolf', 'wolf_cub', 'direwolf'], sorcerer2: ['sorcerer2'], bg: ['bodyguard'], seer: ['seer'], spellcaster: ['spellcaster'], sorcerer: ['sorcerer'], apprentice: ['apprentice_seer'] };
             document.querySelectorAll('#actions-checklist input[type="checkbox"]').forEach(cb => {
+                if(cb.dataset.normalNarration)return;
                 const prefix = cb.id.replace('-cb', '');
                 const owners = gameState.players.filter(p => roles[prefix]?.includes(gameState.rolePlayerMap[p]) ||
                     (prefix === 'wolf' && gameState.rolePlayerMap[p] === 'cursed' && gameState.cursedTurned.includes(p)));
-                const available = prefix === 'seer' ? !!inspectionOwner() : owners.some(actorAvailable);
+                const available = prefix === 'seer' ? !!inspectionOwner() : prefix==='cupid'?roleAvailable('cupid'):owners.some(actorAvailable);
                 cb.disabled = false;
                 cb.checked = !!done[prefix];
                 cb.onchange = () => { nightNarrationState()[prefix] = cb.checked; };
@@ -3099,6 +3242,7 @@
             });
         }
         function roleAvailable(role) {
+            if(role==='cupid' && gameState.players.filter(p=>gameState.rolePlayerMap[p]===role).every(p=>normalState().inherited?.[p]))return false;
             return gameState.players.some(p => gameState.rolePlayerMap[p] === role && actorAvailable(p));
         }
         function inspectionOwner() {
@@ -3181,12 +3325,12 @@
             document.getElementById('player-status-list')?.after(panel);
         }
 
-        function getPlayerByRole(roleId) {
+        function legacyGetPlayerByRole(roleId) {
             return gameState.players.find(p => gameState.rolePlayerMap[p] === roleId) || '';
         }
 
         function isPoisoned(playerName) {
-            return !!playerName && gameState.poisonedTarget === playerName;
+            return actorPoisoned(playerName);
         }
 
         function toggleSorcerer2Dropdown() {
@@ -3211,6 +3355,7 @@
             gameState.poisonedTarget = poisonTargetAllowed(target) ? target : '';
             if (sel) sel.value = gameState.poisonedTarget;
             calculateNightResult();
+            normalPanel();
             inspectSeerTarget();
         }
 
@@ -3278,8 +3423,9 @@
 
         let judgeExecutionPending = false;
         async function executeDayVote() {
-            if (judgeExecutionPending) return;
+            if (judgeExecutionPending || normalState().endedDay === gameState.dayCount) return;
             judgeExecutionPending = true;
+            normalState().nightResolution=false;
             const executionState = gameState;
             try {
             const select = document.getElementById('day-vote-target-select');
@@ -3294,6 +3440,10 @@
             }
 
             if (!isMod || gameState.gamePhase !== 'day' || !gameState.playerStatus[victim]?.alive || activeMadBomber) return;
+            const nn=normalState();
+            const prince=gameState.players.find(p=>p!==victim&&effectiveRole(p)==='persian_prince'&&gameState.playerStatus[p]?.alive&&!isPoisoned(p)&&!nn.used[p]?.pardon);
+            if(prince&&confirm(prince+' เปิดเผยตัวใช้ Royal Pardon ช่วย '+victim+' หรือไม่?')){(nn.used[prince]||(nn.used[prince]={})).pardon=true;nn.endedDay=gameState.dayCount;alert('ยกเลิกประหาร จบวัน ไม่มีโหวตใหม่');renderGameplay();return;}
+            if(effectiveRole(victim)==='prince'&&!isPoisoned(victim)){nn.endedDay=gameState.dayCount;alert(victim+' เปิดเผยตัวเป็น Prince ฝ่ายชาวบ้าน รอดจากการประหาร');renderGameplay();return;}
             if (await cancelExecutionWithJudge(victim)) return;
             if (gameState !== executionState || !isMod || gameState.gamePhase !== 'day' || !gameState.playerStatus[victim]?.alive || activeMadBomber) return;
             const roleId = isBedridden(victim) && gameState.rolePlayerMap[victim] === 'mad_bomber' ? 'mad_bomber' : effectiveRole(victim);
@@ -3327,6 +3477,7 @@
 
         // Night preview deaths must not consume Hunter's once-per-game shot.
         function recordDeathPowers() {
+            normalCommittedDeaths();
             const recorded = gameState.deathPowers || (gameState.deathPowers = {});
             const bombs = gameState.bomberPowers || (gameState.bomberPowers = {});
             gameState.players.forEach(player => {
@@ -3384,7 +3535,8 @@
             renderPlayerStatusList();
         }
 
-        function killWithLover(player) {
+        function legacyKillWithLover(player) {
+            if (gameState.playerStatus[player]?.alive && normalBlessBlock(player)) return null;
             if (offerBedridden(player, false)) return null;
             if (gameState.playerStatus[player]) gameState.playerStatus[player].alive = false;
             if (gameState.lovers.includes(player)) {
@@ -3397,7 +3549,8 @@
             return null;
         }
 
-        function nightKill(player) {
+        function legacyNightKill(player) {
+            if (gameState.playerStatus[player]?.alive && normalBlessBlock(player)) return;
             if (!player || !gameState.playerStatus[player]) return;
             if (gameState.playerStatus[player].alive) {
                 if (offerBedridden(player, true)) return;
@@ -3407,6 +3560,7 @@
         }
 
         function calculateNightResult() {
+            const nn=normalNight(); nn.blessSpent.forEach(p=>nn.blessings[p]=true); nn.blessSpent=[];
             // Only validate this night's editable poison; daytime poison lasts until next night.
             if (gameState.gamePhase === 'night' && !poisonTargetAllowed(gameState.poisonedTarget)) gameState.poisonedTarget = '';
             calculateWolfBite(false);
@@ -3416,10 +3570,11 @@
                 try { calculateWolfBite(true); } finally { gameState.wolfTarget = first; }
                 gameState.lastNightResultText = text + '<br>' + gameState.lastNightResultText;
             }
+            for(const witch of Object.values(normalNight().witches||{})){if(witch.kind==='kill'&&actorAvailable(witch.actor)&&!isPoisoned(witch.actor)){const died=nightKill(witch.target);if(died&&gameState.lovers.includes(witch.target))nightKill(gameState.lovers.find(p=>p!==witch.target));}}
         }
         function calculateWolfBite(additional) {
             if (!additional) undoBedriddenPreview();
-            const wolf = (roleAvailable('werewolf') || roleAvailable('wolf_cub') || gameState.cursedTurned.some(p => gameState.rolePlayerMap[p] === 'cursed' && actorAvailable(p))) ? gameState.wolfTarget : '';
+            const wolf = (roleAvailable('werewolf') || roleAvailable('wolf_cub') || roleAvailable('direwolf') || gameState.cursedTurned.some(p => gameState.rolePlayerMap[p] === 'cursed' && actorAvailable(p))) ? gameState.wolfTarget : '';
             const bg = roleAvailable('bodyguard') && bodyguardTargetAllowed(gameState.bodyguardTarget) ? gameState.bodyguardTarget : ''; 
 
             if (!additional) {
@@ -3433,6 +3588,7 @@
                 gameState.cursedPreview = '';
             }
             gameState.wolvesInfectedNext = false;
+            for(const [p,injury] of Object.entries(normalState().injuries||{})){if(injury.night===gameState.dayCount)delete normalState().injuries[p];}
             gameState.pendingMadBomber = null;
             if (gameState.toughGuyInjured && gameState.toughGuyInjured.night === gameState.dayCount) {
                 gameState.toughGuyInjured = null;
@@ -3447,6 +3603,9 @@
                 return;
             }
 
+            const witch=Object.values(normalNight().witches||{}).find(w=>w.kind==='save'&&w.target===wolf&&actorAvailable(w.actor)&&!isPoisoned(w.actor));
+            if(witch){gameState.lastNightResultText='Witch ช่วยชีวิตสำเร็จ';return;}
+            if(actorProtected(wolf)){gameState.lastNightResultText='Bodyguard ป้องกันสำเร็จ';return;}
             const targetRole = effectiveRole(wolf);
             const isLoverTarget = gameState.lovers.includes(wolf);
             const targetPoisoned = isPoisoned(wolf);
@@ -3474,6 +3633,7 @@
 
             // Poisoned target: special on-death abilities are blocked -> normal death
             const effRole = targetPoisoned ? '__poisoned__' : targetRole;
+            if(!['cursed','tough_guy'].includes(effRole)&&normalBlessBlock(wolf,true)){gameState.lastNightResultText='พรป้องกันการตายหนึ่งครั้ง';return;}
 
             // Diseased is triggered by an unblocked, unpoisoned bite, even if Bedridden prevents death.
             if (gameState.rolePlayerMap[wolf] === 'diseased' && !targetPoisoned) gameState.wolvesInfectedNext = true;
@@ -3520,6 +3680,8 @@
 
             // 6. Target is Tough Guy: delayed death
             if (effRole === 'tough_guy') {
+                const injuries=normalState().injuries||(normalState().injuries={});
+                if(!injuries[wolf])injuries[wolf]={player:wolf,night:gameState.dayCount};
                 if (!gameState.toughGuyInjured) gameState.toughGuyInjured = {
                     player: wolf,
                     night: gameState.dayCount
@@ -3548,6 +3710,7 @@
         }
 
         function toggleLife(playerName) {
+            if(gameState.gamePhase==='day')normalState().nightResolution=false;
             if (travelerState().admitted[playerName]?.exiled) return;
             if (activeMadBomber) return;
             // Lock an existing preview before recording an independent manual death.
@@ -3570,6 +3733,7 @@
                     }
                 }
 
+                if(deathAtNight()&&normalState().blessings[playerName]&&!isPoisoned(playerName)){normalBlessBlock(playerName);renderGameplay();return;}
                 if (offerBedridden(playerName, false)) { renderGameplay(); return; }
 
                 // If Tanner dies during day phase, check if voted out
@@ -3592,12 +3756,13 @@
                 }
             }
 
-            gameState.playerStatus[playerName].alive = newStatus;
+            if(newStatus)gameState.playerStatus[playerName].alive=true;
+            else if(!applyDeath(playerName,deathAtNight())){renderPlayerStatusList();normalPanel();return;}
 
             if (!newStatus && gameState.lovers.includes(playerName)) {
                 const partner = gameState.lovers.find(p => p !== playerName);
                 if (partner && gameState.playerStatus[partner].alive) {
-                    gameState.playerStatus[partner].alive = false;
+                    applyDeath(partner,deathAtNight());
                     alert(`💘 เงื่อนไข Lover: ${partner} เสียชีวิตตาม ${playerName} ทันที!`);
                 }
             }
@@ -3609,6 +3774,7 @@
 
         function openMadBomberModal(playerName, context) {
             const bombs = gameState.bomberPowers || (gameState.bomberPowers = {});
+            if(gameState.playerStatus[playerName]?.alive&&(gameState.gamePhase==='night'||context==='night')&&normalState().blessings[playerName]&&!isPoisoned(playerName)){normalBlessBlock(playerName);return;}
             if (activeMadBomber || bombs[playerName] === 'spent' || bombs[playerName] === 'resolving' || (isBedridden(playerName) && bedriddenState().bombSpent)) return;
             if (offerBedridden(playerName, false)) { renderGameplay(); return; }
             if (isPoisoned(playerName)) { bombs[playerName] = 'spent'; killWithLover(playerName); renderPlayerStatusList(); return; }
@@ -3649,13 +3815,13 @@
             if (isBedridden(activeMadBomber)) bedriddenState().bombSpent = true;
             if (activeMadBomber) {
                 // Kill ONLY the mad bomber, skip bomb
-                gameState.playerStatus[activeMadBomber].alive = false;
+                if(!applyDeath(activeMadBomber,deathAtNight())){finishMadBomberModal();return;}
                 
                 // Lover check
                 if (gameState.lovers.includes(activeMadBomber)) {
                     const partner = gameState.lovers.find(p => p !== activeMadBomber);
                     if (partner && gameState.playerStatus[partner].alive) {
-                        gameState.playerStatus[partner].alive = false;
+                        applyDeath(partner,deathAtNight());
                         alert(`💘 เงื่อนไข Lover: ${partner} เสียชีวิตตาม ${activeMadBomber} ทันที!`);
                     }
                 }
@@ -3673,6 +3839,7 @@
             document.getElementById('modal-mad-bomber').classList.add('hidden');
             renderPlayerStatusList();
             if (ctx === 'vote' || ctx === 'night' || ctx === 'bedridden-vote' || ctx === 'gunslinger') renderGameplay();
+            if(!activeMadBomber&&!Object.values(gameState.deathPowers||{}).includes('pending'))normalState().nightResolution=false;
         }
 
         function triggerMadBomberBlast() {
@@ -3694,13 +3861,13 @@
             
             targetsToKill.forEach(target => {
                 if (gameState.playerStatus[target]) {
-                    gameState.playerStatus[target].alive = false;
+                    if(!applyDeath(target,deathAtNight()))return;
                     
                     // Lover check
                     if (gameState.lovers.includes(target)) {
                         const partner = gameState.lovers.find(p => p !== target);
                         if (partner && gameState.playerStatus[partner].alive) {
-                            gameState.playerStatus[partner].alive = false;
+                            applyDeath(partner,deathAtNight());
                             alert(`💘 เงื่อนไข Lover: ${partner} เสียชีวิตตามคู่รัก ทันที!`);
                         }
                     }
@@ -3726,6 +3893,7 @@
             if (travelerState().votingOpen) { alert('กรุณากดจบรอบลงมติในแผง Traveler ก่อนเปลี่ยนช่วง'); return; }
             if (gameState.gamePhase === 'night') {
                 calculateNightResult(); // Resolve the final targets/protection before committing.
+                commitActorHistory();
                 // A poisoned choice still counts; a skipped night breaks consecutiveness.
                 gameState.bodyguardLastChoice = roleAvailable('bodyguard') && bodyguardTargetAllowed(gameState.bodyguardTarget)
                     ? { target: gameState.bodyguardTarget, night: gameState.dayCount } : null;
@@ -3736,12 +3904,16 @@
                 bedriddenState().closed = true;
                 bedriddenState().preview = null;
                 gameState.cursedPreview = ''; // Commit this night's conversion.
+                normalState().nightResolution = true;
+                normalState().blessSpent=[];
                 gameState.gamePhase = 'day';
                 gameState.wolvesInfected = false; // Diseased infection consumed this night
                 gameState.nightKilled = [];       // Lock in tonight's kills
                 gameState.pendingMadBomber = null;
+                for(const [p,pending] of Object.entries(normalState().injuries||{})){if(gameState.dayCount>pending.night&&p!==gameState.toughGuyInjured?.player){delete normalState().injuries[p];if(!isBedridden(p)&&gameState.playerStatus[p]?.alive)killWithLover(p);}}
                 const injury = gameState.toughGuyInjured;
                 if (injury && gameState.dayCount > injury.night) {
+                    if(normalState().injuries)delete normalState().injuries[injury.player];
                     gameState.toughGuyInjured = null;
                     if (!isBedridden(injury.player) && gameState.playerStatus[injury.player]?.alive) {
                         killWithLover(injury.player);
@@ -3749,6 +3921,7 @@
                     }
                 }
             } else {
+                normalState().nightResolution=false;
                 gameState.gamePhase = 'night';
                 gameState.dayCount++;
 
@@ -3772,6 +3945,7 @@
             }
             renderGameplay();
             resetTimer();
+            if(!activeMadBomber&&!Object.values(gameState.deathPowers||{}).includes('pending'))normalState().nightResolution=false;
             // Committed Bomber deaths (including lovers) are serialized by recordDeathPowers.
             // Do not schedule another modal after rendering: it could reopen a resolved blast.
         }
@@ -3995,12 +4169,12 @@
             const roleId = canonicalRoleId(gameState.rolePlayerMap[name]);
             const role = ROLES_DATABASE.find(r => r.id === roleId);
             const assignment = p ? activeRoleAssignments[p.id] : Object.values(activeRoleAssignments).find(a => a.playerName === name);
-            const info = assignment || (role && { roleId, roleName:role.name, roleThai:role.thai, roleIcon:role.icon, team:role.team, desc:role.desc });
+            const info = assignment || (role && { roleId, roleName:role.name, roleThai:role.thai, roleIcon:role.icon, team:role.team, desc:(normalState().original[name]!==roleId?'บทบาทใหม่ของคุณคือ '+role.name+' — ':'')+role.desc });
             if (!info) return;
             const modal=travelerOverlay();
             const card=document.getElementById('screen-player-card');
             const anchor=document.createElement('span');anchor.id='traveler-card-anchor';card.before(anchor);
-            renderPlayerCard({...info, team: gameState.cursedTurned.includes(name) ? 'wolf' : info.team});
+            renderPlayerCard({...info, originalRoleId: normalState().original[name], team: gameState.cursedTurned.includes(name) ? 'wolf' : info.team});
             document.getElementById('card-player-name-tag').innerText=name;
             modal.append(card);card.classList.remove('hidden');
         }
@@ -4165,6 +4339,7 @@
             return false;
         }
         function recordTravelerPower(name, target) {
+            if(gameState.gamePhase==='day')normalState().nightResolution=false;
             const p = travelerState().admitted[name];
             if (!travelerGameActive() || activeMadBomber || !travelerPowerAvailable(name) || !['gunslinger','bureaucrat'].includes(p.kind)) return;
             if (!gameState.playerStatus[target]?.alive || (p.kind === 'bureaucrat' && target === name)) return;
@@ -4378,7 +4553,7 @@
 <dialog id="role-guide" aria-labelledby="rg-title">
   <div class="rg-toolbar"><h2 id="rg-title">📖 Role Guide — คู่มือบทบาท</h2><button type="button" id="rg-close" onclick="closeRoleGuide()">ปิดคู่มือ</button></div>
   <p>บทบาททั้งหมดที่เกมรองรับ ไม่ใช่รายชื่อบทบาทในห้องนี้</p>
-  <div id="rg-categories" class="rg-toolbar" aria-label="ประเภทบทบาท"><button id="rg-normal" type="button" onclick="renderGuideCategory('normal')">Normal</button><button id="rg-traveler" type="button" onclick="renderGuideCategory('traveler')">Traveler</button></div>
+  <div id="rg-categories" class="rg-toolbar" aria-label="ประเภทบทบาท"><button id="rg-normal" type="button" onclick="renderGuideCategory('normal')">Normal</button><button id="rg-traveler" type="button" onclick="renderGuideCategory('traveler')">Traveler</button><button id="rg-expansion" type="button" onclick="renderGuideCategory('expansion')">Expansion — Coming Soon</button></div>
   <div id="rg-list" class="rg-list" aria-label="บทบาท"></div>
   <article id="rg-detail" tabindex="-1"></article>
   <div class="rg-toolbar rg-actions"><button id="rg-show" type="button" onclick="showGuideToPlayer()">อ่านเฉพาะบทบาทนี้</button><button id="rg-browse" type="button" onclick="browseRoleGuide()">กลับไปเลือกบทบาท</button></div>
@@ -4555,9 +4730,373 @@ const ROLE_GUIDE_COPY = {
     "ข้อยกเว้น": "หากพลังถูกระงับด้วยยาพิษ จะใช้ความสามารถไม่ได้"
   }
 };
+// Guide-only: deliberately not included in ROLES_DATABASE.
+const EXPANSION_GUIDE = [
+  {
+    "id": "aura_seer",
+    "name": "Aura Seer",
+    "thai": "ผู้หยั่งรู้ออร่า",
+    "icon": "🔮",
+    "points": 3,
+    "team": "good",
+    "desc": "รอกำหนดความสามารถ",
+    "category": "expansion"
+  },
+  {
+    "id": "revealer",
+    "name": "Revealer",
+    "thai": "ผู้เปิดโปง",
+    "icon": "🕯️",
+    "points": 4,
+    "team": "good",
+    "desc": "เลือกตรวจกลางคืน หากเป็นฝ่ายหมาป่าเป้าหมายตาย มิฉะนั้นคุณตาย",
+    "category": "expansion"
+  },
+  {
+    "id": "mason",
+    "name": "Mason",
+    "thai": "สมาชิกสมาคมลับ",
+    "icon": "⚒️",
+    "points": 2,
+    "team": "good",
+    "desc": "คืนแรกรู้จัก Mason คนอื่น",
+    "category": "expansion"
+  },
+  {
+    "id": "warlock",
+    "name": "Warlock",
+    "thai": "จอมเวทโยกชะตา",
+    "icon": "🧵",
+    "points": 2,
+    "team": "good",
+    "desc": "หนึ่งครั้ง ย้ายเหยื่อหมาป่าไปคนอื่น รู้เหยื่อจนใช้พลัง",
+    "category": "expansion"
+  },
+  {
+    "id": "soothsayer",
+    "name": "Soothsayer",
+    "thai": "ผู้ทำนาย",
+    "icon": "📖",
+    "points": 3,
+    "team": "good",
+    "desc": "คืนแรกเปรียบเทียบผู้เล่นสองคนว่าอยู่ฝ่ายเดียวกันหรือไม่",
+    "category": "expansion"
+  },
+  {
+    "id": "cutthroat",
+    "name": "Cutthroat",
+    "thai": "นักเชือด",
+    "icon": "🗡️",
+    "points": 4,
+    "team": "good",
+    "desc": "หนึ่งครั้งกลางคืน ฆ่าเพื่อนบ้านที่นั่งเดิม Mod ปลุกเหยื่อให้เห็นผู้ฆ่าเป็นส่วนตัว",
+    "category": "expansion"
+  },
+  {
+    "id": "mentalist",
+    "name": "Mentalist",
+    "thai": "นักอ่านจิต",
+    "icon": "🧠",
+    "points": 6,
+    "team": "good",
+    "desc": "แต่ละคืนเปรียบเทียบผู้เล่นอื่นสองคนว่าอยู่ฝ่ายเดียวกันหรือไม่",
+    "category": "expansion"
+  },
+  {
+    "id": "leprechaun",
+    "name": "Leprechaun",
+    "thai": "ภูตจอมป่วน",
+    "icon": "🍀",
+    "points": 5,
+    "team": "good",
+    "desc": "แต่ละคืนย้ายเหยื่อหมาป่าไปเพื่อนบ้านที่นั่งเดิมของเหยื่อซึ่งยังมีชีวิต ไม่ข้ามคนตาย",
+    "category": "expansion"
+  },
+  {
+    "id": "magician",
+    "name": "Magician",
+    "thai": "นักมายากล",
+    "icon": "🎩",
+    "points": 5,
+    "team": "good",
+    "desc": "รอกำหนดความสามารถ",
+    "category": "expansion"
+  },
+  {
+    "id": "pet_wolf",
+    "name": "Pet Wolf",
+    "thai": "หมาป่าเลี้ยง",
+    "icon": "🐺",
+    "points": -3,
+    "team": "wolf",
+    "desc": "คืนแรกเลือกเจ้าของ ถ้าคุณตายเจ้าของตายตาม ไม่ใช่กลับกัน",
+    "category": "expansion"
+  },
+  {
+    "id": "mountain_wolf",
+    "name": "Mountain Wolf",
+    "thai": "หมาป่าภูเขา",
+    "icon": "🐺",
+    "points": -10,
+    "team": "wolf",
+    "desc": "คืนแรก ตรวจกลุ่มขนาดจำนวนหมาป่าลบหนึ่ง ว่ามี Seer หรือไม่",
+    "category": "expansion"
+  },
+  {
+    "id": "kamikaze_wolf",
+    "name": "Kamikaze Wolf",
+    "thai": "หมาป่ากามิกาเซ่",
+    "icon": "🐺",
+    "points": -10,
+    "team": "wolf",
+    "desc": "เมื่อ Seer ตรวจคุณและยังมีหมาป่าอื่น คุณและ Seer ตาย หากเป็นหมาป่าตัวสุดท้ายไม่ทำงาน",
+    "category": "expansion"
+  },
+  {
+    "id": "prairie_wolf",
+    "name": "Prairie Wolf",
+    "thai": "หมาป่าทุ่งหญ้า",
+    "icon": "🐺",
+    "points": -7,
+    "team": "wolf",
+    "desc": "คืนแรกตรวจหนึ่งคนว่าเป็น Seer หรือไม่",
+    "category": "expansion"
+  },
+  {
+    "id": "hunter_wolf",
+    "name": "Hunter Wolf",
+    "thai": "หมาป่านักล่า",
+    "icon": "🐺",
+    "points": -11,
+    "team": "wolf",
+    "desc": "เมื่อตายอาจเลือกฆ่าผู้เล่นอื่นหนึ่งคน",
+    "category": "expansion"
+  },
+  {
+    "id": "exploding_wolf",
+    "name": "Exploding Wolf",
+    "thai": "หมาป่าระเบิด",
+    "icon": "🐺",
+    "points": -7,
+    "team": "wolf",
+    "desc": "เมื่อตาย ผู้เล่นซ้ายและขวาตายทันที",
+    "category": "expansion"
+  }
+];
+
+Object.assign(ROLE_GUIDE_COPY, {
+  "beholder": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "ดวงตาที่สามของคุณไม่ได้มองเห็นหมาป่าที่ซ่อนอยู่ในคราบมนุษย์ แต่มองเห็นผู้ที่หยั่งรู้ความลับนั้นได้ ท่ามกลางคำกล่าวอ้างของคนทั้งหมู่บ้าน คุณรู้ว่าใครคือผู้หยั่งรู้ตัวจริง—และต้องเลือกว่าจะใช้ความลับนี้ช่วยเขาอย่างไร โดยไม่ทำให้เขาตกเป็นเป้าของฝูงหมาป่า",
+    "ความสามารถ": "ในคืนแรก ผู้ดำเนินเกมจะบอกคุณว่าใครคือ Seer",
+    "ช่วงเวลาและข้อจำกัด": "รับข้อมูลเฉพาะคืนแรกหนึ่งครั้ง ไม่มีพลังตรวจผู้เล่นในคืนถัดไป",
+    "เป้าหมายของคุณ": "ใช้ข้อมูลที่รู้ช่วยฝ่ายชาวบ้านค้นหาและกำจัดมนุษย์หมาป่า โดยระวังไม่ให้เปิดเผย Seer จนตกเป็นเป้าโจมตี",
+    "ข้อยกเว้น": "-"
+  },
+  "direwolf": {
+    "ฝ่าย": "หมาป่า",
+    "คำอธิบาย": "คุณคือหมาป่าผู้ดุร้ายที่ออกล่าเคียงข้างฝูง แต่ชีวิตของคุณกลับผูกอยู่กับใครบางคนในหมู่บ้าน คนที่ควรเป็นเหยื่ออาจกลายเป็นผู้ที่คุณต้องรักษาชีวิตไว้ เพราะวันที่เขาสิ้นลมหายใจ จะเป็นวันสุดท้ายของคุณเช่นกัน",
+    "ความสามารถ": "ทุกคืน ร่วมกับฝูงหมาป่าเลือกผู้เล่นที่จะกำจัด ในคืนแรก เลือกผู้เล่น 1 คนเป็นคู่หู หากคู่หูเสียชีวิต คุณจะเสียชีวิตตามด้วย",
+    "ช่วงเวลาและข้อจำกัด": "เลือกคู่หูเฉพาะคืนแรกหนึ่งครั้ง และร่วมออกล่ากับฝูงทุกคืนตามกติกาหมาป่า",
+    "เป้าหมายของคุณ": "ร่วมกับฝูงกำจัดฝ่ายตรงข้ามและยึดครองหมู่บ้าน พร้อมรักษาชีวิตคู่หูเพื่อให้ตัวเองอยู่รอด",
+    "ข้อยกเว้น": "-"
+  },
+  "doppelganger": {
+    "ฝ่าย": "ผู้เปลี่ยนฝ่าย (Team Switcher)",
+    "คำอธิบาย": "คุณเฝ้ามองใครบางคนอย่างเงียบงัน ราวกับชีวิตของเขาคือเงาสะท้อนที่รอให้คุณก้าวเข้าไปแทนที่ เมื่อเขาสิ้นลมหายใจ คุณจะรับช่วงตัวตนและพลังของเขา จากผู้เฝ้ามอง คุณอาจกลายเป็นความหวังของหมู่บ้าน หรือภัยร้ายที่ออกล่าในความมืด",
+    "ความสามารถ": "ในคืนแรก เลือกผู้เล่น 1 คน เมื่อผู้เล่นคนนั้นเสียชีวิต คุณจะกลายเป็นบทบาทของเขา รับฝ่ายและใช้ความสามารถของบทบาทนั้นตามเงื่อนไขของพลัง\n\nDoppelganger ได้สิทธิ์ใช้พลังของตัวเอง แม้เจ้าของเดิมใช้หมดแล้ว ยกเว้นพลังที่ใช้ได้เฉพาะคืนแรก",
+    "ช่วงเวลาและข้อจำกัด": "เลือกเป้าหมายเฉพาะคืนแรกหนึ่งครั้ง การรับบทบาทใหม่ไม่เริ่มคืนแรกใหม่ และไม่ทำให้พลังที่ใช้เฉพาะคืนแรกกลับมาใช้ได้",
+    "เป้าหมายของคุณ": "อยู่รอดเพื่อรับบทบาทของผู้เล่นที่เลือก แล้วทำตามเงื่อนไขชัยชนะของฝ่ายหรือบทบาทที่ได้รับ",
+    "ข้อยกเว้น": "- หากรับบทบาท Seer คุณจะเป็น Seer ก่อน Apprentice Seer รับตำแหน่ง\n- หากได้รับบทบาทที่มีความสามารถเฉพาะคืนแรกหลังผ่านคืนแรกไปแล้ว คุณจะไม่สามารถใช้ความสามารถนั้นได้"
+  },
+  "pi": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "ร่องรอยที่คนอื่นมองข้ามกลับนำคุณเข้าใกล้ความจริง คุณสัมผัสได้ถึงเงาของหมาป่าที่แฝงอยู่ในกลุ่มคน แม้ยังระบุไม่ได้ว่าเป็นใคร แต่เบาะแสเพียงครั้งเดียวอาจเพียงพอให้หมู่บ้านเริ่มคลี่คลายความลับ",
+    "ความสามารถ": "เลือกผู้เล่น 1 คน ผู้ดำเนินเกมจะบอกว่า ในกลุ่มผู้เล่นคนนั้นและเพื่อนบ้านทางซ้ายกับขวา มีอย่างน้อยหนึ่งคนเป็นหมาป่าหรือไม่ โดยไม่ระบุว่าเป็นคนใด",
+    "ช่วงเวลาและข้อจำกัด": "ใช้ในตอนกลางคืนได้หนึ่งครั้งตลอดเกม เพื่อนบ้านอ้างอิงที่นั่งติดกันซ้าย–ขวาเดิม ไม่เลื่อนไปหาคนที่ยังมีชีวิตเมื่อเพื่อนบ้านเสียชีวิต",
+    "เป้าหมายของคุณ": "ใช้เบาะแสจำกัดวงผู้ต้องสงสัย และช่วยฝ่ายชาวบ้านค้นหาและกำจัดมนุษย์หมาป่า",
+    "ข้อยกเว้น": "-"
+  },
+  "priest": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "ในหมู่บ้านที่ความหวาดกลัวค่อย ๆ กลืนกินศรัทธา คุณยังเชื่อว่ามีชีวิตที่ควรได้รับการปกป้อง คำอวยพรของคุณจะเฝ้ารักษาใครบางคนท่ามกลางความมืด แต่ปาฏิหาริย์นี้ช่วยต้านความตายได้เพียงครั้งเดียว จงเลือกผู้รับพรอย่างรอบคอบ",
+    "ความสามารถ": "เลือกผู้เล่น 1 คนเพื่อมอบพรคุ้มครอง พรจะป้องกันการถูกฆ่าในตอนกลางคืนได้หนึ่งครั้ง ไม่ว่าการฆ่านั้นจะมาจากหมาป่าหรือพลังอื่น",
+    "ช่วงเวลาและข้อจำกัด": "มอบพรในตอนกลางคืนได้หนึ่งครั้งตลอดเกม พรคงอยู่ข้ามคืนจนได้ป้องกันการฆ่าหนึ่งครั้ง แล้วจึงหมดไป ผู้รับพรสามารถถูกฆ่าได้ตามปกติหลังจากนั้น",
+    "เป้าหมายของคุณ": "ปกป้องผู้เล่นที่สำคัญ และช่วยฝ่ายชาวบ้านค้นหาและกำจัดมนุษย์หมาป่า",
+    "ข้อยกเว้น": "พรไม่ป้องกันการประหารหรือการถูกฆ่าในตอนกลางวัน"
+  },
+  "witch": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "ชาวบ้านอาจหวาดกลัวศาสตร์ลึกลับของคุณ แต่ในค่ำคืนที่หมาป่าออกล่า พลังนั้นอาจเป็นความหวังสุดท้ายของใครบางคน คุณมีโอกาสเพียงครั้งเดียวที่จะเปลี่ยนชะตา จะฉุดชีวิตหนึ่งกลับจากความตาย หรือพรากอีกชีวิตเพื่อปกป้องหมู่บ้าน",
+    "ความสามารถ": "ผู้ดำเนินเกมจะบอกคุณว่าใครถูกหมาป่าเลือกเป็นเหยื่อในคืนนั้น คุณสามารถเลือกช่วยเหยื่อ 1 คนไม่ให้ถูกหมาป่าฆ่า หรือเลือกผู้เล่นอีก 1 คนให้เสียชีวิต",
+    "ช่วงเวลาและข้อจำกัด": "ใช้พลังในตอนกลางคืนได้หนึ่งครั้งตลอดเกม โดยเลือกช่วยชีวิตหรือฆ่าอย่างใดอย่างหนึ่ง หากยังไม่ใช้พลัง คุณจะได้รับข้อมูลเหยื่อหมาป่าในคืนถัดไป",
+    "เป้าหมายของคุณ": "เลือกจังหวะช่วยชีวิตหรือกำจัดผู้ต้องสงสัย เพื่อช่วยฝ่ายชาวบ้านกำจัดมนุษย์หมาป่า",
+    "ข้อยกเว้น": "หลังใช้พลังอย่างใดอย่างหนึ่งแล้ว คุณจะไม่ได้รับข้อมูลเหยื่อหมาป่าในคืนต่อ ๆ ไปอีก"
+  },
+  "cult_leader": {
+    "ฝ่าย": "อิสระ",
+    "คำอธิบาย": "ขณะที่ชาวบ้านและหมาป่าต่างต่อสู้เพื่อเอาชีวิตรอด คุณกลับค่อย ๆ แผ่อิทธิพลผ่านคำปลอบโยนและคำสัญญา ไม่มีใครรู้ว่าตนได้กลายเป็นส่วนหนึ่งของลัทธิ จนวันที่ทุกชีวิตที่เหลืออยู่ตกอยู่ใต้อำนาจของคุณ",
+    "ความสามารถ": "ทุกคืน เลือกผู้เล่น 1 คนเข้าร่วมลัทธิ หากผู้เล่นคนอื่นที่ยังมีชีวิตทั้งหมดเป็นสมาชิกในลัทธิของคุณ คุณจะชนะเกม",
+    "ช่วงเวลาและข้อจำกัด": "เลือกสมาชิกได้คืนละ 1 คน สมาชิกยังคงบทบาทและฝ่ายเดิม และไม่รู้ว่าตนเข้าร่วมลัทธิ ผู้ดำเนินเกมเป็นผู้ติดตามรายชื่อสมาชิกเป็นความลับ",
+    "เป้าหมายของคุณ": "อยู่รอดและทำให้ผู้เล่นคนอื่นที่ยังมีชีวิตทั้งหมดเข้าร่วมลัทธิของคุณ",
+    "ข้อยกเว้น": "เมื่อคุณเสียชีวิต ลัทธิจะสลายและทุกคนพ้นจากการเป็นสมาชิก แม้ผู้เล่นที่เหลือจะเข้าร่วมลัทธิครบในเวลาเดียวกับที่คุณเสียชีวิต คุณก็ไม่ชนะ"
+  },
+  "prince": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "ขณะที่ชาวบ้านเถียงกันว่าจะประหารคุณดีหรือไม่ คุณกลับมัวจัดปกเสื้อให้เข้าที่ พร้อมรอยยิ้มราวกับทุกคนกำลังเล่นละครให้ชม เมื่อเสียงโหวตสิ้นสุด คุณจึงยอมเอ่ยอย่างเกียจคร้านว่า “จบแล้วหรือ? ทีนี้คุกเข่าได้” น่าเสียดายที่ชาติกำเนิดอันสูงส่งไม่ได้ทำให้หมาป่ารู้สึกเกรงใจ แต่อย่างน้อยคุณก็มั่นใจว่าตัวเองจะเป็นมื้อค่ำที่สง่างามที่สุด",
+    "ความสามารถ": "เมื่อถูกลงคะแนนประหาร คุณจะเปิดเผยบทบาทว่าเป็นเจ้าชายและรอดจากการประหาร",
+    "ช่วงเวลาและข้อจำกัด": "ทำงานเมื่อคุณถูกลงคะแนนประหาร หลังเปิดเผยตัว ผู้เล่นทุกคนจะรู้ว่าคุณเป็นเจ้าชาย",
+    "เป้าหมายของคุณ": "ช่วยฝ่ายชาวบ้านค้นหาและกำจัดมนุษย์หมาป่า ใช้ความน่าเชื่อถือหลังเปิดเผยตัวช่วยนำหมู่บ้านไปสู่ความจริง",
+    "ข้อยกเว้น": "ไม่ป้องกันการถูกหมาป่าฆ่าหรือการเสียชีวิตจากพลังอื่น"
+  },
+  "persian_prince": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "คุณคุ้นเคยกับราชสำนักที่คำพูดเพียงคำเดียวอาจเปลี่ยนชะตาชีวิตคน เมื่อชาวบ้านเตรียมลงมือประหาร คุณสามารถก้าวออกจากฝูงชนและประกาศอภัยโทษให้ผู้ถูกตัดสิน ทุกคนต้องยอมวางอาวุธ แต่ไม่มีใครรับประกันว่าคนที่คุณช่วยจะกล่าวขอบคุณ หรือแอบเลียเขี้ยวเมื่อคุณหันหลังให้",
+    "ความสามารถ": "เปิดเผยตัวว่าเป็นเจ้าชายเปอร์เซียเพื่ออภัยโทษให้ผู้เล่นอื่นที่ถูกลงคะแนนประหาร ยกเลิกการประหารผู้เล่นคนนั้น",
+    "ช่วงเวลาและข้อจำกัด": "ใช้ได้หนึ่งครั้งตลอดเกม หลังประกาศผลโหวต แต่ก่อนเปิดเผยบทบาทของผู้ถูกประหาร เมื่ออภัยโทษแล้ว วันนั้นจะจบลงโดยไม่มีการโหวตใหม่",
+    "เป้าหมายของคุณ": "ช่วยผู้เล่นที่คุณเชื่อว่าอยู่ฝ่ายชาวบ้านให้รอดจากการประหาร และร่วมกำจัดมนุษย์หมาป่า",
+    "ข้อยกเว้น": "ไม่สามารถอภัยโทษให้ตัวเองได้"
+  },
+  "drunk": {
+    "ฝ่าย": "ผู้เปลี่ยนฝ่าย (Team Switcher)",
+    "คำอธิบาย": "คุณจำได้ว่าตัวเองมีหน้าที่สำคัญในหมู่บ้าน แต่หลังจากแก้วที่เจ็ด รายละเอียดก็เริ่มไม่ชัดนัก ระหว่างที่ทุกคนพยายามหาว่าใครเป็นหมาป่า คุณยังพยายามนึกว่าบ้านตัวเองอยู่ทางไหน รอให้สร่างก่อนเถอะ คุณอาจเป็นความหวังของหมู่บ้าน หรือเป็นเหตุผลที่ทุกคนควรวิ่งหนีตั้งแต่แรก",
+    "ความสามารถ": "คุณมีบทบาทที่แท้จริงซึ่งผู้ดำเนินเกมกำหนดไว้เป็นความลับก่อนเริ่มเกม เมื่อถึงคืนที่ 3 คุณจะได้รู้บทบาทนั้น และรับฝ่ายกับความสามารถของบทบาทนั้น",
+    "ช่วงเวลาและข้อจำกัด": "ก่อนรู้บทบาทที่แท้จริง คุณเป็นชาวบ้านที่ไม่มีพลังพิเศษ เมื่อผู้ดำเนินเกมแจ้งบทบาทในคืนที่ 3 คุณจึงเริ่มใช้ความสามารถตามเงื่อนไขของบทบาทนั้น",
+    "เป้าหมายของคุณ": "ช่วงแรกช่วยชาวบ้านค้นหามนุษย์หมาป่า หลังรู้บทบาทที่แท้จริง ให้ทำตามเป้าหมายของฝ่ายที่คุณได้รับ",
+    "ข้อยกเว้น": "Seer จะตรวจพบตามบทบาทที่แท้จริงของคุณตั้งแต่ต้นเกม แม้คุณยังไม่รู้บทบาทนั้น"
+  },
+  "insomniac": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "หน่องนอนไม่หลั๊บ เสียงฝีเท้าหน้าบ้านดังอีกแล้ว บางคืนหยุดบ้านซ้าย บางคืนหยุดบ้านขวา คืนไหนหยุดตรงบ้านตัวเอง หน่องจะดึงผ้าห่มคลุมหัวทันที คนในหมู่บ้านบอกว่าไม่มีอะไรต้องกลัว หน่องก็อยากเชื่ออยู่หรอก ถ้าคนที่พูดเมื่อวานยังอยู่ให้ถามซ้ำวันนี้",
+    "ความสามารถ": "ทุกคืน คุณจะทราบว่ามีผู้เล่นอื่นใช้ความสามารถกลางคืนโดยเลือก **คุณหรือเพื่อนบ้านที่นั่งติดกับคุณอย่างน้อยหนึ่งคน** เป็นเป้าหมายหรือไม่\n\nคุณได้รับคำตอบเพียง **“มี” หรือ “ไม่มี”** ไม่ทราบผู้กระทำ จำนวนคน ชนิดความสามารถ หรือว่าใครในสามคนถูกเลือก",
+    "ช่วงเวลาและข้อจำกัด": "- รับข้อมูลเมื่อจบขั้นตอนแอ็กชันกลางคืน ไม่ต้องเลือกเป้าหมาย\n- เพื่อนบ้านหมายถึงผู้เล่นทางซ้ายและขวาตามที่นั่งเดิม ไม่ข้ามที่นั่งของผู้ถูกกำจัด\n- นับทั้งความสามารถช่วยเหลือ ตรวจสอบ และโจมตี ไม่ได้ตรวจเฉพาะหมาป่า\n- การโจมตีที่ถูกป้องกันยังนับว่ามีการเลือกเป้าหมาย\n- ไม่รวมความสามารถของคุณเอง และพลังที่ไม่มีการเลือกผู้เล่นเป็นเป้าหมาย\n- ผู้มาเยือนติดพิษ ยังนับการเยือน เช่น Seer ติดพิษแต่เลือกตรวจเพื่อนบ้าน → หน่องตรวจพบการมาเยือน\n- การสลับเป้าหมาย นับการเยือนทั้งสองบ้าน เพราะผู้ใช้พลังสลับต้องไปทั้งคู่ ไม่ใช่นับเฉพาะปลายทาง",
+    "เป้าหมายของคุณ": "ใช้ความเคลื่อนไหวรอบตัวตรวจสอบคำกล่าวอ้างของผู้เล่น และชนะร่วมกับฝ่ายชาวบ้าน",
+    "ข้อยกเว้น": "เมื่อหน่องติดพิษ ผู้ดำเนินเกมเลือกให้ข้อมูล **ตรงตามจริงหรือกลับด้าน** ได้ เช่นเดียวกับ Seer ไม่ใช่หยุดรับข้อมูล และไม่บังคับให้ได้รับข้อมูลผิดเสมอ"
+  },
+  "aura_seer": {
+    "ฝ่าย": null,
+    "คำอธิบาย": null,
+    "ความสามารถ": null,
+    "ช่วงเวลาและข้อจำกัด": null,
+    "เป้าหมายของคุณ": null,
+    "ข้อยกเว้น": null
+  },
+  "revealer": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "คุณไม่ชอบการนั่งเถียงกันว่าใครเป็นหมาป่าให้เสียเวลา ในเมื่อสามารถไปเคาะประตูถามให้รู้เรื่องถึงบ้านได้ ถ้าจับได้ว่าเป็นหมาป่า คุณก็จัดการเสียตรงนั้น แต่ถ้าเขาบริสุทธิ์ พลังจะย้อนกลับมาเอาชีวิตคุณแทน นับเป็นบริการตรวจสอบข้อเท็จจริงที่รับผิดชอบต่อความผิดพลาดอย่างถึงที่สุด เสียอย่างเดียว หาคนมารับช่วงงานต่อค่อนข้างยาก",
+    "ความสามารถ": "ในตอนกลางคืน เลือกผู้เล่น 1 คน หากเป้าหมายอยู่ **ฝ่ายมนุษย์หมาป่า** เป้าหมายจะเสียชีวิต รวมถึงบทบาทสนับสนุนในฝ่ายนั้นด้วย แต่หากเป้าหมายไม่ใช่ฝ่ายมนุษย์หมาป่า คุณจะเสียชีวิตแทน",
+    "ช่วงเวลาและข้อจำกัด": "เลือกใช้พลังได้คืนละ 1 ครั้ง หรือเลือกไม่ใช้ในคืนนั้นก็ได้",
+    "เป้าหมายของคุณ": "ค้นหาและกำจัดมนุษย์หมาป่าด้วยพลังของคุณ โดยระวังไม่ให้ความมั่นใจเกินเหตุทำให้หมู่บ้านเสียคุณไป",
+    "ข้อยกเว้น": "-"
+  },
+  "mason": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "สมาคมของคุณมีทั้งพิธีรับสมาชิก รหัสลับ และการประชุมที่ห้ามคนนอกเข้าฟัง ฟังดูเหมือนกำลังวางแผนครองโลก แต่ประโยชน์ที่จับต้องได้ตอนนี้คือรู้ว่าเพื่อนร่วมสมาคมไม่ใช่หมาป่า ส่วนเรื่องซ่อมกำแพงหมู่บ้านที่ประชุมกันมาสามเดือนนั้น ยังตกลงไม่ได้ว่าใครจะออกค่าปูน",
+    "ความสามารถ": "ในคืนแรก คุณและสมาชิกสมาคมลับคนอื่นจะลืมตาขึ้นพร้อมกัน ทำให้รู้ว่าใครบ้างมีบทบาทเดียวกับคุณและอยู่ฝ่ายชาวบ้าน",
+    "ช่วงเวลาและข้อจำกัด": "รู้จักสมาชิกคนอื่นเฉพาะคืนแรก ไม่มีพลังที่ต้องใช้ในคืนถัดไป หากมีสมาชิกสมาคมลับเพียงคนเดียว คุณจะไม่พบสมาชิกคนอื่น",
+    "เป้าหมายของคุณ": "ใช้ความไว้ใจระหว่างสมาชิกช่วยกันวิเคราะห์ หาเสียงสนับสนุน และกำจัดมนุษย์หมาป่า",
+    "ข้อยกเว้น": "-"
+  },
+  "warlock": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "คุณเชื่อว่าทุกชีวิตมีค่า โดยเฉพาะชีวิตที่คุณยังไม่อยากให้ตาย เมื่อความตายมาเคาะประตูผิดบ้าน คุณจึงช่วยชี้ทางไปบ้านอื่นอย่างมีน้ำใจ ส่วนเจ้าของบ้านใหม่จะซาบซึ้งแค่ไหน คงต้องเคาะโลงถามเอาเอง",
+    "ความสามารถ": "ช่วยผู้เล่น 1 คนไม่ให้ถูกฆ่าในตอนกลางคืน แล้วเปลี่ยนให้ผู้เล่นอีก 1 คนเป็นเป้าหมายการฆ่าแทน",
+    "ช่วงเวลาและข้อจำกัด": "ใช้ได้หนึ่งครั้งตลอดเกม ผู้ดำเนินเกมจะแจ้งเหยื่อหมาป่าให้คุณทราบในแต่ละคืนจนกว่าจะใช้พลัง การช่วยชีวิตต้องแลกกับการเปลี่ยนเป้าหมายไปยังผู้เล่นอื่น ไม่สามารถเลือกช่วยเพียงอย่างเดียวได้",
+    "เป้าหมายของคุณ": "ช่วยชีวิตผู้เล่นฝ่ายชาวบ้าน และเปลี่ยนการโจมตีให้ย้อนกลับไปเล่นงานฝ่ายมนุษย์หมาป่า",
+    "ข้อยกเว้น": "หลังใช้พลัง คุณจะไม่ได้รับข้อมูลเหยื่อหมาป่าในคืนต่อ ๆ ไปอีก"
+  },
+  "soothsayer": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "ชาวบ้านชอบตัดสินคนจากหน้าตา คุณจึงใช้ญาณตรวจให้รู้ว่าคนสองคนอยู่ฝ่ายเดียวกันหรือไม่ คู่ที่เถียงกันจนแทบจะเอาเก้าอี้ฟาดหัวกัน อาจเป็นพวกเดียวกันมาตั้งแต่ต้น ส่วนคู่ที่ยิ้มหวานให้กันทุกเช้า อาจกำลังคิดว่าอีกฝ่ายกินกับอะไรอร่อย มองคนให้ลึกกว่าใบหน้า โดยเฉพาะหน้าที่มีเขี้ยวซ่อนอยู่",
+    "ความสามารถ": "ในคืนแรก เลือกผู้เล่น 2 คน ผู้ดำเนินเกมจะบอกว่าทั้งสองอยู่ฝ่ายเดียวกันหรือไม่ โดยไม่ระบุว่าเป็นฝ่ายใดหรือมีบทบาทอะไร",
+    "ช่วงเวลาและข้อจำกัด": "ใช้เฉพาะคืนแรกหนึ่งครั้ง ข้อมูลที่ได้รับอ้างอิงฝ่ายของผู้เล่นทั้งสองในขณะที่ตรวจ ไม่อัปเดตหากภายหลังมีการเปลี่ยนฝ่าย",
+    "เป้าหมายของคุณ": "ใช้ความเชื่อมโยงของผู้เล่นทั้งสองช่วยวิเคราะห์คำกล่าวอ้าง และช่วยฝ่ายชาวบ้านค้นหาและกำจัดมนุษย์หมาป่า",
+    "ข้อยกเว้น": "-"
+  },
+  "cutthroat": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "กลางวันคุณเป็นเพื่อนบ้านเงียบ ๆ ไม่ค่อยมีปากเสียงกับใคร กลางคืนก็เช่นกัน เพียงแต่บางครั้งเพื่อนบ้านจะไม่มีโอกาสมีปากเสียงอีกเลย ก่อนลงมือคุณยังอุตส่าห์ปลุกเขาขึ้นมาสบตา จะได้รู้ว่าเป็นฝีมือใคร ไม่ต้องตายไปสงสัยให้เสียเวลา",
+    "ความสามารถ": "เลือกผู้เล่นที่นั่งติดกับคุณทางซ้ายหรือขวา 1 คน ผู้ดำเนินเกมจะสะกิดเป้าหมายให้ลืมตาขึ้นสบตากับคุณ ก่อนให้ทั้งคู่หลับตาลง เป้าหมายจะถูกฆ่าในคืนนั้น",
+    "ช่วงเวลาและข้อจำกัด": "ใช้ในตอนกลางคืนได้หนึ่งครั้งตลอดเกม โดยเลือกใช้หรือข้ามได้ ประกาศผู้เสียชีวิตพร้อมผลกลางคืนตามปกติ โดยไม่เปิดเผยตัวนักเชือดต่อผู้เล่นคนอื่น",
+    "เป้าหมายของคุณ": "สังเกตพฤติกรรมของเพื่อนบ้าน และเลือกกำจัดผู้เล่นที่คุณเชื่อว่าอยู่ฝ่ายมนุษย์หมาป่า",
+    "ข้อยกเว้น": "-"
+  },
+  "mentalist": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "คุณอ่านความเชื่อมโยงในใจคนได้ จึงรู้ว่าคนสองคนอยู่ฝ่ายเดียวกันหรือไม่ แม้ทั้งคู่จะยืนยันว่าไม่เคยรู้จักกันมาก่อนก็ตาม คุณมักพยักหน้ารับฟังอย่างสุภาพ ปล่อยให้เขาแต่งเรื่องต่อจนจบ อุตส่าห์เตรียมกันมาทั้งคืน จะขัดเสียกลางคันก็สงสาร",
+    "ความสามารถ": "ทุกคืน เลือกผู้เล่นอื่น 2 คน ผู้ดำเนินเกมจะบอกว่าทั้งสองอยู่ฝ่ายเดียวกันหรือไม่ โดยไม่ระบุว่าเป็นฝ่ายใดหรือมีบทบาทอะไร",
+    "ช่วงเวลาและข้อจำกัด": "ตรวจได้คืนละ 1 คู่ ผลตรวจอ้างอิงฝ่ายของผู้เล่นทั้งสองในคืนนั้น หากภายหลังมีการเปลี่ยนฝ่าย ผลตรวจครั้งก่อนจะไม่เปลี่ยนตาม\nห้ามเลือกตัวเอง",
+    "เป้าหมายของคุณ": "เชื่อมโยงผลตรวจจากแต่ละคืนเพื่อแยกกลุ่มผู้เล่น และช่วยฝ่ายชาวบ้านค้นหาและกำจัดมนุษย์หมาป่า",
+    "ข้อยกเว้น": "-"
+  },
+  "leprechaun": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "คุณคือเลพริคอน ภูตตัวเล็กในชุดเขียวที่ขึ้นชื่อเรื่องโชคลาภและนิสัยขี้แกล้ง ชาวบ้านชอบขอให้คุณช่วยปัดเป่าเคราะห์ร้าย คุณก็ช่วยปัดให้จริง ๆ เพียงแต่ไม่ได้ปัดไปไหนไกล แค่บ้านข้าง ๆ เช้ามาคนรอดก็ยกมือไหว้คุณใหญ่ ส่วนคนข้างบ้านไม่ได้ออกมาไหว้ด้วย",
+    "ความสามารถ": "ทุกคืน คุณสามารถเปลี่ยนเป้าหมายการฆ่าของหมาป่าไปยังผู้เล่นที่นั่งติดกับเป้าหมายเดิมทางซ้ายหรือขวา 1 คน",
+    "ช่วงเวลาและข้อจำกัด": "ใช้หลังหมาป่าเลือกเหยื่อ ผู้ดำเนินเกมจะแจ้งเป้าหมายเดิมให้คุณทราบ คุณเลือกเปลี่ยนเป้าหมายได้คืนละ 1 ครั้ง หรือปล่อยให้หมาป่าโจมตีเป้าหมายเดิมก็ได้",
+    "เป้าหมายของคุณ": "ช่วยผู้เล่นที่คุณเชื่อว่าอยู่ฝ่ายชาวบ้าน และเบี่ยงการโจมตีของหมาป่าให้เป็นประโยชน์ต่อหมู่บ้าน",
+    "ข้อยกเว้น": "- เป้าหมายใหม่ต้องเป็นผู้เล่นที่ยังมีชีวิตและนั่งติดกับเหยื่อเดิมทางซ้ายหรือขวา โดยอ้างอิงที่นั่งเดิม\n- หากเพื่อนบ้านด้านใดเสียชีวิตแล้ว จะไม่ข้ามไปเลือกผู้เล่นที่ยังมีชีวิตคนถัดไป หากทั้งสองด้านเสียชีวิตแล้ว คุณจะเปลี่ยนเป้าหมายไม่ได้"
+  },
+  "magician": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "คุณเป็นนักมายากลเร่ที่ติดอยู่ในหมู่บ้านตอนหมาป่าเริ่มออกล่า ชาวบ้านพากันขอให้คุณใช้วิชาช่วย ส่วนคุณก็ไม่น่าเผลอคุยไว้เยอะว่าเสกอะไรก็ได้ ครั้นจะเก็บของหนี ทุกคนก็มายืนรอดูหน้าประตู นึกว่ากำลังจะเล่นกลหายตัว",
+    "ความสามารถ": null,
+    "ช่วงเวลาและข้อจำกัด": null,
+    "เป้าหมายของคุณ": null,
+    "ข้อยกเว้น": null
+  },
+  "pet_wolf": {
+    "ฝ่าย": "มนุษย์หมาป่า",
+    "คำอธิบาย": "เจ้าของยืนยันกับทุกคนว่าคุณเชื่องมาก ไม่กัดหรอก แค่ชอบออกไปเดินเล่นตอนดึก ส่วนที่ชาวบ้านหายไปทีละคนก็อย่าเพิ่งโยงกันมั่วซั่ว คุณเองก็รักเจ้าของมาก ถึงขนาดถ้าต้องตายก่อน ก็จะพาเขาไปด้วย คราวนี้คงไม่มีใครบ่นว่าคุณเป็นสัตว์เลี้ยงที่ทิ้งภาระไว้ให้คนข้างหลัง",
+    "ความสามารถ": "ทุกคืน ร่วมกับฝูงหมาป่าเลือกผู้เล่นที่จะฆ่า ในคืนแรก เลือกผู้เล่น 1 คนเป็นเจ้าของ หากคุณเสียชีวิตขณะที่เจ้าของยังมีชีวิต เจ้าของจะเสียชีวิตตามคุณไปด้วย",
+    "ช่วงเวลาและข้อจำกัด": "เลือกเจ้าของเฉพาะคืนแรกหนึ่งครั้ง การล่าเป็นการเลือกเหยื่อร่วมกับฝูง ไม่ใช่การฆ่าเพิ่มแยกต่างหาก",
+    "เป้าหมายของคุณ": "ร่วมมือกับฝูงหมาป่ากำจัดฝ่ายชาวบ้านจนฝ่ายมนุษย์หมาป่าชนะ",
+    "ข้อยกเว้น": "หากเจ้าของเสียชีวิตก่อน คุณจะไม่เสียชีวิตตาม และยังเล่นต่อได้ตามปกติ"
+  },
+  "mountain_wolf": {
+    "ฝ่าย": "มนุษย์หมาป่า",
+    "คำอธิบาย": "คุณลงจากเขามาหาอะไรกินในหมู่บ้าน ก็พบว่าที่นี่มีคนชอบส่องดูชาวบ้านตอนกลางคืน แล้วเอาไปเล่าต่อในตอนเช้า จะออกล่าทั้งทีต้องคอยระแวงว่าจะมีใครรู้เข้า คุณจึงตั้งใจตามหาผู้หยั่งรู้ให้เจอเป็นคนแรก อยู่บนเขาว่าหากินลำบากแล้ว ลงมายังต้องจัดการพวกปากสว่างอีก",
+    "ความสามารถ": "ทุกคืน ร่วมกับฝูงหมาป่าเลือกผู้เล่นที่จะฆ่า ในคืนแรก เลือกผู้เล่นจำนวนเท่ากับ **จำนวนหมาป่าในเกมลบ 1** ผู้ดำเนินเกมจะบอกว่ามี Seer อยู่ในกลุ่มนั้นหรือไม่ โดยไม่ระบุว่าเป็นคนใด",
+    "ช่วงเวลาและข้อจำกัด": "ตรวจหาผู้หยั่งรู้ได้เฉพาะคืนแรกหนึ่งครั้ง เช่น มีหมาป่า 3 ตัว คุณจะเลือกตรวจได้ 2 คน การล่าเป็นการเลือกเหยื่อร่วมกับฝูง ไม่ใช่การฆ่าเพิ่ม",
+    "เป้าหมายของคุณ": "ช่วยฝูงค้นหาและกำจัดผู้หยั่งรู้ ก่อนที่ข้อมูลของเขาจะนำชาวบ้านมาถึงตัวคุณ",
+    "ข้อยกเว้น": "ผลตรวจบอกเพียงว่ามี Seer อยู่ในกลุ่มหรือไม่ ไม่เปิดเผยบทบาทของผู้เล่นคนอื่นในกลุ่ม"
+  },
+  "kamikaze_wolf": {
+    "ฝ่าย": "มนุษย์หมาป่า",
+    "คำอธิบาย": "หมาป่าตัวอื่นกลัวผู้หยั่งรู้จะมองออก แต่คุณรอให้เขามองมาอยู่พอดี อุตส่าห์ซ่อนตัวมาตั้งนาน ถ้าจะมีใครรู้ความลับทั้งที ก็ขอให้เก็บไปจนตาย ถึงคุณต้องตามไปด้วยก็ไม่เป็นไร เพื่อนในฝูงจะได้กินอิ่มกันต่อ ส่วนคุณคงได้คำชมว่าทุ่มเท น่าเสียดายที่ไม่ได้อยู่ฟัง",
+    "ความสามารถ": "ทุกคืน ร่วมกับฝูงหมาป่าเลือกผู้เล่นที่จะฆ่า หาก Seer ตรวจคุณขณะที่ยังมีหมาป่าตัวอื่นมีชีวิตอยู่ คุณและ Seer จะเสียชีวิตทั้งคู่",
+    "ช่วงเวลาและข้อจำกัด": "พลังทำงานเมื่อถูก Seer ตรวจ โดยต้องมีหมาป่าตัวอื่นนอกจากคุณยังมีชีวิตอยู่อย่างน้อย 1 ตัว การล่าเป็นการเลือกเหยื่อร่วมกับฝูง ไม่ใช่การฆ่าเพิ่ม",
+    "เป้าหมายของคุณ": "ช่วยฝูงกำจัดฝ่ายชาวบ้าน และพาผู้หยั่งรู้ตายไปด้วยหากเขามาตรวจคุณ",
+    "ข้อยกเว้น": "หากคุณเป็นหมาป่าตัวสุดท้ายที่ยังมีชีวิต การถูก Seer ตรวจจะไม่ทำให้คุณหรือ Seer เสียชีวิตด้วยพลังนี้"
+  },
+  "prairie_wolf": {
+    "ฝ่าย": "มนุษย์หมาป่า",
+    "คำอธิบาย": "อยู่ทุ่งหญ้ามานาน คุณชินกับการมองหาเหยื่อโดยไม่มีต้นไม้บัง พอเข้าหมู่บ้านกลับเจอแต่คนบังหน้า อ้างเป็นชาวบ้านกันเสียหมด คุณจึงเล็งใครสักคนไว้แล้วดมให้แน่ใจว่าใช่ผู้หยั่งรู้หรือเปล่า ถ้าใช่ก็นับว่าโชคดี ไม่ต้องเสียเวลาถามทางไปบ้านเขาให้ดูมีพิรุธ",
+    "ความสามารถ": "ทุกคืน ร่วมกับฝูงหมาป่าเลือกผู้เล่นที่จะฆ่า ในคืนแรก เลือกผู้เล่น 1 คน ผู้ดำเนินเกมจะบอกว่าผู้เล่นคนนั้นเป็น Seer หรือไม่",
+    "ช่วงเวลาและข้อจำกัด": "ตรวจหาผู้หยั่งรู้ได้เฉพาะคืนแรกหนึ่งครั้ง การล่าเป็นการเลือกเหยื่อร่วมกับฝูง ไม่ใช่การฆ่าเพิ่ม",
+    "เป้าหมายของคุณ": "ค้นหาผู้หยั่งรู้และร่วมมือกับฝูงกำจัดฝ่ายชาวบ้านจนฝ่ายมนุษย์หมาป่าชนะ",
+    "ข้อยกเว้น": "หากเป้าหมายไม่ใช่ Seer คุณจะไม่ทราบว่าเขามีบทบาทอะไร"
+  },
+  "hunter_wolf": {
+    "ฝ่าย": "มนุษย์หมาป่า",
+    "คำอธิบาย": "คุณออกล่ากับฝูงมานานจนติดนิสัยต้องมีอะไรติดไม้ติดมือกลับไป แม้วันไหนตัวเองจะเป็นฝ่ายถูกล่า ก็ยังไม่วายคว้าคนอื่นไปด้วย ชาวบ้านจึงควรคิดให้ดีว่าจะส่งใครมาจัดการคุณ โดยเฉพาะคนที่อาสาเสียเสียงดัง เดี๋ยวจะได้ไปจริง ๆ",
+    "ความสามารถ": "ทุกคืน ร่วมกับฝูงหมาป่าเลือกผู้เล่นที่จะฆ่า เมื่อคุณเสียชีวิต คุณสามารถเลือกผู้เล่นอื่น 1 คนให้เสียชีวิตตามไปด้วย",
+    "ช่วงเวลาและข้อจำกัด": "ใช้พลังเลือกเหยื่อได้เมื่อคุณเสียชีวิตหนึ่งครั้ง โดยเลือกใช้หรือไม่ใช้ก็ได้ การล่าตอนกลางคืนเป็นการเลือกเหยื่อร่วมกับฝูง ไม่ใช่การฆ่าเพิ่ม",
+    "เป้าหมายของคุณ": "ร่วมมือกับฝูงกำจัดฝ่ายชาวบ้าน และใช้พลังสุดท้ายกำจัดผู้เล่นที่เป็นภัยต่อฝูง",
+    "ข้อยกเว้น": "พลังเมื่อเสียชีวิตใช้ได้ทั้งจากการประหารและการเสียชีวิตในตอนกลางคืน"
+  },
+  "exploding_wolf": {
+    "ฝ่าย": "มนุษย์หมาป่า",
+    "คำอธิบาย": "คุณมีเพื่อนน้อย ไม่ใช่เพราะนิสัยไม่ดี แต่พอใครรู้ว่าคุณตายแล้วระเบิดได้ ก็มักขอย้ายไปนั่งที่อื่น ชาวบ้านที่ยังไม่รู้ต่างชมว่าคุณเป็นหมาป่าที่จับง่ายเหลือเกิน ไม่หนี ไม่ดิ้น แถมขยับเข้ามาใกล้เสียด้วย",
+    "ความสามารถ": "ทุกคืน ร่วมกับฝูงหมาป่าเลือกผู้เล่นที่จะฆ่า เมื่อคุณเสียชีวิต ผู้เล่นที่นั่งติดกับคุณทางซ้ายและขวาจะเสียชีวิตไปด้วย",
+    "ช่วงเวลาและข้อจำกัด": "พลังระเบิดทำงานเมื่อคุณเสียชีวิต ไม่ต้องเลือกเป้าหมาย การล่าตอนกลางคืนเป็นการเลือกเหยื่อร่วมกับฝูง ไม่ใช่การฆ่าเพิ่ม",
+    "เป้าหมายของคุณ": "ร่วมมือกับฝูงกำจัดฝ่ายชาวบ้าน และใช้การระเบิดเมื่อเสียชีวิตให้เป็นประโยชน์ต่อฝ่ายมนุษย์หมาป่า",
+    "ข้อยกเว้น": "- การระเบิดไม่แยกฝ่าย ผู้เล่นข้างคุณอาจเป็นหมาป่าด้วยกันได้\n- อ้างอิงที่นั่งติดกันเดิม หากเพื่อนบ้านเสียชีวิตแล้ว จะไม่ข้ามไปหาผู้เล่นที่ยังมีชีวิตคนถัดไป"
+  }
+});
 const ROLE_GUIDE_COLORS = Object.freeze({ wolf: '#ef4444', village: '#93c5fd', independent: '#b4b16a', traveler: '#5eead4', changing: '#d8b4fe' });
 // Approved Team switcher presentation, including Cursed; never current faction.
-const ROLE_GUIDE_COLOR_OVERRIDES = Object.freeze({ cursed: 'changing', mad_bomber: 'village', cupid: 'village', tanner: 'independent' });
+const ROLE_GUIDE_COLOR_OVERRIDES = Object.freeze({ drunk: 'changing', doppelganger: 'changing', cult_leader: 'independent', cursed: 'changing', mad_bomber: 'village', cupid: 'village', tanner: 'independent' });
 const ROLE_GUIDE_BACKGROUNDS = Object.freeze({ wolf: '#35232b', village: '#172b45', independent: '#302e1b', traveler: '#12303d', changing: '#2e2042' });
 function guideTeam(r) { return r.category === 'traveler' ? 'traveler' : ROLE_GUIDE_COLOR_OVERRIDES[r.id] || (r.team === 'wolf' ? 'wolf' : 'village'); }
 const GUIDE_ART_STEMS = Object.freeze({ wolf_cub:'wolf_cub', mad_bomber:'mad_bomber', apprentice_seer:'apprentice_seer', tough_guy:'tough_guy', disease:'diseased', diseased:'diseased', sorcerer:'sorceress', sorcerer2:'sorcerer' });
@@ -4570,7 +5109,7 @@ function guideCatalog() {
         const r = travelerRole(id);
         return { id, name: r.name, thai: r.thai, icon: r.icon, category: 'traveler' };
     });
-    return [...normal, ...travelers];
+    return [...normal, ...travelers, ...EXPANSION_GUIDE];
 }
 function guideColor(r) {
     const key = r.category === 'traveler' ? 'traveler' : ROLE_GUIDE_COLOR_OVERRIDES[r.id] || (r.team === 'wolf' ? 'wolf' : 'village');
@@ -4598,7 +5137,7 @@ document.getElementById('role-guide').addEventListener('cancel', event => {
 document.getElementById('role-guide').addEventListener('close', () => { if (guideReturnFocus && guideReturnFocus.isConnected) guideReturnFocus.focus(); });
 function renderGuideCategory(category) {
     const roles = guideCatalog().filter(r => r.category === category);
-    ['normal', 'traveler'].forEach(c => document.getElementById('rg-' + c).setAttribute('aria-pressed', String(c === category)));
+    ['normal', 'traveler', 'expansion'].forEach(c => document.getElementById('rg-' + c).setAttribute('aria-pressed', String(c === category)));
     const list = document.getElementById('rg-list'); list.replaceChildren();
     roles.forEach(r => {
         const button = document.createElement('button'); button.type = 'button'; button.className = 'rg-role';
@@ -4630,6 +5169,7 @@ function renderGuideRole(id, focus) {
     const enlarge = document.createElement('button'); enlarge.type = 'button'; enlarge.className = 'rg-enlarge'; enlarge.hidden = false; enlarge.setAttribute('aria-label', 'ขยายภาพ ' + r.name); enlarge.title = 'แตะเพื่อขยายภาพ';
     enlarge.onclick = () => { const viewer = document.getElementById('rg-art-viewer'); const full = document.getElementById('rg-full-art'); full.src = image.src; full.alt = image.alt; document.getElementById('rg-art-title').textContent = r.name; viewer.showModal(); };
     enlarge.append(image); figure.append(enlarge, fallback); detail.append(title, figure);
+    const balance=document.createElement('p');balance.textContent='Balance: '+(r.points>0?'+':'')+(r.points??'—')+(r.category==='expansion'?' — Coming Soon · คู่มือเท่านั้น':'');detail.append(balance);
     if (copy) {
         const story = document.createElement('section'); const summary = document.createElement('h4'); summary.textContent = 'คำอธิบาย / เรื่องราว';
         const paragraph = document.createElement('p'); paragraph.textContent = copy['คำอธิบาย']; story.append(summary, paragraph); detail.append(story);
@@ -4640,7 +5180,7 @@ function renderGuideRole(id, focus) {
             if (label === 'ฝ่าย') { value.className = 'rg-faction'; value.innerHTML = value.textContent.replaceAll('หมาป่า', '<span class="rg-wolf">หมาป่า</span>').replaceAll('ชาวบ้าน', '<span class="rg-village">ชาวบ้าน</span>'); }
             facts.append(term, value);
         }); detail.append(facts);
-    } else { const note = document.createElement('p'); note.textContent = 'ยังไม่มีคำอธิบายที่ยืนยัน'; detail.append(note); }
+    } else { const note = document.createElement('p'); note.textContent = r.desc || 'ยังไม่มีคำอธิบายที่ยืนยัน'; detail.append(note); }
     if (focus) focusGuideSection(detail);
 }
 function showGuideToPlayer() {
