@@ -126,7 +126,7 @@
         #traveler-controls button { white-space: normal; overflow-wrap: anywhere; }
         #traveler-controls button:disabled { opacity: .4; cursor: not-allowed; }
         #traveler-controls button:focus-visible, #traveler-controls select:not(.traveler-target-select):focus-visible {
-            outline: 2px solid #c084fc; outline-offset: 2px;
+            outline: 2px solid #2dd4bf; outline-offset: 2px;
         }
         #traveler-controls > div > select { grid-column: 1; }
         #traveler-controls > div > select + button { grid-column: 2; }
@@ -172,6 +172,59 @@
 #screen-player-waiting .my-auto > .animate-pulse-glow {
   line-height: 1;
 }
+
+/* Public role encyclopedia: independent of room and assignment state. */
+#role-guide { border: 1px solid #475569; border-radius: 1rem; padding: 1rem; width: min(56rem, calc(100% - 1rem)); max-height: calc(100dvh - 1rem); background: #0f172a; color: #f1f5f9; overflow-y: auto; }
+#role-guide::backdrop { background: #020617; }
+#role-guide button { min-height: 44px; padding: .6rem .85rem; border: 1px solid #64748b; border-radius: .6rem; background: #1e293b; color: #f8fafc; }
+#role-guide button:focus-visible, #role-guide summary:focus-visible { outline: 3px solid #fbbf24; outline-offset: 2px; }
+.rg-toolbar { display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; margin-bottom:1rem; }
+.rg-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%, 10rem),1fr)); gap:.5rem; margin:1rem 0; }
+#role-guide .rg-role { border-left: 5px solid var(--role-color); color: var(--role-color); text-align:left; overflow-wrap:anywhere; }
+#role-guide [aria-pressed="true"] { outline:2px solid #fbbf24; outline-offset:1px; }
+.rg-art { margin:0 0 1rem; background:#020617; border-radius:.75rem; overflow:hidden; }
+.rg-art img { display:block; width:100%; height:auto; aspect-ratio:3 / 2; object-fit:contain; }
+.rg-art figcaption { padding:.75rem; text-align:center; color:#cbd5e1; }
+#rg-detail h3 { font-size:1.25rem; font-weight:700; margin:1rem 0; color:var(--role-color); }
+#rg-detail dt { color:#fcd34d; font-weight:600; margin-top:1rem; }
+#rg-detail dd, #rg-detail p { line-height:1.8; overflow-wrap:anywhere; }
+#rg-detail summary { cursor:pointer; padding:.6rem 0; }
+#role-guide.rg-public #rg-list, #role-guide.rg-public #rg-categories { display:none; }
+.rg-entry { min-height:44px; margin-top:.5rem; padding:.5rem 1rem; border:1px solid #64748b; border-radius:.6rem; color:#e2e8f0; background:#1e293b; }
+
+/* V2: solid team backgrounds, only decorative thumbnail has 15% opacity. */
+#role-guide, #role-guide * { box-sizing:border-box; }
+#role-guide [hidden], #rg-art-viewer [hidden] { display:none !important; }
+#role-guide .rg-role { position:relative; isolation:isolate; overflow:hidden; background:var(--role-background); color:#fff; border:1px solid #94a3b8; min-height:64px; }
+.rg-thumb { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.15; z-index:-1; pointer-events:none; }
+.rg-role-label { position:relative; opacity:1; font-weight:700; }
+#role-guide .rg-enlarge { display:block; padding:0; border:0; width:100%; background:#020617; cursor:zoom-in; }
+.rg-rule-note { border-left:4px solid #fbbf24; padding:.75rem; background:#292524; color:#fef3c7; }
+#rg-art-viewer { box-sizing:border-box; width:calc(100% - 1rem); max-width:1600px; max-height:calc(100dvh - 1rem); padding:1rem; border:1px solid #64748b; background:#020617; color:#fff; border-radius:.75rem; overflow:auto; }
+#rg-art-viewer::backdrop { background:#020617; }
+#rg-art-viewer img { display:block; width:100%; height:auto; object-fit:contain; }
+#rg-art-viewer button { min-height:44px; padding:.5rem 1rem; background:#1e293b; color:white; border:1px solid #94a3b8; border-radius:.5rem; }
+#rg-art-viewer button:focus-visible { outline:3px solid #fbbf24; }
+
+/* Approved alignment polish: same Prompt font, slate borders, 8/12/16/24 spacing. */
+#role-guide, #rg-art-viewer { font-family:'Prompt',sans-serif; border-color:#334155; border-radius:1rem; padding:1rem; box-shadow:0 20px 25px -5px rgb(0 0 0 / .35); }
+#role-guide button, #rg-art-viewer button { font:inherit; font-size:.875rem; border-radius:.75rem; }
+#rg-title, #rg-art-title { font-size:1.125rem; line-height:1.5; font-weight:700; margin:0; flex:1; min-width:0; }
+.rg-toolbar { gap:.75rem; }
+#role-guide > p { margin:0 0 1rem; font-size:.875rem; line-height:1.75; }
+.rg-list { grid-template-columns:repeat(2,minmax(0,1fr)); grid-auto-rows:1fr; gap:.75rem; }
+#role-guide .rg-role { padding:.75rem; min-width:0; min-height:72px; }
+.rg-role-label { display:grid; grid-template-columns:1.5rem minmax(0,1fr); gap:.5rem; align-items:center; line-height:1.5; }
+.rg-role-icon { text-align:center; font-size:1.125rem; }
+.rg-role-name { overflow-wrap:anywhere; }
+#rg-detail dd { margin:.25rem 0 0; }
+#role-guide .rg-role[aria-pressed="true"] { outline:2px solid #fbbf24; outline-offset:2px; box-shadow:0 0 0 4px #0f172a; }
+#role-guide button:hover { filter:brightness(1.12); }
+.rg-entry { display:flex; align-items:center; justify-content:center; gap:.5rem; width:100%; min-height:48px; margin:0; padding:.75rem 1rem; border-radius:.75rem; border:1px solid #334155; background:#1e293b; color:#e2e8f0; font:inherit; font-size:.875rem; font-weight:600; box-shadow:0 10px 15px -3px rgb(0 0 0 / .15); }
+.rg-entry:focus-visible { outline:3px solid #fbbf24; outline-offset:2px; }
+@media(min-width:640px) { .rg-list { grid-template-columns:repeat(4,minmax(0,1fr)); } #role-guide, #rg-art-viewer { padding:1.5rem; } }
+
+@media(max-width:479px) { .rg-list { grid-template-columns:minmax(0,1fr); } }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-amber-500 selection:text-slate-950">
@@ -182,7 +235,7 @@
             <span>&larr;</span> <span class="hidden sm:inline">หน้าหลัก Hub</span>
         </a>
         <h1 class="text-lg sm:text-xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent flex items-center justify-center gap-2">
-            <img src="./WolfIcon.png" alt="Wolf Icon" class="w-6 h-6 object-contain inline-block">
+            <img src="./WolfIcon.webp" onerror="this.onerror=null;this.src='./WolfIcon.png'" alt="Wolf Icon" class="w-6 h-6 object-contain inline-block">
             <span>Werewolf Modulator</span>
         </h1>
         <div id="game-status" class="text-[11px] sm:text-xs text-slate-400 mt-0.5">ยินดีต้อนรับเข้าสู่ Game Werewolf</div>
@@ -190,6 +243,7 @@
 
     <!-- Main Container -->
     <main class="flex-1 max-w-md w-full mx-auto p-4 pb-20 space-y-4">
+        <button type="button" class="rg-entry" onclick="openRoleGuide()">📖 Role Guide / คู่มือบทบาท</button>
 
         <!-- ========================================== -->
         <!-- SCREEN 0: MOD HOME (เลือกโหมดเปิดห้อง) -->
@@ -198,7 +252,7 @@
             <div class="relative bg-slate-900 border border-slate-800 rounded-2xl text-center shadow-xl overflow-hidden">
                 <!-- Background Image -->
                 <div class="absolute inset-0 z-0">
-                    <img src="./design/bg_card.png" alt="Background" class="w-full h-full object-cover opacity-50">
+                    <img src="./design/bg_card.webp" onerror="this.onerror=null;this.src='./design/bg_card.png'" alt="Background" class="w-full h-full object-cover opacity-50">
                 </div>
                 <!-- Gradients for readability -->
                 <div class="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-slate-900/95 to-transparent z-0"></div>
@@ -206,7 +260,7 @@
 
                 <div class="relative z-10 p-6 space-y-4">
                     <div class="w-24 h-24 mx-auto rounded-3xl overflow-hidden shadow-2xl border-2 border-amber-500/40 p-1.5 bg-slate-950/70 flex items-center justify-center backdrop-blur-sm">
-                        <img src="./WolfIcon.png" alt="Wolf Icon" class="w-full h-full object-contain rounded-2xl drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]">
+                        <img src="./WolfIcon.webp" onerror="this.onerror=null;this.src='./WolfIcon.png'" alt="Wolf Icon" class="w-full h-full object-contain rounded-2xl drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]">
                     </div>
                     <div>
                         <h2 class="text-xl font-bold text-slate-100 drop-shadow-md">ยินดีต้อนรับเข้าสู่ Game Werewolf</h2>
@@ -221,7 +275,7 @@
                         </button>
                         
                         <!-- Traveler Role Button (New) -->
-                        <button onclick="openTravelerModal()" class="w-full bg-purple-700 hover:bg-purple-600 text-white font-semibold py-3 px-4 rounded-xl border border-purple-500 transition shadow-lg shadow-purple-600/20 flex items-center justify-center gap-2 active:scale-[0.99]">
+                        <button onclick="openTravelerModal()" class="w-full bg-teal-700 hover:bg-teal-600 text-white font-semibold py-3 px-4 rounded-xl border border-teal-500 transition shadow-lg shadow-teal-600/20 flex items-center justify-center gap-2 active:scale-[0.99]">
                             <span class="text-lg">🧳</span>
                             <span>เลือกบทบาท Traveler (สำหรับผู้เล่นมาใหม่)</span>
                         </button>
@@ -363,8 +417,7 @@
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
                         <h4 class="text-xs font-bold text-slate-200">รายชื่อผู้เล่นที่เข้าร่วมแล้ว</h4>
                     </div>
-                    <span class="text-xs font-bold text-amber-400">
-                        <span id="mod-joined-count">0</span> / <span id="mod-target-count">0</span> คน
+                    <span class="text-xs font-bold text-amber-400">                        <span id="mod-joined-count">0</span> / <span id="mod-target-count">0</span> คน
                     </span>
                 </div>
 
@@ -397,7 +450,7 @@
         <section id="screen-player-join" class="space-y-4 hidden">
             <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl text-center space-y-4 shadow-xl">
                 <div class="w-16 h-16 mx-auto rounded-2xl overflow-hidden shadow-lg border border-amber-500/30 p-1 bg-slate-950/60 flex items-center justify-center">
-                    <img src="./WolfIcon.png" alt="Wolf Icon" class="w-full h-full object-contain rounded-xl">
+                    <img src="./WolfIcon.webp" onerror="this.onerror=null;this.src='./WolfIcon.png'" alt="Wolf Icon" class="w-full h-full object-contain rounded-xl">
                 </div>
                 <div>
                     <span class="text-xs text-amber-400 font-mono font-bold uppercase tracking-wider">ห้องเล่นเกม: <span id="player-view-room-code">WW-XXXX</span></span>
@@ -477,8 +530,7 @@
             <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-center space-y-2">
                 <div class="flex items-center justify-center gap-2">
                     <span id="player-conn-status-badge" class="px-2 py-0.5 rounded text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800">
-                        🟢 เชื่อมต่อห้องสำเร็จ
-                    </span>
+                        🟢 เชื่อมต่อห้องสำเร็จ                    </span>
                     <span class="text-xs text-slate-300">คุณ: <b id="player-my-name-display" class="text-amber-400">ผู้เล่น</b></span>
                 </div>
                 <div id="player-friends-preview" class="text-[11px] text-slate-400">
@@ -711,9 +763,9 @@
         <!-- MODAL: TRAVELER SELECT (For Late Joiners) -->
         <!-- ========================================== -->
         <div id="modal-traveler" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-950/90 backdrop-blur-sm px-4">
-            <div class="bg-slate-900 border border-purple-500/50 w-full max-w-md rounded-2xl p-5 shadow-2xl shadow-purple-900/20 max-h-[90vh] overflow-y-auto">
+            <div class="bg-slate-900 border border-teal-500/50 w-full max-w-md rounded-2xl p-5 shadow-2xl shadow-teal-900/20 max-h-[90vh] overflow-y-auto">
                 <div class="text-center space-y-1 mb-4">
-                    <h3 class="text-lg font-bold text-purple-400">🧳 เลือกบทบาท Traveler</h3>
+                    <h3 class="text-lg font-bold text-teal-400">🧳 เลือกบทบาท Traveler</h3>
                     <p class="text-[11px] text-slate-400">ให้ Modulator เลือกบทบาทและฝ่าย (ดี/ร้าย) ให้กับผู้เล่นที่เพิ่งเข้าร่วมกลางเกม</p>
                 </div>
                 
@@ -764,8 +816,7 @@
                     </div>
 
                     <!-- Bureaucrat -->
-                    <div class="bg-slate-950 border border-slate-800 p-3 rounded-xl">
-                        <div class="flex items-center gap-2 mb-2">
+                    <div class="bg-slate-950 border border-slate-800 p-3 rounded-xl">                        <div class="flex items-center gap-2 mb-2">
                             <span class="text-2xl">📜</span>
                             <div>
                                 <div class="text-sm font-bold text-slate-200">Bureaucrat (ข้าราชการ)</div>
@@ -2135,7 +2186,7 @@
             const wolves = document.getElementById('traveler-wolf-disclosure');
             badge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-200 border border-slate-600';
             badge.innerText = revealed ? (info.team === 'wolf' ? 'ฝ่ายหมาป่า' : 'ฝ่ายชาวบ้าน') : 'Traveler';
-            document.getElementById('role-bg-glow').className = 'absolute -top-20 -left-20 w-56 h-56 rounded-full blur-3xl opacity-30 bg-purple-500 pointer-events-none';
+            document.getElementById('role-bg-glow').className = 'absolute -top-20 -left-20 w-56 h-56 rounded-full blur-3xl opacity-30 bg-teal-500 pointer-events-none';
             wolves.textContent = revealed && info.team === 'wolf' ? 'หมาป่าที่ Mod เปิดเผยตอนรับเข้า: ' + (info.wolfDisclosure || []).join(', ') : '';
             wolves.className = revealed && info.team === 'wolf' ? 'text-xs text-slate-200 break-words' : 'hidden';
             document.getElementById('btn-toggle-privacy-text').innerText = revealed ? 'ซ่อนฝ่าย / แสดงเฉพาะบทบาท' : 'เปิดดูฝ่ายส่วนตัว';
@@ -3718,7 +3769,7 @@
                 [['good','ฝ่ายชาวบ้าน'],['wolf','ฝ่ายหมาป่า']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;team.append(o);});
                 [kind,team].forEach(el=>{el.style.cssText='padding:12px;background:#334155;margin:8px;';modal.append(el);});
                 const error=document.createElement('p'); error.id='local-traveler-error'; error.setAttribute('role','alert');
-                const add=document.createElement('button'); add.textContent=gameState.gamePhase==='day'?'รับเข้าหมู่บ้าน':'เพิ่มคิว / รอเช้า'; add.style.cssText='display:block;padding:12px;background:#581c87;';
+                const add=document.createElement('button'); add.textContent=gameState.gamePhase==='day'?'รับเข้าหมู่บ้าน':'เพิ่มคิว / รอเช้า'; add.style.cssText='display:block;padding:12px;background:#134e4a;';
                 add.onclick=()=>queueLocalTraveler(input.value,kind.value,team.value); modal.append(add,error);
                 return;
             }
@@ -3791,7 +3842,7 @@
             travelerKinds.forEach(kind => {
                 const role = travelerRole(kind);
                 const b = document.createElement('button');
-                b.className = 'block w-full p-3 bg-purple-950 rounded text-left';
+                b.className = 'block w-full p-3 bg-teal-950 rounded text-left';
                 b.textContent = role.icon + ' ' + role.name + ': ' + role.desc;
                 b.onclick = () => chooseTraveler(kind);
                 box.append(b);
@@ -3877,9 +3928,9 @@
         function askJudgePower(name, victim) {
             return new Promise(resolve => {
                 const modal = document.createElement('dialog'); modal.id = 'judge-power-modal';
-                modal.className = 'bg-slate-900 text-slate-100 border border-purple-700 rounded-xl p-5 space-y-4 w-full max-w-sm';
+                modal.className = 'bg-slate-900 text-slate-100 border border-teal-700 rounded-xl p-5 space-y-4 w-full max-w-sm';
                 modal.setAttribute('aria-labelledby', 'judge-power-title');
-                const title = document.createElement('h2'); title.id = 'judge-power-title'; title.className = 'text-lg font-bold text-purple-200';
+                const title = document.createElement('h2'); title.id = 'judge-power-title'; title.className = 'text-lg font-bold text-teal-200';
                 title.textContent = '⚖️ Mod: สอบถาม Judge';
                 const question = document.createElement('p'); question.textContent = name + ' ใช้พลังครั้งเดียว ยกเลิกการประหาร ' + victim + ' หรือไม่?';
                 const note = document.createElement('p'); note.className = 'text-xs text-slate-400'; note.textContent = 'Mod สอบถามผู้เล่น แล้วบันทึกคำตอบที่เครื่องนี้';
@@ -3889,9 +3940,9 @@
                     settled = true; modal.close(); modal.remove(); resolve(answer);
                 };
                 modal.append(title, question, note);
-                for (const [answer, label, color] of [['use','ใช้พลัง','bg-purple-800'],['decline','ไม่ใช้พลัง','bg-slate-700'],['cancel','ปิด / ยกเลิกการประหารครั้งนี้','bg-slate-800']]) {
+                for (const [answer, label, color] of [['use','ใช้พลัง','bg-teal-800'],['decline','ไม่ใช้พลัง','bg-slate-700'],['cancel','ปิด / ยกเลิกการประหารครั้งนี้','bg-slate-800']]) {
                     const button = document.createElement('button'); button.type = 'button'; button.dataset.answer = answer;
-                    button.className = 'block w-full rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-purple-400 ' + color;
+                    button.className = 'block w-full rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-teal-400 ' + color;
                     button.textContent = label; button.onclick = () => finish(answer); modal.append(button);
                 }
                 modal.addEventListener('cancel', e => { e.preventDefault(); finish('cancel'); });
@@ -3954,20 +4005,21 @@
             let panel = document.getElementById('traveler-controls');
             if (!panel) {
                 panel = document.createElement('div'); panel.id = 'traveler-controls';
-                panel.className = 'p-3 rounded-xl border border-purple-800 space-y-3';
+                panel.className = 'p-3 rounded-xl border border-teal-800 space-y-3';
                 const list = document.getElementById('player-status-list');
                 list.after(panel);
             }
             panel.textContent = '';
             const heading = document.createElement('p');
-            heading.textContent = 'Traveler — หน้าลับ Mod / นับคะแนนและตัดสินผลเอง'; panel.append(heading);
+            heading.className = 'font-bold text-teal-300';
+            heading.textContent = 'Traveler'; panel.append(heading);
             const state = travelerState();
             const round = document.createElement('button');
             round.className = 'p-2 bg-slate-700 rounded';
             round.textContent = state.votingOpen ? 'จบรอบลงมติ / หมดอายุโบนัส +1' : 'เริ่มรอบลงมติถัดไป / เปิดโบนัส +1';
             round.disabled = gameState.gamePhase !== 'day' || !!activeMadBomber;
             round.onclick = () => setTravelerVotingRound(!state.votingOpen); panel.append(round);
-            const add = document.createElement('button'); add.id='btn-add-traveler'; add.textContent='➕ Add Traveler / เพิ่ม Traveler'; add.className='block w-full p-3 bg-purple-900 rounded'; add.onclick=openAddTraveler; panel.append(add);
+            const add = document.createElement('button'); add.id='btn-add-traveler'; add.textContent='➕ Add Traveler / เพิ่ม Traveler'; add.className='block w-full p-3 bg-teal-900 rounded'; add.onclick=openAddTraveler; panel.append(add);
             state.pending.forEach(p => {
                 const row = document.createElement('div');
                 const summary = document.createElement('span'); summary.className = 'traveler-summary';
@@ -3975,7 +4027,7 @@
                 const select = document.createElement('select');
                 [['good','ฝ่ายชาวบ้าน'],['wolf','ฝ่ายหมาป่า']].forEach(([value,label]) => { const o = document.createElement('option'); o.value=value; o.textContent=label; select.append(o); });
                 select.value=p.team || 'good'; select.className='bg-slate-800 p-1'; row.append(select);
-                const b=document.createElement('button'); b.textContent='รับเข้าหมู่บ้าน'; b.className='p-2 bg-purple-900 rounded';
+                const b=document.createElement('button'); b.textContent='รับเข้าหมู่บ้าน'; b.className='p-2 bg-teal-900 rounded';
                 b.disabled=gameState.gamePhase !== 'day'; b.onclick=()=>admitTraveler(p.id,select.value); row.append(b); panel.append(row);
             });
             Object.entries(state.admitted).forEach(([name,p]) => {
@@ -4000,7 +4052,7 @@
                     const select=document.createElement('select'); select.className='traveler-target-select w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-500';
                     gameState.players.filter(n=>gameState.playerStatus[n]?.alive && (p.kind !== 'bureaucrat' || n!==name)).forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;select.append(o);});
                     if (p.kind !== 'judge') row.append(select);
-                    const b=document.createElement('button'); b.className='p-2 bg-purple-900 rounded';
+                    const b=document.createElement('button'); b.className='p-2 bg-teal-900 rounded';
                     b.textContent=p.used?'ใช้แล้ว'+(p.target?' → '+p.target:''):(p.kind === 'gunslinger' ? 'ยิงเป้าหมาย' : 'ให้ +1 รอบถัดไป');
                     b.disabled=!travelerPowerAvailable(name) || !!activeMadBomber; b.onclick=()=>recordTravelerPower(name,p.kind==='judge'?'':select.value); row.append(b);
                 }
@@ -4056,7 +4108,7 @@
             panel.id = 'ww-seating-panel';
             panel.className = 'p-3 border border-slate-600 rounded-xl space-y-2 text-sm';
             const title = document.createElement('h3');
-            title.textContent = 'ลำดับที่นั่ง 1–N'; panel.append(title);
+            title.textContent = 'ลำดับที่นั่ง'; panel.append(title);
             const hint = document.createElement('p');
             hint.className = 'text-xs text-slate-400';
             hint.textContent = 'เรียงรอบวง: เลขก่อนหน้า = ขวา เลขถัดไป = ซ้าย (วนหัวท้าย) • เก็บที่นั่งผู้ตาย • ระเบิด จะแนะนำคนที่ยังมีชีวิตข้างถัดไปตามกติกาเดิม Mod ยืนยันเป้าหมายเอง';
@@ -4118,5 +4170,279 @@
     })();
     
     </script>
+
+<!-- Public catalog only: never populated from the room roster. -->
+<dialog id="role-guide" aria-labelledby="rg-title">
+  <div class="rg-toolbar"><h2 id="rg-title">📖 Role Guide — คู่มือบทบาท</h2><button type="button" onclick="closeRoleGuide()">ปิดคู่มือ</button></div>
+  <p>บทบาททั้งหมดที่เกมรองรับ ไม่ใช่รายชื่อบทบาทในห้องนี้</p>
+  <div id="rg-categories" class="rg-toolbar" aria-label="ประเภทบทบาท"><button id="rg-normal" type="button" onclick="renderGuideCategory('normal')">Normal</button><button id="rg-traveler" type="button" onclick="renderGuideCategory('traveler')">Traveler</button></div>
+  <div id="rg-list" class="rg-list" aria-label="บทบาท"></div>
+  <article id="rg-detail" tabindex="-1"></article>
+  <div class="rg-toolbar"><button id="rg-show" type="button" onclick="showGuideToPlayer()">Show to player — แสดงให้ผู้เล่นดู</button><button id="rg-browse" type="button" hidden onclick="browseRoleGuide()">กลับไปเลือกบทบาท</button></div>
+</dialog>
+<dialog id="rg-art-viewer" aria-labelledby="rg-art-title"><div class="rg-toolbar"><h2 id="rg-art-title">ภาพเต็ม</h2><button type="button" onclick="document.getElementById('rg-art-viewer').close()">ปิดภาพขยาย</button></div><img id="rg-full-art" alt=""></dialog>
+<script>
+// ROLE GUIDE BEGIN — static public data; no room, assignment or faction lookup.
+const ROLE_GUIDE_COPY = {
+  "werewolf": {
+    "ฝ่าย": "หมาป่า",
+    "คำอธิบาย": "ยามกลางวัน คุณคือเพื่อนบ้านที่ดูไว้ใจได้ แต่เมื่อค่ำคืนมาเยือน คุณจะออกล่าพร้อมฝูง ซ่อนตัวตนให้แนบเนียน บิดเบือนความสงสัย และอย่าปล่อยให้ชาวบ้านค้นพบว่าใครอยู่เบื้องหลังเสียงหอน",
+    "ความสามารถ": "รู้จักหมาป่าตัวอื่นในฝูง และร่วมกันเลือกกัดผู้เล่น 1 คน",
+    "ช่วงเวลาและข้อจำกัด": "ทุกคืน เลือกเหยื่อร่วมกันทั้งฝูง 1 คน ไม่ใช่คนละ 1 คน",
+    "เป้าหมายของคุณ": "ร่วมกับฝูงกำจัดฝ่ายตรงข้ามและยึดครองหมู่บ้าน",
+    "ข้อยกเว้น": "ผลการกัดอาจเปลี่ยนไปตามพลังหรือสถานะของเหยื่อ เช่น การป้องกัน การกลายร่าง หรือการติดเชื้อ"
+  },
+  "wolf_cub": {
+    "ฝ่าย": "หมาป่า",
+    "คำอธิบาย": "แม้ยังตัวเล็กน่ารัก แต่คุณคือสมาชิกที่ฝูงพร้อมปกป้อง หากใครพรากชีวิตคุณไป ความโกรธแค้นของเหล่าคุณแม่หมาป่าจะทำให้ค่ำคืนถัดมาของหมู่บ้านโหดร้ายกว่าเดิม",
+    "ความสามารถ": "ร่วมออกล่ากับฝูงหมาป่า เมื่อคุณเสียชีวิต ฝูงจะเลือกกัดผู้เล่นได้ 2 คนในคืนถัดไป",
+    "ช่วงเวลาและข้อจำกัด": "ร่วมล่าทุกคืน ผลเพิ่มเหยื่อทำงานเมื่อเสียชีวิต และมีผลเฉพาะคืนถัดไป 1 คืน",
+    "เป้าหมายของคุณ": "ร่วมกับฝูงกำจัดฝ่ายตรงข้ามและยึดครองหมู่บ้าน",
+    "ข้อยกเว้น": "-"
+  },
+  "sorcerer": {
+    "ฝ่าย": "หมาป่า",
+    "คำอธิบาย": "คุณรับใช้ความมืดด้วยเวทมนตร์แทนเขี้ยวเล็บ ทุกคืนคุณจะค้นหาผู้ที่มองทะลุคำลวงของฝูง เพราะเมื่อแสงแห่งความจริงดับลง หมู่บ้านก็จะตกอยู่ในเงื้อมมือหมาป่าได้ง่ายขึ้น",
+    "ความสามารถ": "เลือกตรวจผู้เล่น 1 คน แล้วรับคำตอบจากผู้ดำเนินเกมว่าเป็น Seer หรือไม่",
+    "ช่วงเวลาและข้อจำกัด": "ทุกคืน คืนละ 1 คน",
+    "เป้าหมายของคุณ": "ค้นหา Seer และช่วยฝ่ายหมาป่ากำจัดฝ่ายตรงข้ามเพื่อยึดครองหมู่บ้าน",
+    "ข้อยกเว้น": "คุณอยู่ฝ่ายหมาป่า แต่ไม่ใช่มนุษย์หมาป่า ผลตรวจของ Seer จึงไม่พบว่าคุณเป็นหมาป่า"
+  },
+  "sorcerer2": {
+    "ฝ่าย": "หมาป่า",
+    "คำอธิบาย": "คุณไม่จำเป็นต้องมีเขี้ยวเล็บเพื่อทำให้หมู่บ้านอ่อนแอ ยาพิษเพียงหยดเดียวอาจทำให้ผู้พิทักษ์ช่วยใครไม่ได้ หรือทำให้นิมิตของผู้หยั่งรู้กลายเป็นคำลวง เปิดทางให้ฝูงหมาป่าออกล่าอย่างได้เปรียบ",
+    "ความสามารถ": "เลือกวางยาผู้เล่น 1 คน เพื่อระงับความสามารถของเป้าหมายระหว่างที่ยาพิษมีผล",
+    "ช่วงเวลาและข้อจำกัด": "ทุกคืน หลังหมาป่าเลือกเหยื่อ คืนละ 1 คน ยาพิษหมดฤทธิ์เมื่อเริ่มคืนถัดไป",
+    "เป้าหมายของคุณ": "ขัดขวางพลังของฝ่ายชาวบ้าน และช่วยฝ่ายหมาป่ายึดครองหมู่บ้าน",
+    "ข้อยกเว้น": "Seer ที่ถูกวางยาจะได้รับผลตรวจตรงข้าม พลังตอนตายจะไม่ทำงานหากเสียชีวิตขณะติดยาพิษ แต่ยาพิษไม่ระงับเงื่อนไขชนะของ Tanner"
+  },
+  "seer": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "ในขณะที่คนอื่นมองเห็นเพียงใบหน้าที่คุ้นเคย คุณกลับสัมผัสได้ถึงเงามืดที่ซ่อนอยู่ ใช้นิมิตยามค่ำคืนค้นหาความจริง และนำทางหมู่บ้านโดยไม่เปิดเผยตัวจนตกเป็นเหยื่อเสียเอง",
+    "ความสามารถ": "เลือกตรวจผู้เล่น 1 คน แล้วรับคำตอบจากผู้ดำเนินเกมว่าเป็นมนุษย์หมาป่าหรือไม่ โดยไม่ทราบชื่อบทบาท",
+    "ช่วงเวลาและข้อจำกัด": "ทุกคืน คืนละ 1 คน",
+    "เป้าหมายของคุณ": "ใช้ข้อมูลช่วยฝ่ายชาวบ้านค้นหาและกำจัดมนุษย์หมาป่าให้หมด",
+    "ข้อยกเว้น": "Lycan จะถูกตรวจพบว่าเป็นหมาป่า แม้อยู่ฝ่ายชาวบ้าน ผลตรวจอาจคลาดเคลื่อนจากพิษหรือความสามารถอื่นตามกติกา"
+  },
+  "apprentice_seer": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "คุณเฝ้าเรียนรู้การอ่านนิมิต แม้วันนี้ยังมองไม่ทะลุเงามืด แต่หากผู้หยั่งรู้ล้มลง คุณจะเป็นผู้รับช่วงแสงแห่งความจริง เพื่อไม่ให้หมู่บ้านต้องเผชิญค่ำคืนอย่างไร้ความหวัง",
+    "ความสามารถ": "เมื่อ Seer เสียชีวิต คุณจะรับช่วงพลังตรวจผู้เล่นว่าเป็นมนุษย์หมาป่าหรือไม่ โดยไม่ทราบชื่อบทบาท",
+    "ช่วงเวลาและข้อจำกัด": "ใช้พลังได้หลังรับช่วงจาก Seer เท่านั้น ทุกคืน คืนละ 1 คน",
+    "เป้าหมายของคุณ": "ช่วยฝ่ายชาวบ้านค้นหาและกำจัดมนุษย์หมาป่า พร้อมรับหน้าที่ผู้หยั่งรู้เมื่อถึงเวลา",
+    "ข้อยกเว้น": "หลังรับช่วงพลัง ผลตรวจใช้กติกาเดียวกับ Seer รวมถึงผลจาก Lycan และยาพิษ"
+  },
+  "bodyguard": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "เมื่อทุกบ้านดับไฟ คุณยังคงเฝ้าระวังอยู่ในเงามืด คุณอาจไม่รู้ว่าใครคือหมาป่า แต่การเลือกคุ้มครองใครสักคนคืนนี้ อาจทำให้เขามีโอกาสเห็นแสงเช้าอีกครั้ง",
+    "ความสามารถ": "เลือกปกป้องผู้เล่น 1 คนจากการถูกหมาป่ากัด รวมถึงเลือกปกป้องตัวเองได้",
+    "ช่วงเวลาและข้อจำกัด": "ทุกคืน คืนละ 1 คน ห้ามเลือกคนเดิมสองคืนติดต่อกัน รวมถึงตัวเอง การป้องกันมีผลเฉพาะคืนนั้น",
+    "เป้าหมายของคุณ": "ปกป้องคนในหมู่บ้าน และช่วยฝ่ายชาวบ้านกำจัดมนุษย์หมาป่าให้หมด",
+    "ข้อยกเว้น": "ไม่ป้องกันการประหารหรือการตายจากพลังอื่น หากคุณถูกวางยา การป้องกันจะไม่ทำงาน"
+  },
+  "hunter": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "คุณคุ้นเคยกับการเป็นผู้ล่า แต่คืนนี้คุณอาจกลายเป็นเหยื่อ ถึงอย่างนั้น ลมหายใจสุดท้ายของคุณจะไม่สูญเปล่า เล็งให้ดี เพราะการยิงครั้งสุดท้ายอาจเปลี่ยนชะตาของทั้งหมู่บ้าน",
+    "ความสามารถ": "เมื่อคุณเสียชีวิต เลือกยิงผู้เล่นที่ยังมีชีวิต 1 คนให้ตายตามทันที",
+    "ช่วงเวลาและข้อจำกัด": "เมื่อเสียชีวิต ใช้ได้หนึ่งครั้งตลอดเกม",
+    "เป้าหมายของคุณ": "ช่วยฝ่ายชาวบ้านกำจัดมนุษย์หมาป่า และใช้การยิงครั้งสุดท้ายให้เป็นประโยชน์ต่อหมู่บ้าน",
+    "ข้อยกเว้น": "หากพลังถูกระงับด้วยยาพิษขณะเสียชีวิต จะไม่สามารถยิงได้"
+  },
+  "spellcaster": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "ท่ามกลางเสียงถกเถียง บางคำพูดอาจพาหมู่บ้านหลงทาง คุณมีมนตร์ที่ทำให้เสียงหนึ่งเงียบลง เลือกให้ดี เพราะคนที่คุณปิดปากอาจเป็นหมาป่าจอมลวง หรือชาวบ้านที่กำลังจะบอกความจริง",
+    "ความสามารถ": "เลือกผู้เล่น 1 คนให้ติดสถานะใบ้ ห้ามพูดตลอดช่วงกลางวันถัดไป",
+    "ช่วงเวลาและข้อจำกัด": "ทุกคืน คืนละ 1 คน",
+    "เป้าหมายของคุณ": "ใช้ความเงียบขัดขวางการหลอกลวง และช่วยฝ่ายชาวบ้านกำจัดมนุษย์หมาป่าให้หมด",
+    "ข้อยกเว้น": "หากพลังถูกระงับด้วยยาพิษ จะไม่สามารถทำให้เป้าหมายติดสถานะใบ้ได้"
+  },
+  "tough_guy": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "เขี้ยวหมาป่าอาจทำให้คุณบาดเจ็บ แต่ยังพรากลมหายใจไปไม่ได้ง่าย ๆ แม้รู้ว่าเวลาเหลือไม่มาก คุณก็พร้อมยืนหยัดอีกวัน เพื่อช่วยหมู่บ้านก่อนที่บาดแผลจะคร่าชีวิต",
+    "ความสามารถ": "เมื่อถูกหมาป่ากัด คุณจะยังไม่เสียชีวิตในเช้าวันนั้น และอยู่ร่วมพูดคุยและลงคะแนนได้อีกหนึ่งวัน ก่อนเสียชีวิตในเช้าวันถัดไป",
+    "ช่วงเวลาและข้อจำกัด": "ทำงานเมื่อถูกหมาป่ากัด ชะลอการเสียชีวิตเท่านั้น ไม่ได้ทำให้รอดจากการกัด",
+    "เป้าหมายของคุณ": "ใช้เวลาที่เหลือช่วยฝ่ายชาวบ้านค้นหาและกำจัดมนุษย์หมาป่า",
+    "ข้อยกเว้น": "ไม่ชะลอการตายจากการประหารหรือพลังอื่น หากพลังถูกระงับด้วยยาพิษขณะถูกกัด จะเสียชีวิตตามปกติ"
+  },
+  "disease": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "ความเจ็บป่วยทำให้คุณดูเป็นเหยื่อที่อ่อนแอ แต่หมาป่าที่เลือกกัดคุณอาจต้องเสียใจ เชื้อร้ายในตัวคุณจะทำให้ทั้งฝูงหมดแรงออกล่า และมอบค่ำคืนแห่งความสงบให้หมู่บ้าน",
+    "ความสามารถ": "เมื่อถูกหมาป่ากัดสำเร็จ หมาป่าจะติดเชื้อและไม่สามารถกัดผู้เล่นในคืนถัดไป",
+    "ช่วงเวลาและข้อจำกัด": "ทำงานเมื่อถูกหมาป่ากัด ไม่ต้องตื่นใช้พลัง งดกัดเฉพาะคืนถัดไป 1 คืน",
+    "เป้าหมายของคุณ": "ช่วยฝ่ายชาวบ้านกำจัดมนุษย์หมาป่า โดยใช้ผลของเชื้อร้ายหยุดการล่าของฝูง",
+    "ข้อยกเว้น": "หากถูกกัดคืนแรกแล้วติดเตียงผลติดเชื้อยังทำงาน หมาป่าจึงงดกัดคืนที่ 2 และกลับมากัดได้คืนที่ 3"
+  },
+  "lycan": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "สายเลือดหมาป่าไหลเวียนอยู่ในตัวคุณ แต่หัวใจยังอยู่ข้างหมู่บ้าน แม้แต่นิมิตของผู้หยั่งรู้ก็อาจตัดสินคุณผิด คุณจึงต้องพิสูจน์ความบริสุทธิ์ด้วยคำพูดและการกระทำ",
+    "ความสามารถ": "เมื่อ Seer ตรวจคุณ จะได้รับผลว่าเป็นมนุษย์หมาป่า แม้คุณอยู่ฝ่ายชาวบ้าน",
+    "ช่วงเวลาและข้อจำกัด": "มีผลทุกครั้งที่ถูกตรวจ ไม่ต้องตื่นใช้พลัง",
+    "เป้าหมายของคุณ": "ช่วยฝ่ายชาวบ้านกำจัดมนุษย์หมาป่า และอย่าปล่อยให้สายเลือดของคุณทำให้หมู่บ้านหลงทาง",
+    "ข้อยกเว้น": "-"
+  },
+  "cursed": {
+    "ฝ่าย": "ชาวบ้าน → หมาป่าเมื่อกลายร่าง",
+    "คำอธิบาย": "คุณใช้ชีวิตอยู่เคียงข้างชาวบ้าน โดยมีคำสาปหลับใหลอยู่ในตัว รอยกัดจากหมาป่าจะไม่พรากชีวิตคุณ แต่จะปลุกบางสิ่งที่เปลี่ยนเพื่อนบ้านให้กลายเป็นเหยื่อของคุณเอง",
+    "ความสามารถ": "เมื่อถูกหมาป่ากัด คุณจะไม่ตาย แต่กลายเป็นมนุษย์หมาป่าและย้ายไปอยู่ฝ่ายหมาป่า",
+    "ช่วงเวลาและข้อจำกัด": "ทำงานเมื่อถูกหมาป่ากัดสำเร็จ หลังกลายร่างจะร่วมออกล่ากับฝูงในคืนถัดไป",
+    "เป้าหมายของคุณ": "ก่อนกลายร่าง ช่วยฝ่ายชาวบ้านกำจัดมนุษย์หมาป่า หลังกลายร่าง ร่วมกับฝูงกำจัดฝ่ายตรงข้ามและยึดครองหมู่บ้าน",
+    "ข้อยกเว้น": "การประหารหรือการตายจากพลังอื่นไม่ทำให้กลายร่าง"
+  },
+  "mad_bomber": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "คุณรักหมู่บ้าน แม้วิธีปกป้องของคุณจะชวนให้คนข้าง ๆ หวาดเสียว ระเบิดที่พกติดตัวพร้อมเป็นของขวัญอำลาชิ้นสุดท้าย และไม่มีใครอยากยืนใกล้คุณในวินาทีนั้น",
+    "ความสามารถ": "เมื่อคุณเสียชีวิต ระเบิดจะทำให้ผู้เล่นทางซ้ายและขวาของคุณตายตาม",
+    "ช่วงเวลาและข้อจำกัด": "เมื่อเสียชีวิต ทำงานหนึ่งครั้งตลอดเกม ไม่สามารถเลือกเป้าหมายเอง",
+    "เป้าหมายของคุณ": "ช่วยฝ่ายชาวบ้านกำจัดมนุษย์หมาป่า โดยระวังไม่ให้ระเบิดพาคนฝ่ายเดียวกันตายไปด้วย",
+    "ข้อยกเว้น": "การกลายเป็นคนติดเตียงไม่ทำให้ระเบิดทำงาน แต่ยังคงระเบิดเมื่อเสียชีวิตจริง หากพลังถูกระงับด้วยยาพิษขณะเสียชีวิต ระเบิดจะไม่ทำงาน"
+  },
+  "tanner": {
+    "ฝ่าย": "อิสระ",
+    "คำอธิบาย": "ในขณะที่ทุกคนพยายามเอาชีวิตรอด คุณกลับต้องการให้หมู่บ้านตัดสินว่าคุณคือผู้ร้าย ทำตัวให้น่าสงสัยอย่างแนบเนียน เพราะวันที่พวกเขาคิดว่าจับหมาป่าได้ อาจเป็นวันที่คุณได้หัวเราะเป็นคนสุดท้าย",
+    "ความสามารถ": "หากถูกลงคะแนนประหาร คุณจะชนะเกมทันที",
+    "ช่วงเวลาและข้อจำกัด": "ต้องเสียชีวิตจากการลงคะแนนประหาร การถูกหมาป่ากัดหรือถูกฆ่าด้วยพลังอื่นไม่ทำให้ชนะ",
+    "เป้าหมายของคุณ": "ทำให้ผู้เล่นคนอื่นลงคะแนนประหารคุณ",
+    "ข้อยกเว้น": "ยาพิษและสถานะติดเตียงไม่ระงับเงื่อนไขชนะ แต่คุณยังต้องถูกลงคะแนนประหารจึงจะชนะ"
+  },
+  "cupid": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "ท่ามกลางความหวาดระแวง คุณยังเชื่อในพลังแห่งความรัก ลูกศรของคุณจะผูกชะตาของคนสองคนเข้าด้วยกัน แต่ในหมู่บ้านแห่งนี้ ความรักอาจไม่ได้หมายถึงการอยู่ด้วยกันตลอดไป—อาจหมายถึงการจากไปพร้อมกัน",
+    "ความสามารถ": "เลือกผู้เล่น 2 คนให้เป็นคู่รัก หากคนใดคนหนึ่งเสียชีวิต อีกคนจะตายตามทันที",
+    "ช่วงเวลาและข้อจำกัด": "เฉพาะคืนแรก ใช้ได้หนึ่งครั้งตลอดเกม",
+    "เป้าหมายของคุณ": "ช่วยฝ่ายชาวบ้านค้นหาและกำจัดมนุษย์หมาป่า",
+    "ข้อยกเว้น": "คู่รักที่ถูกหมาป่ากัดในคืนแรกจะเสียชีวิตตามกติกาคู่รัก ไม่กลายเป็นคนติดเตียง"
+  },
+  "villager": {
+    "ฝ่าย": "ชาวบ้าน",
+    "คำอธิบาย": "คุณเป็นคนธรรมดาในหมู่บ้านที่ไม่ธรรมดาอีกต่อไป เมื่อความมืดมาถึง มนุษย์หมาป่าจะออกล่าโดยซ่อนตัวอยู่ในคราบเพื่อนบ้าน แม้ไม่มีพลังพิเศษ แต่ไหวพริบและเสียงโหวตของคุณอาจช่วยหมู่บ้านไว้ได้",
+    "ความสามารถ": "ไม่มีพลังพิเศษ ใช้การพูดคุย สังเกตพิรุธ และลงคะแนนประหารผู้ต้องสงสัย",
+    "ข้อยกเว้น": "-",
+    "ช่วงเวลาและข้อจำกัด": "ร่วมพูดคุยและลงคะแนนในช่วงกลางวันตามกติกาปกติ ไม่มีการตื่นใช้พลังในตอนกลางคืน",
+    "เป้าหมายของคุณ": "ช่วยฝ่ายชาวบ้านค้นหาและกำจัดมนุษย์หมาป่าให้หมด"
+  },
+  "judge": {
+    "ฝ่าย": "ชาวบ้านหรือหมาป่า ตามที่ผู้ดำเนินเกมกำหนดเป็นความลับ",
+    "คำอธิบาย": "คุณเดินทางมาถึงหมู่บ้านพร้อมอำนาจชี้ขาด เมื่อเสียงส่วนใหญ่เรียกร้องให้ใครสักคนตาย คำตัดสินของคุณอาจหยุดการประหารไว้ได้ แต่ไม่มีใครรู้ว่าคุณกำลังปกป้องผู้บริสุทธิ์ หรือช่วยผู้ร้ายให้รอดพ้นโทษ",
+    "ความสามารถ": "ยกเลิกการประหารผู้เล่นที่ถูกลงคะแนนเลือกในครั้งนั้น",
+    "ช่วงเวลาและข้อจำกัด": "ช่วงกลางวัน หลังทราบผลลงคะแนนและก่อนประหาร ใช้ได้หนึ่งครั้งตลอดเกม",
+    "เป้าหมายของคุณ": "ใช้อำนาจยกเลิกการประหารเพื่อช่วยฝ่ายของคุณชนะ",
+    "ข้อยกเว้น": "ไม่สามารถยกเลิกการเนรเทศ Traveler หากพลังถูกระงับด้วยยาพิษ จะใช้ความสามารถไม่ได้"
+  },
+  "gunslinger": {
+    "ฝ่าย": "ชาวบ้านหรือหมาป่า ตามที่ผู้ดำเนินเกมกำหนดเป็นความลับ",
+    "คำอธิบาย": "คุณเดินทางมาพร้อมปืนคู่ใจและกระสุนที่พร้อมชี้ชะตาใครสักคน เมื่อคำพูดไม่อาจยุติความสงสัย เสียงปืนของคุณอาจเป็นคำตอบ แต่ไม่มีใครแน่ใจว่าคุณเล็งเพื่อช่วยหมู่บ้าน หรือปิดปากคนที่รู้มากเกินไป",
+    "ความสามารถ": "เลือกยิงผู้เล่นที่ยังมีชีวิต 1 คนให้เสียชีวิตทันที โดยไม่ต้องผ่านการลงคะแนน",
+    "ช่วงเวลาและข้อจำกัด": "ช่วงกลางวัน ใช้ได้หนึ่งครั้งตลอดเกม",
+    "เป้าหมายของคุณ": "เลือกกำจัดผู้เล่นฝ่ายตรงข้าม เพื่อช่วยฝ่ายของคุณชนะ",
+    "ข้อยกเว้น": "การยิงไม่ใช่การประหารจากการลงคะแนน จึงไม่ทำให้ Tanner ชนะ หากพลังถูกระงับด้วยยาพิษ จะไม่สามารถยิงได้"
+  },
+  "politician": {
+    "ฝ่าย": "ชาวบ้านหรือหมาป่า ตามที่ผู้ดำเนินเกมกำหนดเป็นความลับ",
+    "คำอธิบาย": "คุณเดินทางมาพร้อมรอยยิ้ม คำสัญญา และอิทธิพลที่มากกว่าคนทั่วไป เมื่อหมู่บ้านต้องตัดสินชะตาใครสักคน เสียงของคุณมีน้ำหนักเป็นพิเศษ แต่คำว่า “เพื่อส่วนรวม” อาจหมายถึงคนละฝ่ายกับที่ทุกคนคิด",
+    "ความสามารถ": "คะแนนโหวตของคุณมีค่า 2 เสียง",
+    "ช่วงเวลาและข้อจำกัด": "มีผลขณะลงคะแนน โดยทั้ง 2 เสียงต้องลงให้เป้าหมายเดียวกัน",
+    "เป้าหมายของคุณ": "ใช้อิทธิพลในการลงคะแนนเพื่อช่วยฝ่ายของคุณชนะ",
+    "ข้อยกเว้น": "หากพลังถูกระงับด้วยยาพิษ คะแนนโหวตของคุณจะมีค่าเพียง 1 เสียง"
+  },
+  "bureaucrat": {
+    "ฝ่าย": "ชาวบ้านหรือหมาป่า ตามที่ผู้ดำเนินเกมกำหนดเป็นความลับ",
+    "คำอธิบาย": "คุณไม่ได้พกอาวุธ แต่พกอำนาจมากับเอกสารและตราประทับ ลายเซ็นเพียงครั้งเดียวของคุณอาจทำให้เสียงของใครบางคนมีน้ำหนักมากขึ้น และเปลี่ยนชะตาของทั้งหมู่บ้าน",
+    "ความสามารถ": "เลือกผู้เล่น 1 คนให้คะแนนโหวตของเขามีค่าเพิ่มขึ้น 1 เสียงในการลงคะแนนรอบถัดไป",
+    "ช่วงเวลาและข้อจำกัด": "ช่วงกลางวัน ใช้ได้หนึ่งครั้งตลอดเกม เลือกตัวเองไม่ได้ โบนัสมีผลเพียงรอบถัดไป 1 รอบ",
+    "เป้าหมายของคุณ": "มอบอิทธิพลให้คนที่เหมาะสม เพื่อช่วยฝ่ายของคุณชนะ",
+    "ข้อยกเว้น": "หากพลังถูกระงับด้วยยาพิษ จะใช้ความสามารถไม่ได้"
+  }
+};
+const ROLE_GUIDE_COLORS = Object.freeze({ wolf: '#fca5a5', village: '#93c5fd', independent: '#b4b16a', traveler: '#5eead4', changing: '#d8b4fe' });
+// Approved Team switcher presentation, including Cursed; never current faction.
+const ROLE_GUIDE_COLOR_OVERRIDES = Object.freeze({ cursed: 'changing', mad_bomber: 'village', cupid: 'village', tanner: 'independent' });
+const ROLE_GUIDE_BACKGROUNDS = Object.freeze({ wolf: '#991b1b', village: '#1e40af', independent: '#514d24', traveler: '#115e59', changing: '#6b21a8' });
+function guideTeam(r) { return r.category === 'traveler' ? 'traveler' : ROLE_GUIDE_COLOR_OVERRIDES[r.id] || (r.team === 'wolf' ? 'wolf' : 'village'); }
+function guideArtPath(r, thumbnail = false) { return './Assets/role-guide/' + (thumbnail ? 'thumbs/' : '') + r.name.toLowerCase().replace(/\s+/g, '-') + '.webp'; }
+let guideReturnFocus = null;
+let guideSelectedId = null;
+function guideCatalog() {
+    const normal = ROLES_DATABASE.map(r => ({ ...roleDisplay(r), category: 'normal' }));
+    const travelers = ['judge', 'gunslinger', 'politician', 'bureaucrat'].map(id => {
+        const r = travelerRole(id);
+        return { id, name: r.name, thai: r.thai, icon: r.icon, category: 'traveler' };
+    });
+    return [...normal, ...travelers];
+}
+function guideColor(r) {
+    const key = r.category === 'traveler' ? 'traveler' : ROLE_GUIDE_COLOR_OVERRIDES[r.id] || (r.team === 'wolf' ? 'wolf' : 'village');
+    return ROLE_GUIDE_COLORS[key];
+}
+function openRoleGuide() {
+    const dialog = document.getElementById('role-guide');
+    if (dialog.open) return;
+    guideReturnFocus = document.activeElement;
+    dialog.classList.remove('rg-public');
+    document.getElementById('rg-show').hidden = false;
+    document.getElementById('rg-browse').hidden = true;
+    renderGuideCategory('normal');
+    dialog.showModal();
+}
+function closeRoleGuide() { document.getElementById('role-guide').close(); }
+document.getElementById('role-guide').addEventListener('close', () => { if (guideReturnFocus && guideReturnFocus.isConnected) guideReturnFocus.focus(); });
+function renderGuideCategory(category) {
+    const roles = guideCatalog().filter(r => r.category === category);
+    ['normal', 'traveler'].forEach(c => document.getElementById('rg-' + c).setAttribute('aria-pressed', String(c === category)));
+    const list = document.getElementById('rg-list'); list.replaceChildren();
+    roles.forEach(r => {
+        const button = document.createElement('button'); button.type = 'button'; button.className = 'rg-role';
+        button.dataset.roleId = r.id;
+        button.style.setProperty('--role-background', ROLE_GUIDE_BACKGROUNDS[guideTeam(r)]);
+        const thumbnail = document.createElement('img'); thumbnail.className = 'rg-thumb'; thumbnail.alt = ''; thumbnail.loading = 'lazy'; thumbnail.decoding = 'async'; thumbnail.width = 240; thumbnail.height = 160;
+        thumbnail.onerror = () => { thumbnail.remove(); }; thumbnail.src = guideArtPath(r, true);
+        const label = document.createElement('span'); label.className = 'rg-role-label'; const emoji = document.createElement('span'); emoji.className = 'rg-role-icon'; emoji.setAttribute('aria-hidden', 'true'); emoji.textContent = r.icon; const name = document.createElement('span'); name.className = 'rg-role-name'; name.textContent = r.name; label.append(emoji, name);
+        button.append(thumbnail, label);
+        button.style.setProperty('--role-color', guideColor(r));
+        button.onclick = () => renderGuideRole(r.id, true); list.append(button);
+    });
+    renderGuideRole(roles[0].id, false);
+}
+function renderGuideRole(id, focus) {
+    const r = guideCatalog().find(r => r.id === id); if (!r) return;
+    guideSelectedId = id;
+    const copy = ROLE_GUIDE_COPY[id];
+    const detail = document.getElementById('rg-detail'); detail.replaceChildren();
+    detail.style.setProperty('--role-color', guideColor(r));
+    document.querySelectorAll('#rg-list button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.roleId === id)));
+    const title = document.createElement('h3'); title.textContent = r.name + ' — ' + r.thai + ' ' + r.icon;
+    const figure = document.createElement('figure'); figure.className = 'rg-art';
+    const image = document.createElement('img'); image.loading = 'lazy'; image.decoding = 'async'; image.width = 1200; image.height = 800; image.alt = r.name + ' — ภาพบทบาทเต็ม';
+    const fallback = document.createElement('figcaption'); fallback.textContent = r.name + ' ' + r.icon + ' — ยังไม่มีภาพประกอบ';
+    image.onload = () => { fallback.hidden = true; enlarge.hidden = false; };
+    image.onerror = () => { image.hidden = true; image.style.display = 'none'; enlarge.hidden = true; fallback.hidden = false; };
+    image.src = './Assets/role-guide/' + r.name.toLowerCase().replace(/\s+/g, '-') + '.webp';
+    const enlarge = document.createElement('button'); enlarge.type = 'button'; enlarge.className = 'rg-enlarge'; enlarge.hidden = false; enlarge.setAttribute('aria-label', 'ขยายภาพ ' + r.name); enlarge.title = 'แตะเพื่อขยายภาพ';
+    enlarge.onclick = () => { const viewer = document.getElementById('rg-art-viewer'); const full = document.getElementById('rg-full-art'); full.src = image.src; full.alt = image.alt; document.getElementById('rg-art-title').textContent = r.name + ' — ภาพเต็ม'; viewer.showModal(); };
+    enlarge.append(image); figure.append(enlarge, fallback); detail.append(title, figure);    if (id === 'wolf_cub') { const warning = document.createElement('p'); warning.className = 'rg-rule-note'; warning.textContent = 'หมายเหตุเอกสาร: ข้อยกเว้นที่ยืนยันไว้ระบุ “-” แต่โค้ดเกมปัจจุบันระงับการกัดเพิ่มเมื่อ Wolf Cub ตายขณะติดพิษ คู่มือนี้แสดงความแตกต่างไว้เพื่อรอยืนยัน ไม่ได้เปลี่ยนกติกาหรือโค้ดเกม และข้อห้ามฝูงกัด Wolf Cub ไม่ใช่ข้อห้าม Wolf Cub ร่วมล่า'; detail.append(warning); }
+    if (copy) {
+        const story = document.createElement('details'); const summary = document.createElement('summary'); summary.textContent = 'คำอธิบาย / เรื่องราว';
+        const paragraph = document.createElement('p'); paragraph.textContent = copy['คำอธิบาย']; story.append(summary, paragraph); detail.append(story);
+        const facts = document.createElement('dl');
+        ['ฝ่าย', 'ความสามารถ', 'ช่วงเวลาและข้อจำกัด', 'เป้าหมายของคุณ', 'ข้อยกเว้น'].forEach(label => {
+            const term = document.createElement('dt'); term.textContent = label;
+            const value = document.createElement('dd'); value.textContent = copy[label] || 'ยังไม่มีคำอธิบายที่ยืนยัน'; facts.append(term, value);
+        }); detail.append(facts);
+    } else { const note = document.createElement('p'); note.textContent = 'ยังไม่มีคำอธิบายที่ยืนยัน'; detail.append(note); }
+    if (focus) detail.focus();
+}
+function showGuideToPlayer() {
+    // Native modal + opaque backdrop keeps the underlying moderator/private view inert and invisible.
+    document.getElementById('role-guide').classList.add('rg-public');
+    document.getElementById('rg-show').hidden = true;
+    document.getElementById('rg-browse').hidden = false;
+    document.getElementById('rg-detail').focus();
+}
+function browseRoleGuide() {
+    document.getElementById('role-guide').classList.remove('rg-public');
+    document.getElementById('rg-show').hidden = false;
+    document.getElementById('rg-browse').hidden = true;
+}
+// ROLE GUIDE END
+</script>
 </body>
 </html>
