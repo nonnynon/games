@@ -3074,7 +3074,7 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
                         <div id="day-vote-box" class="bg-slate-900/40 p-2.5 rounded border border-slate-700/50 space-y-2">
                             <div class="flex items-center gap-2 border-b border-slate-800 pb-1.5">
                                 <span class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
-                                    <span>⚖️</span> 2. ดำเนินการ Vote Out ประจำวัน (โหวตประหารชีวิต)
+                                    2. ดำเนินการ Vote Out ประจำวัน (โหวตประหารชีวิต) <span>⚖️</span>
                                 </span>
                             </div>
                             <div class="flex items-center gap-2">
@@ -3598,8 +3598,20 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
             if (!first || document.getElementById('wolf-target-select-2')) return;
             const second = first.cloneNode(true); second.id = 'wolf-target-select-2';
             second.value = gameState.wolfTarget2 || '';
-            const label = document.createElement('p'); label.textContent = '🐺 Wolf Cub: เลือกเหยื่อคนที่ 2 (คนละคน)';
-            first.parentElement.after(label, second);
+            const row = first.parentElement;
+            row.className = 'grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3 gap-y-2 text-[11px]';
+            const label = document.createElement('p');
+            label.className = 'text-[11px] text-amber-300 mb-2';
+            label.textContent = 'เนื่องจาก Wolf Cub เสียชีวิต เลือกเหยื่อได้ 2 คน!';
+            row.before(label);
+            const targets = document.createElement('div');
+            targets.className = 'flex flex-col gap-2 min-w-0 w-full max-w-52 justify-self-end';
+            first.classList.add('w-full', 'min-w-0');
+            second.classList.add('w-full', 'min-w-0');
+            first.setAttribute('aria-label', 'เลือกเหยื่อคนที่ 1');
+            second.setAttribute('aria-label', 'เลือกเหยื่อคนที่ 2 (คนละคน)');
+            targets.append(first, second);
+            row.append(targets);
         }
         function renderHunterPowers() {
             document.getElementById('hunter-powers')?.remove();
@@ -5404,6 +5416,7 @@ document.getElementById('role-guide').addEventListener('cancel', event => {
 });
 document.getElementById('role-guide').addEventListener('close', () => { if (guideReturnFocus && guideReturnFocus.isConnected) guideReturnFocus.focus(); });
 function guideGroup(r) { return r.guideGroup || setupGroup(r); }
+function isGuideWolfSupporter(r) { return r.category !== 'traveler' && ['sorceress', 'sorcerer', 'the_cloak', 'apprentice_illusionist', 'illusion_artist'].includes(r.id); }
 function renderGuideCategory(category) {
     const roles = guideCatalog().filter(r=>r.category===category).sort((a,b)=>ROLE_GROUP_ORDER.indexOf(guideGroup(a))-ROLE_GROUP_ORDER.indexOf(guideGroup(b)));
     ['normal', 'traveler', 'expansion'].forEach(c => document.getElementById('rg-' + c).setAttribute('aria-pressed', String(c === category)));
@@ -5411,12 +5424,12 @@ function renderGuideCategory(category) {
     roles.forEach(r => {
         const button = document.createElement('button'); button.type = 'button'; button.className = 'rg-role';
         button.dataset.roleId = r.id;
-        button.style.setProperty('--role-background', ROLE_GUIDE_BACKGROUNDS[guideTeam(r)]);
+        button.style.setProperty('--role-background', isGuideWolfSupporter(r) ? '#3b242b' : ROLE_GUIDE_BACKGROUNDS[guideTeam(r)]);
         const thumbnail = document.createElement('img'); thumbnail.className = 'rg-thumb'; thumbnail.alt = ''; thumbnail.loading = 'lazy'; thumbnail.decoding = 'async'; thumbnail.width = 240; thumbnail.height = 160;
         thumbnail.onerror = () => { thumbnail.remove(); }; thumbnail.src = guideArtPath(r, true);
         const label = document.createElement('span'); label.className = 'rg-role-label'; const emoji = document.createElement('span'); emoji.className = 'rg-role-icon'; emoji.setAttribute('aria-hidden', 'true'); emoji.textContent = r.icon; const name = document.createElement('span'); name.className = 'rg-role-name'; name.textContent = r.name; label.append(emoji, name);
         button.append(thumbnail, label);
-        button.style.setProperty('--role-color', guideColor(r));
+        button.style.setProperty('--role-color', isGuideWolfSupporter(r) ? '#FCA5A5' : guideColor(r));
         button.onclick = () => renderGuideRole(r.id, true); list.append(button);
     });
     if(roles.length)renderGuideRole(roles[0].id, false);else document.getElementById('rg-detail').replaceChildren();
