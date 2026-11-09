@@ -753,8 +753,15 @@
                     <h4 class="text-xs font-semibold text-amber-400">⏱️ ตัวจับเวลาอภิปราย / โหวต</h4>
                     <span id="timer-display" class="text-lg font-bold text-slate-100 font-mono">00:00</span>
                 </div>
+                <div class="grid grid-cols-5 gap-2" role="group" aria-label="เริ่มจับเวลาด่วน">
+                    <button type="button" onclick="startTimerPreset(20)" aria-label="เริ่มจับเวลา 20 วินาที" class="min-w-0 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold py-2 rounded-lg border border-slate-600 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400">20s</button>
+                    <button type="button" onclick="startTimerPreset(30)" aria-label="เริ่มจับเวลา 30 วินาที" class="min-w-0 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold py-2 rounded-lg border border-slate-600 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400">30s</button>
+                    <button type="button" onclick="startTimerPreset(60)" aria-label="เริ่มจับเวลา 60 วินาที" class="min-w-0 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold py-2 rounded-lg border border-slate-600 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400">60s</button>
+                    <button type="button" onclick="startTimerPreset(90)" aria-label="เริ่มจับเวลา 90 วินาที" class="min-w-0 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold py-2 rounded-lg border border-slate-600 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400">90s</button>
+                    <button type="button" onclick="startTimerPreset(120)" aria-label="เริ่มจับเวลา 120 วินาที" class="min-w-0 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold py-2 rounded-lg border border-slate-600 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400">120s</button>
+                </div>
                 <div class="flex items-center space-x-2">
-                    <input type="range" id="timer-range" min="10" max="300" step="10" value="60" class="w-full accent-amber-500 bg-slate-700 h-2 rounded cursor-pointer" oninput="updateTimerRange(this.value)">
+                    <input type="range" aria-label="ระยะเวลาจับเวลา (วินาที)" id="timer-range" min="10" max="300" step="10" value="60" class="w-full accent-amber-500 bg-slate-700 h-2 rounded cursor-pointer" oninput="updateTimerRange(this.value)">
                     <span id="timer-range-label" class="text-[11px] text-slate-400 w-12 text-right">60s</span>
                 </div>
                 <div class="flex gap-2">
@@ -762,6 +769,7 @@
                     <button onclick="stopTimer()" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold py-1.5 rounded-lg transition">Stop</button>
                     <button onclick="resetTimer()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-semibold py-1.5 rounded-lg transition">Reset</button>
                 </div>
+                <button type="button" onclick="playModSound('handbell_short')" class="w-full bg-slate-700 hover:bg-slate-600 text-amber-300 text-xs font-semibold py-2 rounded-lg border border-slate-600 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400">🔔 สั่นกระดิ่ง</button>
             </div>
 
             <!-- Actions Checklist Card -->
@@ -1080,7 +1088,7 @@ function actualRoleForCopy(player){const n=normalState();if(gameState.cursedTurn
 function markApprenticeSuccession(){const n=normalState(),seers=gameState.players.filter(p=>gameState.rolePlayerMap[p]==='seer'||n.apprenticeAwakened?.[p]);if(!seers.some(p=>!gameState.playerStatus[p]?.alive&&!(gameState.nightKilled||[]).includes(p)))return;if(seers.some(p=>gameState.playerStatus[p]?.alive||(gameState.nightKilled||[]).includes(p)))return;n.apprenticeAwakened=n.apprenticeAwakened||{};for(const p of gameState.players.filter(p=>gameState.rolePlayerMap[p]==='apprentice_seer'&&actorAvailable(p))){if(n.apprenticeAwakened[p])continue;n.apprenticeAwakened[p]=true;recordTransformation('apprentice_seer',p,'seer');}}
 function normalRoleActors(role){return gameState.players.filter(p=>gameState.rolePlayerMap[p]===role&&actorAvailable(p));}
 function getPlayerByRole(role){return normalRoleActors(role).find(p=>!isPoisoned(p))||normalRoleActors(role)[0]||gameState.players.find(p=>gameState.rolePlayerMap[p]===role)||'';}
-function normalInspect(actor,target){if(!actorAvailable(actor))return null;if(!target){normalVisit(actor,[],actor+':inspect');return null;}if(!gameState.playerStatus[target])return null;normalVisit(actor,[target],actor+':inspect');const role=gameState.rolePlayerMap[actor];if(role==='sorceress')return actualRoleForCopy(target)==='seer';const trueRole=gameState.rolePlayerMap[target]==='drunk'?normalState().trueRoles[target]:gameState.rolePlayerMap[target];const wolf=['werewolf','wolf_cub','direwolf','lycan'].includes(trueRole)||gameState.cursedTurned.includes(target);return isPoisoned(target)?!wolf:wolf;}
+function normalInspect(actor,target){if(!actorAvailable(actor))return null;if(!target){normalVisit(actor,[],actor+':inspect');return null;}if(!gameState.playerStatus[target])return null;normalVisit(actor,[target],actor+':inspect');const role=gameState.rolePlayerMap[actor];if(role==='sorceress')return actualRoleForCopy(target)==='seer';const trueRole=gameState.rolePlayerMap[target]==='drunk'?normalState().trueRoles[target]:gameState.rolePlayerMap[target];const wolf=['werewolf','wolf_cub','direwolf','lycan'].includes(trueRole)||gameState.cursedTurned.includes(target);return isPoisoned(actor)?!wolf:wolf;}
 
 // Per-actor supplemental powers for inherited/multiple owners. Pack hunting remains shared.
 function actorPowers(){const n=normalNight();return n.actions||(n.actions={});}
@@ -2487,6 +2495,7 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
             showScreen('gameplay-screen');
             gameState.gamePhase = 'night';
             gameState.dayCount = 1;
+            playModSound('wolf_howl');
             renderGameplay();
             resetTimer();
         }
@@ -2766,6 +2775,7 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
             showScreen('gameplay-screen');
             gameState.gamePhase = 'night';
             gameState.dayCount = 1;
+            playModSound('wolf_howl');
             renderGameplay();
             resetTimer();
         }
@@ -3256,7 +3266,7 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
             const seerPlayer = inspectionOwner();
             normalVisit(seerPlayer,[target],seerPlayer+":seer");
             const seerPoisonWarn = isPoisoned(seerPlayer)
-                ? `<div class="text-[10px] text-fuchsia-300 mt-1">⚠️ Seer (${seerPlayer}) ถูกวางยาในคืนนี้ — ผู้ดำเนินเกมอาจแจ้งผลตามจริงหรือกลับด้านได้ตามดุลยพินิจเพื่อสมดุลของเกม</div>`
+                ? `<div class="text-[10px] text-fuchsia-300 mt-1">⚠️ Seer (${seerPlayer}) ถูกวางยาในคืนนี้ — ผลการส่องกลับด้านโดยอัตโนมัติ พิษที่เป้าหมายไม่กลับผลการส่อง</div>`
                 : '';
             if (isTraveler(target)) {
                 disp.innerHTML = 'Traveler: Mod ตัดสินผลการส่องเองตามกติกาที่ตกลง' + seerPoisonWarn;
@@ -3269,15 +3279,15 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
 
 
 
-            if (isPoisoned(target)) {
-                // Poisoned target: Seer sees the OPPOSITE result
+            if (isPoisoned(seerPlayer)) {
+                // Poisoned Seer: invert once, regardless of target poison.
                 const truthWolf = isWolfRole || isLycan;
                 if (truthWolf) {
                     disp.className = "text-xs p-2.5 rounded-lg border border-emerald-700 bg-emerald-950/80 text-emerald-300 space-y-1";
-                    disp.innerHTML = `<div>🟢 ผลการส่อง: <b>เห็นเป็นคนดี (ไม่ใช่หมาป่า)</b></div><div class="text-[10px] text-fuchsia-300">🧪 ผู้เล่นนี้ถูกวางยา! ผลจริงคือ <b>หมาป่า</b> แต่ Seer จะเห็นเป็นตรงข้าม</div><div class="text-[10px] text-slate-400">👉 ให้สัญญาณ Seer: ชูนิ้วโป้งขึ้น หรือส่ายหน้า</div>${seerPoisonWarn}`;
+                    disp.innerHTML = `<div>🟢 ผลการส่อง: <b>เห็นเป็นคนดี (ไม่ใช่หมาป่า)</b></div><div class="text-[10px] text-fuchsia-300">🧪 Seer ถูกวางยา! ผลปกติคือ <b>หมาป่า</b> แต่ Seer จะเห็นเป็นตรงข้าม</div><div class="text-[10px] text-slate-400">👉 ให้สัญญาณ Seer: ชูนิ้วโป้งขึ้น หรือส่ายหน้า</div>${seerPoisonWarn}`;
                 } else {
                     disp.className = "text-xs p-2.5 rounded-lg border border-rose-700 bg-rose-950/80 text-rose-300 space-y-1";
-                    disp.innerHTML = `<div>🐺 ผลการส่อง: <b>เห็นเป็นมนุษย์หมาป่า (Werewolf)</b></div><div class="text-[10px] text-fuchsia-300">🧪 ผู้เล่นนี้ถูกวางยา! ผลจริงคือ <b>คนดี</b> แต่ Seer จะเห็นเป็นตรงข้าม</div><div class="text-[10px] text-slate-400">👉 ให้สัญญาณ Seer: คว่ำนิ้วโป้งลง หรือพยักหน้า</div>${seerPoisonWarn}`;
+                    disp.innerHTML = `<div>🐺 ผลการส่อง: <b>เห็นเป็นมนุษย์หมาป่า (Werewolf)</b></div><div class="text-[10px] text-fuchsia-300">🧪 Seer ถูกวางยา! ผลปกติคือ <b>คนดี</b> แต่ Seer จะเห็นเป็นตรงข้าม</div><div class="text-[10px] text-slate-400">👉 ให้สัญญาณ Seer: คว่ำนิ้วโป้งลง หรือพยักหน้า</div>${seerPoisonWarn}`;
                 }
                 return;
             }
@@ -3531,7 +3541,7 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
             const nn=normalState();
             const prince=gameState.players.find(p=>p!==victim&&effectiveRole(p)==='persian_prince'&&gameState.playerStatus[p]?.alive&&!isPoisoned(p)&&!nn.used[p]?.pardon);
             if(prince&&confirm(prince+' เปิดเผยตัวใช้ Royal Pardon ช่วย '+victim+' หรือไม่?')){(nn.used[prince]||(nn.used[prince]={})).pardon=true;nn.endedDay=gameState.dayCount;alert('ยกเลิกประหาร จบวัน ไม่มีโหวตใหม่');renderGameplay();return;}
-            if(effectiveRole(victim)==='prince'&&!isPoisoned(victim)){nn.endedDay=gameState.dayCount;alert(victim+' เปิดเผยตัวเป็น Prince ฝ่ายชาวบ้าน รอดจากการประหาร');renderGameplay();return;}
+            if(effectiveRole(victim)==='prince'&&!isPoisoned(victim)){nn.endedDay=gameState.dayCount;playModSound('fanfare');alert(victim+' เปิดเผยตัวเป็น Prince ฝ่ายชาวบ้าน รอดจากการประหาร');renderGameplay();return;}
             if (await cancelExecutionWithJudge(victim)) return;
             if (gameState !== executionState || !isMod || gameState.gamePhase !== 'day' || !gameState.playerStatus[victim]?.alive || activeMadBomber) return;
             const roleId = isBedridden(victim) && gameState.rolePlayerMap[victim] === 'mad_bomber' ? 'mad_bomber' : effectiveRole(victim);
@@ -3984,7 +3994,7 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
         }
 
         function nextPhase() {
-            if (activeMadBomber) return;
+            if (!isMod || activeMadBomber || !['day', 'night'].includes(gameState.gamePhase)) return;
             // Advisory helper: pending abilities never impose a sequential phase lock.
             // Moderator may skip unfinished checklist items and advance freely.
             if (gameState.gamePhase === 'night') {
@@ -4005,6 +4015,7 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
                 normalState().nightResolution = true;
                 normalState().blessSpent=[];
                 gameState.gamePhase = 'day';
+                playModSound('rooster');
                 gameState.wolvesInfected = false; // Diseased infection consumed this night
                 gameState.nightKilled = [];       // Lock in tonight's kills
                 gameState.pendingMadBomber = null;
@@ -4021,6 +4032,7 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
             } else {
                 normalState().nightResolution=false;
                 gameState.gamePhase = 'night';
+                playModSound('wolf_howl');
                 gameState.dayCount++;
 
                 // Poison expires when the next night begins.
@@ -4046,6 +4058,27 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
             if(!activeMadBomber&&!Object.values(gameState.deathPowers||{}).includes('pending'))normalState().nightResolution=false;
             // Committed Bomber deaths (including lovers) are serialized by recordDeathPowers.
             // Do not schedule another modal after rendering: it could reopen a resolved blast.
+        }
+
+        // Local Mod-only effects: never broadcast or play from render/restore paths.
+        const modSounds = Object.create(null);
+        function playModSound(name) {
+            if (!isMod || !['rooster', 'wolf_howl', 'fanfare', 'handbell_short'].includes(name)) return;
+            try {
+                const sound = modSounds[name] || (modSounds[name] = new Audio('Assets/sound/' + name + '.mp3'));
+                sound.pause();
+                sound.currentTime = 0; // Repeated bell clicks restart the same clip, never overlap it.
+                const playback = sound.play();
+                if (playback && typeof playback.catch === 'function') playback.catch(() => {});
+            } catch (e) { /* Missing/blocked audio must never interrupt gameplay. */ }
+        }
+
+        function startTimerPreset(seconds) {
+            if (!isMod || ![20, 30, 60, 90, 120].includes(seconds)) return;
+            stopTimer();
+            document.getElementById('timer-range').value = seconds;
+            updateTimerRange(seconds);
+            startTimer();
         }
 
         function updateTimerRange(val) {
@@ -4692,7 +4725,7 @@ const ROLE_GUIDE_COPY = {
     "ความสามารถ": "เลือกวางยาผู้เล่น 1 คน เพื่อระงับความสามารถของเป้าหมายระหว่างที่ยาพิษมีผล",
     "ช่วงเวลาและข้อจำกัด": "ทุกคืน หลังหมาป่าเลือกเหยื่อ คืนละ 1 คน ยาพิษหมดฤทธิ์เมื่อเริ่มคืนถัดไป",
     "เป้าหมายของคุณ": "ขัดขวางพลังของฝ่ายชาวบ้าน และช่วยฝ่ายหมาป่ายึดครองหมู่บ้าน",
-    "ข้อยกเว้น": "เมื่อ Seer ถูกวางยา ผู้ดำเนินเกมอาจแจ้งผลตามจริงหรือกลับด้านได้ตามดุลยพินิจเพื่อสมดุลของเกม พลังตอนตายจะไม่ทำงานหากเสียชีวิตขณะติดยาพิษ แต่ยาพิษไม่ระงับเงื่อนไขชนะของ Tanner"
+    "ข้อยกเว้น": "เมื่อ Seer ถูกวางยา ผลการส่องกลับด้านโดยอัตโนมัติ พิษที่เป้าหมายไม่กลับผลการส่อง พลังตอนตายจะไม่ทำงานหากเสียชีวิตขณะติดยาพิษ แต่ยาพิษไม่ระงับเงื่อนไขชนะของ Tanner"
   },
   "seer": {
     "ฝ่าย": "ชาวบ้าน",
@@ -5149,7 +5182,7 @@ Object.assign(ROLE_GUIDE_COPY, {
     "ความสามารถ": "ทุกคืน คุณจะทราบว่ามีผู้เล่นอื่นใช้ความสามารถกลางคืนโดยเลือก **คุณหรือเพื่อนบ้านที่นั่งติดกับคุณอย่างน้อยหนึ่งคน** เป็นเป้าหมายหรือไม่\n\nคุณได้รับคำตอบเพียง **“มี” หรือ “ไม่มี”** ไม่ทราบผู้กระทำ จำนวนคน ชนิดความสามารถ หรือว่าใครในสามคนถูกเลือก",
     "ช่วงเวลาและข้อจำกัด": "- รับข้อมูลเมื่อจบขั้นตอนแอ็กชันกลางคืน ไม่ต้องเลือกเป้าหมาย\n- เพื่อนบ้านหมายถึงผู้เล่นทางซ้ายและขวาตามที่นั่งเดิม ไม่ข้ามที่นั่งของผู้ถูกกำจัด\n- นับทั้งความสามารถช่วยเหลือ ตรวจสอบ และโจมตี ไม่ได้ตรวจเฉพาะหมาป่า\n- การโจมตีที่ถูกป้องกันยังนับว่ามีการเลือกเป้าหมาย\n- ไม่รวมความสามารถของคุณเอง และพลังที่ไม่มีการเลือกผู้เล่นเป็นเป้าหมาย\n- ผู้มาเยือนติดพิษ ยังนับการเยือน เช่น Seer ติดพิษแต่เลือกตรวจเพื่อนบ้าน → หน่องตรวจพบการมาเยือน\n- การสลับเป้าหมาย นับการเยือนทั้งสองบ้าน เพราะผู้ใช้พลังสลับต้องไปทั้งคู่ ไม่ใช่นับเฉพาะปลายทาง",
     "เป้าหมายของคุณ": "ใช้ความเคลื่อนไหวรอบตัวตรวจสอบคำกล่าวอ้างของผู้เล่น และชนะร่วมกับฝ่ายชาวบ้าน",
-    "ข้อยกเว้น": "เมื่อหน่องติดพิษ ผู้ดำเนินเกมเลือกให้ข้อมูล **ตรงตามจริงหรือกลับด้าน** ได้ เช่นเดียวกับ Seer ไม่ใช่หยุดรับข้อมูล และไม่บังคับให้ได้รับข้อมูลผิดเสมอ"
+    "ข้อยกเว้น": "เมื่อหน่องติดพิษ ผู้ดำเนินเกมเลือกให้ข้อมูล **ตรงตามจริงหรือกลับด้าน** ได้ ไม่ใช่หยุดรับข้อมูล และไม่บังคับให้ได้รับข้อมูลผิดเสมอ"
   },
   "aura_seer": {
     "ฝ่าย": null,
@@ -5334,6 +5367,7 @@ const ROLE_GUIDE_COLOR_OVERRIDES = Object.freeze({ drunk: 'changing', doppelgang
 const ROLE_GUIDE_BACKGROUNDS = Object.freeze({ wolf: '#35232b', village: '#172b45', independent: '#302e1b', traveler: '#12303d', changing: '#2e2042' });
 function guideTeam(r) { return r.category === 'traveler' ? 'traveler' : ROLE_GUIDE_COLOR_OVERRIDES[r.id] || (r.team === 'wolf' ? 'wolf' : 'village'); }
 const GUIDE_ART_STEMS = Object.freeze({ wolf_cub:'wolf_cub', mad_bomber:'mad_bomber', apprentice_seer:'apprentice_seer', tough_guy:'tough_guy', disease:'diseased', diseased:'diseased', sorceress:'sorceress', sorcerer:'sorcerer', count_dracula:'count_dracula', grave_robber:'grave_robber', mad_destroyer:'mad_destroyer', assassin:'assassin', the_cloak:'the_cloak', apprentice_illusionist:'apprentice_illusionist', illusion_artist:'illusion_artist', magician:'magician' });
+function guideFactionMarkup(r, text) { const labels={village:'ชาวบ้าน',wolf:'หมาป่า',independent:'อิสระ',changing:'เปลี่ยนฝ่าย'}; const colors={ชาวบ้าน:'#60a5fa',หมาป่า:'#ef4444',อิสระ:'#b4b16a',เปลี่ยนฝ่าย:'#d8b4fe'}; const label=r.category==='traveler'?text:labels[guideTeam(r)]; return safeGuideMarkup(label || text || '').replace(/ชาวบ้าน|หมาป่า|อิสระ|เปลี่ยนฝ่าย/g, word => '<span style="color:'+colors[word]+'">'+word+'</span>'); }
 function guideArtPath(r, thumbnail = false) { return './Assets/role-guide/' + (thumbnail ? 'thumbs/' : '') + (GUIDE_ART_STEMS[r.id] || r.id) + '.webp'; }
 let guideReturnFocus = null;
 let guideSelectedId = null;
@@ -5410,7 +5444,7 @@ function renderGuideRole(id, focus) {
         ['ฝ่าย','คำอธิบาย/เรื่องราว','ความสามารถ','ช่วงเวลาและข้อจำกัด','เป้าหมายของคุณ','ข้อยกเว้น'].forEach(label => {
             const section=document.createElement('section');const heading=document.createElement('h4');heading.textContent=label;
             const value=document.createElement('p');value.style.whiteSpace='pre-line';value.innerHTML=safeGuideMarkup(copy[label]);
-            if(label==='ฝ่าย'){value.className='rg-faction';value.innerHTML=value.innerHTML.replaceAll('หมาป่า','<span class="rg-wolf">หมาป่า</span>').replaceAll('ชาวบ้าน','<span class="rg-village">ชาวบ้าน</span>');}
+            if (label === 'ฝ่าย') { value.className = 'rg-faction'; value.innerHTML = guideFactionMarkup(r, copy[label]); }
             section.append(heading,value);detail.append(section);
         });
     } else if (copy) {
@@ -5421,7 +5455,7 @@ function renderGuideRole(id, focus) {
             const term = document.createElement('dt'); term.textContent = label;
             const value = document.createElement('dd'); value.textContent = (copy[label] || 'ยังไม่มีคำอธิบายที่ยืนยัน').replaceAll('มนุษย์หมาป่า','หมาป่า').replace(/\s+[-–]\s+/g,'\n- ');value.style.whiteSpace='pre-line';
             value.innerHTML=safeGuideMarkup(value.textContent);
-            if (label === 'ฝ่าย') { value.className = 'rg-faction'; value.innerHTML = value.innerHTML.replaceAll('หมาป่า', '<span class="rg-wolf">หมาป่า</span>').replaceAll('ชาวบ้าน', '<span class="rg-village">ชาวบ้าน</span>'); }
+            if (label === 'ฝ่าย') { value.className = 'rg-faction'; value.innerHTML = guideFactionMarkup(r, copy[label]); }
             facts.append(term, value);
         }); detail.append(facts);
     } else { const note = document.createElement('p'); note.textContent = r.desc || 'ยังไม่มีคำอธิบายที่ยืนยัน'; detail.append(note); }
