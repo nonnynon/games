@@ -293,6 +293,22 @@
     .rg-role-label { display: flex; flex-wrap: wrap; gap: .125rem .25rem; }
     .rg-role-name { flex: 0 1 auto; min-width: 0; }
 }
+.player-guide-action { display:flex; justify-content:flex-end; margin-top:.4rem; }
+#player-role-guide { background:#334155; color:#e2e8f0; border:1px solid #64748b; border-radius:.5rem; padding:.4rem .55rem; font-size:11px; min-height:36px; }
+#player-role-guide:focus-visible { outline:2px solid #fbbf24; outline-offset:2px; }
+#role-guide.rg-player .rg-actions { display:none; }
+.community-ranking { white-space:pre-line; }
+
+.community-panel{font-family:inherit;background:#1e293b;border:1px solid #334155;border-radius:.75rem;padding:1rem;margin-block:1rem;display:grid;gap:.75rem;min-width:0;color:#e2e8f0;font-size:.875rem;line-height:1.6;overflow-wrap:anywhere}
+.community-panel h3{font-weight:600;color:#fbbf24;font-size:1rem}.community-panel h4{font-weight:600;margin-top:.25rem}.community-muted{font-size:.75rem;color:#cbd5e1}
+.community-button{font:inherit;min-height:44px;border:1px solid #475569;border-radius:.75rem;padding:.55rem .8rem;background:#334155;color:#f8fafc;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;overflow-wrap:anywhere;white-space:normal;text-align:center;line-height:1.5}
+.community-button:hover:not(:disabled){border-color:#fbbf24;background:#475569}.community-button:disabled{opacity:.5;cursor:not-allowed}.community-button:focus-visible,.ballot-option:focus-within{outline:3px solid #f59e0b;outline-offset:3px}.community-button[aria-pressed=true]{border-color:#fbbf24;background:#78350f}
+.community-role-list{max-height:24rem;overflow-y:auto;padding:.25rem;scrollbar-gutter:stable;display:grid;gap:.5rem}.community-role-row{display:grid;grid-template-columns:minmax(0,1fr) 1.5rem auto;gap:.5rem;align-items:center}.community-role-row>:first-child{justify-content:flex-start;text-align:left;min-width:0}.community-score{text-align:center;font-variant-numeric:tabular-nums}.community-chips{display:flex;flex-wrap:wrap;gap:.5rem}.community-ranking{min-height:5.5rem;padding:.75rem;border-radius:.75rem;background:#0f172a}.community-panel details{padding:.75rem;border:1px solid #475569;border-radius:.75rem}.community-panel summary{cursor:pointer;font-weight:500}
+#mayor-ballot{font-family:'Prompt',sans-serif;width:min(94vw,32rem);max-height:92dvh;border:1px solid #c8b893;border-radius:.75rem;background:#f6efdc;color:#302b23;padding:0;box-shadow:0 24px 80px #0009}
+#mayor-ballot[open]{display:flex;flex-direction:column}#mayor-ballot::backdrop{background:#020617cc}#mayor-ballot header,#mayor-ballot footer{padding:1rem 1.25rem;flex:none}#mayor-ballot header{border-bottom:1px solid #c8b893}#mayor-ballot h2{font-size:1.2rem;font-weight:600}#mayor-ballot p{font-size:.8rem;line-height:1.65;margin:.35rem 0}#mayor-ballot footer{border-top:1px solid #c8b893;display:grid;gap:.4rem}#mayor-ballot .ballot-footnote{font-size:.68rem;color:#655943}#mayor-ballot .community-button{background:#ece1c5;color:#302b23;border-color:#b4a17b}#mayor-ballot footer .community-button:first-of-type{background:#493f2d;color:#fff9e8}
+.ballot-candidates{overflow-y:auto;min-height:0;flex:1;padding:.75rem 1.25rem;display:grid;gap:.6rem}.ballot-option{position:relative;display:grid;grid-template-columns:2rem minmax(0,1fr);align-items:center;gap:.8rem;padding:.8rem;border:1px solid #c8b893;border-radius:.75rem;min-height:56px;overflow-wrap:anywhere;cursor:pointer}.ballot-option input{position:absolute;width:1px;height:1px;opacity:0}.ballot-cross{position:relative;width:1.8rem;height:1.8rem;border:2px solid #736346;border-radius:.25rem}.ballot-option input:checked + .ballot-cross:before,.ballot-option input:checked + .ballot-cross:after{content:'';position:absolute;left:50%;top:50%;width:1.35rem;height:3px;background:#302b23;transform:translate(-50%,-50%) rotate(45deg)}.ballot-option input:checked + .ballot-cross:after{transform:translate(-50%,-50%) rotate(-45deg)}.ballot-option:has(input:checked){background:#e8ddbf;border-color:#736346}.ballot-option:has(input:disabled){cursor:default}
+@media(max-width:360px){#mayor-ballot header,#mayor-ballot footer,.ballot-candidates{padding:.75rem}.community-panel{padding:.75rem}.community-role-row{gap:.3rem}.community-button{padding:.5rem}}
+
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-amber-500 selection:text-slate-950">
@@ -665,6 +681,7 @@
                             <p id="card-role-desc" class="text-[11px] text-slate-300 leading-relaxed">
                                 ตื่นขึ้นมาในตอนกลางคืนเพื่อตรวจสอบบทบาทของผู้เล่น 1 คนว่าเป็นหมาป่าหรือไม่
                             </p>
+                            <div class="player-guide-action"><button id="player-role-guide" type="button" onclick="openPlayerRoleGuide(event)">📖 ดูคู่มือบทบาท</button></div>
                         </div>
                     </div>
                 </div>
@@ -1298,6 +1315,107 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
             lastNightResultText: '- เริ่มต้นเกมคืนแรก -'
         };
 
+// Community features: host state stays private; only explicit projections cross the wire.
+let community = freshCommunity(), communityView = null, communityOwn = null;
+let communityPending = null, ballotChoice = null, lobbyDraft = null;
+function mayorCandidateChoice(name){return 'player:'+name;}
+function mayorChoiceName(choice){return choice.slice(7);}
+function mayorChoiceLabel(choice){return choice==='no:'?'Vote No':mayorChoiceName(choice);}
+function freshCommunity(){return {epoch: crypto.randomUUID(),revision:0,election:null,mayor:null,mayorStatus:'ยังไม่มีผู้ใหญ่บ้าน',survey:{id:crypto.randomUUID(),open:false,locked:false,votes:{},versions:{}}};}
+function communityAlive(){return gameState.players.filter(p=>gameState.playerStatus[p]?.alive);}
+function communityReconcile(){if(community.mayor&&!communityAlive().includes(community.mayor)){community.mayorStatus=community.mayor+' — เสียชีวิต';community.mayor=null;community.revision++;}}
+function communityTotals(){const counts=Object.fromEntries(ROLES_DATABASE.map(r=>[r.id,0]));for(const [id,roles] of Object.entries(community.survey.votes))if(joinedPlayers.some(p=>p.id===id))for(const r of roles)counts[r]++;return counts;}
+function communityPublic(){communityReconcile();const e=community.election;return {epoch:community.epoch,revision:community.revision,started:isGameStarted||!!gameState.offlineGame,mayor:community.mayor,mayorStatus:community.mayorStatus,election:e?{id:e.id,phase:e.phase,candidates:e.candidates.filter(p=>communityAlive().includes(p)),result:e.phase==='announced'?e.result:null}:null,survey:{id:community.survey.id,open:community.survey.open,locked:community.survey.locked,totals:communityTotals()}};}
+function communityPrivate(id){const p=activeRoleAssignments[id]?.playerName;return {ballot:community.election?.ballots[id]??null,alive:!!gameState.playerStatus[p]?.alive,selected:community.survey.votes[id]||[],version:community.survey.versions[id]||0};}
+function communitySend(conn,requestId=null,error=''){if(!conn?.open||!conn.wwPlayerId||!joinedPlayers.some(p=>p.id===conn.wwPlayerId)&&!activeRoleAssignments[conn.wwPlayerId])return;conn.send({type:'COMMUNITY_STATE',room:activeRoomCode,public:communityPublic(),own:communityPrivate(conn.wwPlayerId),requestId,error});}
+function communityPublish(){if(!isMod)return;community.revision++;Object.values(connectedPeers).forEach(c=>communitySend(c));renderCommunity();}
+function communityRequest(data,conn){
+ if(!isMod||!conn||connectedPeers[conn.peer]!==conn||!conn.open)return;
+ const id=conn.wwPlayerId, member=joinedPlayers.some(p=>p.id===id)||!!activeRoleAssignments[id];if(!id||!member)return;
+ let error='';const e=community.election,s=community.survey;
+ if(data.type==='COMMUNITY_SYNC'){communitySend(conn);return;}
+ if(data.epoch!==community.epoch)error='สถานะห้องเปลี่ยนแล้ว กรุณาลองอีกครั้ง';
+ else if(data.type==='MAYOR_BALLOT'){
+  const p=activeRoleAssignments[id]?.playerName;
+  if(!e||data.electionId!==e.id)error='บัตรเลือกตั้งหมดอายุ';
+  else if(Object.hasOwn(e.ballots,id)){if(e.ballots[id]!==data.choice)error='ยืนยันแล้ว ไม่สามารถเปลี่ยนบัตรได้';}
+  else if(e.phase!=='open'||!isGameStarted||!communityAlive().includes(p))error='ไม่สามารถลงคะแนนในขณะนี้';
+  else if(data.choice!=='no:'&&(typeof data.choice!=='string'||!data.choice.startsWith('player:')||!e.candidates.includes(mayorChoiceName(data.choice))||!communityAlive().includes(mayorChoiceName(data.choice))))error='ผู้สมัครไม่พร้อมรับคะแนน';
+  else e.ballots[id]=data.choice;
+ }else if(data.type==='ROLE_SURVEY'){
+  if(s.locked||!s.open||isGameStarted||data.surveyId!==s.id)error='ปิดการสำรวจแล้ว';
+  else if(data.version!==(s.versions[id]||0))error='ข้อมูลเปลี่ยนแล้ว กรุณาเลือกใหม่';
+  else if(!Array.isArray(data.selected)||data.selected.length>3||new Set(data.selected).size!==data.selected.length||data.selected.some(r=>!ROLES_DATABASE.some(x=>x.id===r)))error='เลือกได้ไม่เกิน 3 บทที่รองรับ';
+  else {s.votes[id]=[...data.selected];s.versions[id]=(s.versions[id]||0)+1;}
+ }else return;
+ community.revision++;communitySend(conn,data.requestId,error);Object.values(connectedPeers).filter(c=>c!==conn).forEach(c=>communitySend(c));renderCommunity();
+}
+function openMayorElection(){if(!isMod||!isGameStarted||gameState.offlineGame||community.mayor||community.election&&community.election.phase!=='announced')return;community.election={id:crypto.randomUUID(),phase:'open',candidates:communityAlive(),ballots:{},totals:null,result:null};communityPublish();}
+function closeMayorElection(){const e=community.election;if(!isMod||e?.phase!=='open')return;e.phase='closed';e.totals=Object.fromEntries([...e.candidates.map(mayorCandidateChoice),'no:'].map(p=>[p,0]));Object.values(e.ballots).forEach(p=>e.totals[p]++);communityPublish();}
+function announceMayor(){const e=community.election;if(!isMod||e?.phase!=='closed')return;const max=Math.max(0,...Object.values(e.totals)),winners=Object.keys(e.totals).filter(p=>e.totals[p]===max);e.result=max>0&&winners.length===1&&winners[0]!=='no:'&&communityAlive().includes(mayorChoiceName(winners[0]))?mayorChoiceName(winners[0]):null;e.phase='announced';community.mayor=e.result;community.mayorStatus=e.result?'ดำรงตำแหน่ง':'ไม่มีผู้ใหญ่บ้านรอบนี้';communityPublish();renderPlayerStatusList();}
+function impeachmentThreshold(){return Math.floor(Math.max(0,communityAlive().length-1)/2)+1;}
+function impeachMayor(){communityReconcile();if(!isMod||!community.mayor)return;if(!confirm('ยืนยันผลยกมือจริงอย่างน้อย '+impeachmentThreshold()+' เสียง จากผู้มีชีวิตทุกฝ่ายยกเว้นผู้ใหญ่บ้าน?'))return;community.mayorStatus=community.mayor+' — ถูกถอดถอน';community.mayor=null;communityPublish();renderPlayerStatusList();}
+function toggleRoleSurvey(){if(!isMod||isGameStarted||community.survey.locked)return;community.survey.open=!community.survey.open;communityPublish();}
+function sendCommunityAction(type,extra){if(communityPending||!playerModConn?.open){communityMessage('ยังไม่ส่ง: รอเชื่อมต่อ Mod');return;}const requestId=crypto.randomUUID();communityPending={requestId,type};playerModConn.send({type,room:activeRoomCode,epoch:communityView.epoch,requestId,...extra});renderCommunity();setTimeout(()=>{if(communityPending?.requestId===requestId){communityPending=null;renderCommunity();communityMessage('ยังไม่ได้รับการยืนยันจาก Mod — เชื่อมต่อแล้วลองอีกครั้ง');}},8000);}
+function submitMayorBallot(){if(ballotChoice===null||!communityView?.election)return;sendCommunityAction('MAYOR_BALLOT',{electionId:communityView.election.id,choice:ballotChoice});}
+function selectSurveyRole(id){const a=[...(communityOwn?.selected||[])],i=a.indexOf(id);if(i>=0)a.splice(i,1);else if(a.length<3)a.push(id);else {communityMessage('เลือกได้สูงสุด 3 บท');return;}sendCommunityAction('ROLE_SURVEY',{surveyId:communityView.survey.id,version:communityOwn?.version||0,selected:a});}
+function communityMessage(text){document.querySelectorAll('[data-community-message]').forEach(n=>n.textContent=text);}
+function beginLobbyEdit(){if(!isMod||isGameStarted||lobbyDraft)return;lobbyDraft={counts:{...currentRoleCounts},drunk:gameState.pendingDrunkRole};renderRolesBuilder();updateBalanceCalculations();showScreen('screen-role-select');renderLobbyEdit();}
+function renderLobbyEdit(){const b=document.querySelector('[onclick="confirmRolesAndCreateRoom()"]');if(b&&lobbyDraft)b.textContent='บันทึกและกลับล็อบบี้';const back=document.querySelector("#screen-role-select .flex.gap-2 > button");if(back&&lobbyDraft){back.onclick=cancelLobbyEdit;back.textContent='ยกเลิกการแก้ไข';}}
+function finishLobbyEdit(save){if(!lobbyDraft||!isMod||isGameStarted)return false;if(save){const n=Object.values(currentRoleCounts).reduce((a,b)=>a+b,0);if(n<Math.max(3,joinedPlayers.length)){alert('จำนวนบทต้องไม่น้อยกว่าผู้เล่นล่าสุด ('+joinedPlayers.length+' คน)');return false;}if(currentRoleCounts.drunk&&!validDrunkRole(gameState.pendingDrunkRole)){alert('กรุณากำหนดบทบาทจริงของ Drunk');return false;}gameState.selectedRoles=ROLES_DATABASE.flatMap(r=>Array(currentRoleCounts[r.id]||0).fill(r.id));}else {currentRoleCounts={...lobbyDraft.counts};gameState.pendingDrunkRole=lobbyDraft.drunk;}lobbyDraft=null;updateModLobbyUI();broadcastRoomStateUpdate();showScreen('screen-mod-lobby');return true;}
+function cancelLobbyEdit(){finishLobbyEdit(false);}
+// DOM is constructed with textContent for all names/labels. No role pool or secret card enters these panels.
+function communityNode(tag,text,cls){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;}
+function communityButton(text,fn,disabled=false){const b=communityNode('button',text,'community-button');b.type='button';b.onclick=fn;b.disabled=disabled;return b;}
+function communityPanel(host,id){let p=document.getElementById(id);if(!p){p=communityNode('section',undefined,'community-panel');p.id=id;host.append(p);}return p;}
+function renderCommunity(){
+ const view=isMod?communityPublic():communityView;if(!view)return;
+ const lobby=document.getElementById(isMod?'screen-mod-lobby':'screen-player-waiting');
+ if(lobby){const panel=communityPanel(lobby,'community-survey');renderSurveyPanel(panel,view);}
+ const game=document.getElementById(isMod?'gameplay-screen':'screen-player-card');
+ if(game){const panel=communityPanel(game,'community-mayor');panel.replaceChildren();panel.append(communityNode('h3','🏅 ผู้ใหญ่บ้านปัจจุบัน'),communityNode('p',view.mayor?view.mayor+' 🏅':view.mayorStatus));if(view.mayor)panel.append(communityNode('p','คะแนนโหวตประหาร ×2','community-muted'));
+ if(isMod){if(gameState.offlineGame){panel.append(communityNode('p','โหมดเครื่องเดียว: ยังไม่รองรับเลือกตั้งผู้ใหญ่บ้าน / รับบัตรออนไลน์','community-muted'));return;}const e=community.election;panel.append(communityButton('เปิดเลือกตั้งผู้ใหญ่บ้าน',openMayorElection,!isGameStarted||!!view.mayor||!!e&&e.phase!=='announced'));
+ if(view.mayor){panel.append(communityNode('p','ถอดถอนโดยยกมือจริง: ทุกฝ่ายที่มีชีวิตยกเว้นผู้ใหญ่บ้าน คนละ 1 เสียง ต้องอย่างน้อย '+impeachmentThreshold()+' เสียง'),communityButton('ยืนยันผลถอดถอน',impeachMayor));}
+ if(e){panel.append(communityNode('p',e.phase==='open'?'กำลังรับบัตร • ยืนยันแล้ว '+Object.keys(e.ballots).length+' ใบ':e.phase==='closed'?'ปิดหีบแล้ว • ผลยังไม่ประกาศ':'ประกาศผลแล้ว'));if(e.phase==='open')panel.append(communityButton('ปิดหีบ',closeMayorElection));if(e.phase==='closed')panel.append(communityButton('ประกาศผล',announceMayor));if(e.phase!=='open'){panel.append(communityNode('h4','คะแนนรวม'));for(const [name,n] of Object.entries(e.totals))panel.append(communityNode('p',mayorChoiceLabel(name)+' · '+n));}const detail=communityNode('details');detail.append(communityNode('summary','รายละเอียดการลงคะแนน'));for(const [id,choice] of Object.entries(e.ballots))detail.append(communityNode('p',(activeRoleAssignments[id]?.playerName||'ผู้เล่น')+' → '+mayorChoiceLabel(choice)));panel.append(detail);}
+ }else {const e=view.election;if(e){panel.append(communityNode('p',e.phase==='open'?'เปิดรับบัตรเลือกตั้ง • ไม่แสดงคะแนนสด':e.phase==='closed'?'ปิดหีบแล้ว รอ Mod ประกาศผล':'ผลเลือกตั้ง: '+(e.result||'ไม่มีผู้ใหญ่บ้าน')));if(e.phase==='open')panel.append(communityButton(communityOwn?.ballot!==null&&communityOwn?.ballot!==undefined?'ดูบัตรที่ยืนยันแล้ว':'เปิดบัตรเลือกตั้ง',openMayorBallot,!communityOwn?.alive));}const msg=communityNode('p',undefined,'community-muted');msg.dataset.communityMessage='';msg.setAttribute('role','status');panel.append(msg);}
+ }
+ if(document.getElementById('mayor-ballot')?.open)renderMayorBallot();
+}
+// Keep controls and rows alive across heartbeat renders; update only their state.
+function renderSurveyPanel(panel,view){
+ const s=view.survey,selected=isMod?[]:communityOwn?.selected||[];
+ let ui=panel.surveyUI;
+ if(!ui){
+  ui=panel.surveyUI={rows:new Map(),chips:new Map()};
+  panel.append(communityNode('h3','📋 สำรวจบทที่อยากให้มี'),communityNode('p','ข้อเสนอเท่านั้น ไม่เพิ่มบทหรือกำหนดบทให้ผู้โหวต • เลือกได้สูงสุด 3 บท','community-muted'));
+  if(isMod){ui.edit=communityButton('แก้ไขชุดบทบาท',beginLobbyEdit);ui.toggle=communityButton('เปิดสำรวจ',toggleRoleSurvey);panel.append(ui.edit,ui.toggle);}
+  ui.status=communityNode('p');panel.append(ui.status);
+  if(!isMod){ui.chipList=communityNode('div',undefined,'community-chips');ui.empty=communityNode('span','ยังไม่ได้เลือก','community-muted');ui.chipList.append(ui.empty);panel.append(communityNode('h4','บทที่คุณเลือก'),ui.chipList);}
+  ui.ranking=communityNode('div',undefined,'community-ranking');panel.append(communityNode('h4','Top 3'),ui.ranking,communityNode('h4','บทบาททั้งหมด'));
+  ui.list=communityNode('div',undefined,'community-role-list');
+  for(const r of ROLES_DATABASE){const row=communityNode('div',undefined,'community-role-row'),detail=communityButton(r.icon+' '+r.name,()=>{openRoleGuide();renderGuideRole(r.id,true);}),score=communityNode('span','0','community-score');detail.dataset.communityFocus='detail-'+r.id;row.append(detail,score);let select=null;if(!isMod){select=communityButton('เลือก',()=>selectSurveyRole(r.id));select.dataset.communityFocus='select-'+r.id;row.append(select);}ui.rows.set(r.id,{row,detail,score,select});ui.list.append(row);}
+  ui.message=communityNode('p','','community-muted');ui.message.dataset.communityMessage='';ui.message.setAttribute('role','status');panel.append(ui.list,ui.message);
+ }
+ if(isMod){ui.edit.disabled=isGameStarted;ui.toggle.textContent=s.open?'ปิดสำรวจ':'เปิดสำรวจ';ui.toggle.disabled=s.locked||isGameStarted;}
+ ui.status.textContent=s.locked?'ล็อกแล้ว — เริ่มเกมแล้ว':s.open?'เปิดสำรวจ • คะแนนรวมสาธารณะ':'ปิดสำรวจ';
+ if(!isMod){
+  for(const [id,b] of ui.chips)if(!selected.includes(id)){b.remove();ui.chips.delete(id);}
+  selected.forEach((id,i)=>{let b=ui.chips.get(id);if(!b){const r=ROLES_DATABASE.find(r=>r.id===id);b=communityButton((r?.icon||'')+' '+(r?.name||id)+' · ถอน',()=>selectSurveyRole(id));b.dataset.communityFocus='chip-'+id;ui.chips.set(id,b);}b.disabled=!s.open||s.locked||!!communityPending;const at=ui.chipList.children[i];if(at!==b)ui.chipList.insertBefore(b,at||null);});
+  ui.empty.hidden=!!selected.length;
+ }
+ const top=ROLES_DATABASE.map((r,i)=>({r,i,n:s.totals[r.id]||0})).filter(x=>x.n>0).sort((a,b)=>b.n-a.n||a.i-b.i).slice(0,3);
+ const rankText=top.map((x,i)=>(i+1)+'. '+x.r.icon+' '+x.r.name+' · '+x.n).join('\n')||'ยังไม่มีคะแนน';if(ui.ranking.textContent!==rankText)ui.ranking.textContent=rankText;
+ for(const r of ROLES_DATABASE){const {score,select}=ui.rows.get(r.id);score.textContent=String(s.totals[r.id]||0);if(select){const chosen=selected.includes(r.id);select.textContent=chosen?'ถอน':'เลือก';select.disabled=!s.open||s.locked||!!communityPending||!chosen&&selected.length>=3;select.setAttribute('aria-pressed',String(chosen));select.setAttribute('aria-label',(chosen?'ถอน ':'เลือก ')+r.name);}}
+ ui.message.textContent=communityPending?'กำลังส่ง — รอ Mod ยืนยัน':'';
+}
+
+let ballotReturnFocus=null;
+function openMayorBallot(){ballotReturnFocus=document.activeElement;ballotChoice=communityOwn?.ballot??null;let d=document.getElementById('mayor-ballot');if(!d){d=communityNode('dialog');d.id='mayor-ballot';d.setAttribute('aria-labelledby','mayor-ballot-title');d.addEventListener('close',()=>ballotReturnFocus?.focus());document.body.append(d);}renderMayorBallot();d.showModal();}
+function renderMayorBallot(){const d=document.getElementById('mayor-ballot'),e=communityView?.election;if(!d||!e)return;const focused=document.activeElement?.dataset.ballotIndex,scroll=d.querySelector('.ballot-candidates')?.scrollTop||0;d.replaceChildren();const heading=communityNode('h2','บัตรเลือกตั้งผู้ใหญ่บ้าน');heading.id='mayor-ballot-title';const header=communityNode('header');header.append(heading,communityNode('p','เลือกหนึ่งตัวเลือก • โหวตตัวเองได้ • ยืนยันแล้วเปลี่ยนไม่ได้'));d.append(header);const list=communityNode('div',undefined,'ballot-candidates');const confirmed=communityOwn?.ballot!==null&&communityOwn?.ballot!==undefined;[...e.candidates.map(mayorCandidateChoice),'no:'].forEach((name,i)=>{const label=communityNode('label',undefined,'ballot-option');const radio=communityNode('input');radio.type='radio';radio.name='mayor-choice';radio.checked=(confirmed?communityOwn.ballot:ballotChoice)===name;radio.disabled=confirmed||!!communityPending||e.phase!=='open'||!communityOwn?.alive;radio.dataset.ballotIndex=String(i);radio.onchange=()=>{ballotChoice=name;renderMayorBallot();};const box=communityNode('span',undefined,'ballot-cross');box.setAttribute('aria-hidden','true');label.append(radio,box,communityNode('span',name==='no:'?'Vote No — ไม่เลือกผู้ใด':mayorChoiceName(name)));list.append(label);});d.append(list);list.scrollTop=scroll;const footer=communityNode('footer');const status=communityNode('p',confirmed?'Mod รับบัตรแล้ว ✓':communityPending?'กำลังส่ง — รอ Mod ยืนยัน':e.phase!=='open'?'ปิดหีบแล้ว':'Mod สามารถดูได้ว่าใครเลือกใคร');status.setAttribute('role','status');status.dataset.communityMessage='';footer.append(status,communityButton('ยืนยันลงคะแนนเสียง',submitMayorBallot,confirmed||!!communityPending||ballotChoice===null||e.phase!=='open'||!communityOwn?.alive),communityNode('p','เนื่องจาก กกต. ระบุ QR code บนบัตรเลือกตั้ง Mod จึงสามารถดูรายละเอียดการลงคะแนนได้','ballot-footnote'),communityButton('ปิดบัตร',()=>d.close()));d.append(footer);if(focused!==undefined)d.querySelector('[data-ballot-index="'+focused+'"]')?.focus({preventScroll:true});}
+
+function restoreLobbyButtons(){const back=document.querySelector('#screen-role-select .flex.gap-2 > button');if(back){back.onclick=()=>showScreen('screen-home');back.textContent='ย้อนกลับ';}const b=document.querySelector('[onclick="confirmRolesAndCreateRoom()"]');if(b)b.textContent='ตกลง & รับ QR Code';}
+function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn||!data.public||!data.own)return;if(communityView?.epoch===data.public.epoch&&data.public.revision<communityView.revision)return;const changed=communityView?.election?.id!==data.public.election?.id;if(changed){ballotChoice=null;document.getElementById('mayor-ballot')?.close();}communityView=data.public;communityOwn=data.own;if(communityPending?.requestId===data.requestId)communityPending=null;renderCommunity();if(data.error)communityMessage(data.error);}
+
         let timerInterval = null;
         let timeLeft = 60;
         let totalTime = 60;
@@ -1335,6 +1453,7 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
             if (screenId === 'screen-player-waiting') statusEl.innerText = 'รอสมาชิกให้ครบทีม...';
             if (screenId === 'screen-player-card') statusEl.innerText = 'บทบาทลับของคุณ';
             if (screenId === 'gameplay-screen') statusEl.innerText = 'สถานะ: เกมกำลังดำเนินอยู่';
+            renderCommunity();
         }
 
         window.onload = function() {
@@ -1659,6 +1778,7 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
         }
 
         function acknowledgeJoin(conn) {
+            communitySend(conn);
             const p = joinedPlayers.find(p => p.id === conn.wwPlayerId);
             if (conn.open && p) conn.send({type:'JOIN_ACK', room:activeRoomCode,
                 id:p.id, name:p.name, requestId:conn.wwJoinRequestId, joinedCount:joinedPlayers.length});
@@ -1811,6 +1931,8 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
 
         function handleIncomingMessage(data, conn) {
             if (!data || data.room !== activeRoomCode) return;
+            if(["COMMUNITY_SYNC","MAYOR_BALLOT","ROLE_SURVEY"].includes(data.type)){communityRequest(data,conn);return;}
+            if(data.type==="COMMUNITY_STATE"){receiveCommunityState(data,conn);return;}
             if (!isMod && ['GAME_STARTED_ASSIGNMENTS','TRAVELER_OFFER','JOIN_ERROR','JOIN_ACK','PLAYER_KICKED'].includes(data.type) && (!conn || conn !== playerModConn)) return;
             if (!isMod && ['JOIN_ACK','JOIN_ERROR','TRAVELER_OFFER','GAME_STARTED_ASSIGNMENTS'].includes(data.type) && (!joinIntent || data.requestId !== joinRequestId)) return;
             if (!isMod && data.type === 'JOIN_ACK') { if (data.id === myDeviceId) acceptJoin(data.name); return; }
@@ -1855,6 +1977,7 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
                 } else if (existingByName) {
                     rejectJoin(conn, 'ชื่อนี้มีผู้เล่นใช้แล้ว'); return;
                 } else {
+                    if(joinedPlayers.length>=getTotalPlayersCount()){rejectJoin(conn,"ห้องเต็มแล้ว รอ Mod เพิ่มจำนวนบท");return;}
                     joinedPlayers.push({ id: data.id, name: uniqueName });
                 }
                 acknowledgeJoin(conn);
@@ -1908,7 +2031,7 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
 
                 const friendsEl = document.getElementById('player-friends-preview');
                 if (friendsEl && Array.isArray(data.playersList)) {
-                    friendsEl.innerHTML = `<span class="text-slate-400">เพื่อนในห้อง: </span>` + data.playersList.map(n => `<span class="px-1.5 py-0.5 rounded bg-slate-800 text-amber-300 mr-1 inline-block text-[10px]">${n}</span>`).join('');
+                    friendsEl.innerHTML = `<span class="text-slate-400">เพื่อนในห้อง: </span>` + data.playersList.map(n => `<span class="px-1.5 py-0.5 rounded bg-slate-800 text-amber-300 mr-1 inline-block text-[10px]">${safeGuideMarkup(n)}</span>`).join('');
                 }
 
                 // Also update join screen count preview
@@ -1958,6 +2081,7 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
             // PLAYERS RECEIVE GAME RESET FROM MOD
             if (!isMod && data.type === 'GAME_RESET') {
                 myAssignedRole = null; lastCardDelivery = null; requestedTravelerKind = null;
+                closePlayerRoleGuide();
                 closeTravelerModal();
                 try {
                     sessionStorage.removeItem('ww_assigned_role');
@@ -1995,6 +2119,7 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
         // STEP 1: ROLE SELECTION & BALANCE CALCULATOR
         // ---------------------------------------------
         function startCreateRoom() {
+            lobbyDraft=null;restoreLobbyButtons();
             renderRolesBuilder();
             updateBalanceCalculations();
             showScreen('screen-role-select');
@@ -2077,6 +2202,7 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
         }
 
         function getTotalPlayersCount() {
+            if(lobbyDraft)return Object.values(lobbyDraft.counts).reduce((a,b)=>a+b,0);
             let total = 0;
             for (let id in currentRoleCounts) {
                 total += currentRoleCounts[id] || 0;
@@ -2146,6 +2272,8 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
         // STEP 2: GENERATE QR CODE & ROOM LOBBY
         // ---------------------------------------------
         function confirmRolesAndCreateRoom() {
+            if(lobbyDraft){finishLobbyEdit(true);return;}
+            community=freshCommunity(); gameState.offlineGame=false;
             const totalPlayers = getTotalPlayersCount();
             if (totalPlayers < 3) {
                 alert('กรุณาเลือก Role ให้มีจำนวนผู้เล่นอย่างน้อย 3 คนขึ้นไป');
@@ -2272,6 +2400,7 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
         }
 
         function updateModLobbyUI() {
+            if(isMod)communityPublish();
             const total = getTotalPlayersCount();
             const current = joinedPlayers.length;
             document.getElementById('mod-joined-count').innerText = current;
@@ -2401,6 +2530,8 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
         }
 
         function triggerGameStart() {
+            if(!isMod||lobbyDraft)return;
+            if(joinedPlayers.length!==gameState.selectedRoles.length){alert("จำนวนผู้เล่นต้องตรงกับชุดบทที่บันทึกไว้");return;}
             if(gameState.selectedRoles.includes('drunk')&&!validDrunkRole(gameState.pendingDrunkRole)){alert('กรุณากำหนดบทบาทจริงของ Drunk ก่อนเริ่มเกม');return;}
             if (isGameStarted) {
                 console.warn('Game already started! Ignoring duplicate trigger.');
@@ -2416,6 +2547,7 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
             }
 
             isGameStarted = true;
+            community.survey.open=false;community.survey.locked=true;
             currentGameSessionId = activeRoomCode + '_' + Date.now();
 
             const startBtn = document.getElementById('btn-force-start');
@@ -2543,6 +2675,7 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
         }
         function renderPlayerCard(roleInfo) {
             roleInfo = normalizeRoleAssignment(roleInfo);
+            closePlayerRoleGuide();
             paintPlayerArtwork(false);
             playerCardRoleId = cardArtIdentity(roleInfo);
             document.getElementById('card-front-content').dataset.roleId = roleInfo.roleId;
@@ -2730,6 +2863,7 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
         }
 
         function startOfflineGame() {
+            community=freshCommunity();
             if([...document.querySelectorAll('.match-select-offline')].some(s=>s.dataset.role==='drunk')&&!validDrunkRole(gameState.pendingDrunkRole)){alert('กรุณากำหนดบทบาทจริงของ Drunk ก่อนเริ่มเกม');return;}
             isMod = true;
             isGameStarted = false;
@@ -3099,6 +3233,7 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
         }
 
         function renderPlayerStatusList() {
+            if(isMod)communityPublish();
             const statusList = document.getElementById('player-status-list');
             statusList.innerHTML = '';
 
@@ -3136,7 +3271,7 @@ function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.rol
                     <div class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-700 flex items-center justify-between ${opacityClass}">
                         <div class="space-y-0.5 flex-1">
                             <div class="flex items-center space-x-1.5 flex-wrap">
-                                <span class="font-semibold text-slate-100 text-xs">${p}</span>
+                                <span class="font-semibold text-slate-100 text-xs">${safeGuideMarkup(p)}${community.mayor===p?" 🏅":""}</span>
                                 ${loverBadge}
                                 ${cultBadge}
                                 ${wolfTurnBadge}
@@ -5381,6 +5516,40 @@ function guideTeam(r) { return r.category === 'traveler' ? 'traveler' : ROLE_GUI
 const GUIDE_ART_STEMS = Object.freeze({ wolf_cub:'wolf_cub', mad_bomber:'mad_bomber', apprentice_seer:'apprentice_seer', tough_guy:'tough_guy', disease:'diseased', diseased:'diseased', sorceress:'sorceress', sorcerer:'sorcerer', count_dracula:'count_dracula', grave_robber:'grave_robber', mad_destroyer:'mad_destroyer', assassin:'assassin', the_cloak:'the_cloak', apprentice_illusionist:'apprentice_illusionist', illusion_artist:'illusion_artist', magician:'magician' });
 function guideFactionMarkup(r, text) { const labels={village:'ชาวบ้าน',wolf:'หมาป่า',independent:'อิสระ',changing:'เปลี่ยนฝ่าย'}; const colors={ชาวบ้าน:'#60a5fa',หมาป่า:'#ef4444',อิสระ:'#b4b16a',เปลี่ยนฝ่าย:'#d8b4fe'}; const label=r.category==='traveler'?text:labels[guideTeam(r)]; return safeGuideMarkup(label || text || '').replace(/ชาวบ้าน|หมาป่า|อิสระ|เปลี่ยนฝ่าย/g, word => '<span style="color:'+colors[word]+'">'+word+'</span>'); }
 function guideArtPath(r, thumbnail = false) { return './Assets/role-guide/' + (thumbnail ? 'thumbs/' : '') + (GUIDE_ART_STEMS[r.id] || r.id) + '.webp'; }
+// Player entry reads ONLY the role already disclosed on the rendered card.
+function openPlayerRoleGuide(event){
+ event?.stopPropagation();
+ const card=document.getElementById('player-card-inner');
+ if(!card.classList.contains('flipped'))return;
+ const id=document.getElementById('card-front-content').dataset.roleId;
+ if(!guideCatalog().some(r=>r.id===id))return;
+ const dialog=document.getElementById('role-guide');
+ if(dialog.open)return;
+ guideReturnFocus=document.getElementById('player-role-guide');
+ dialog.classList.add('rg-public','rg-player');
+ document.getElementById('rg-close').textContent='ปิดคู่มือ';
+ document.getElementById('rg-show').hidden=true;
+ document.getElementById('rg-browse').hidden=true;
+ renderGuideRole(id,false);
+ dialog.showModal();
+ focusGuideSection(document.getElementById('rg-detail'));
+}
+function clearPlayerGuideArt(){
+ const dialog=document.getElementById('role-guide');
+ if(!dialog?.classList.contains('rg-player'))return;
+ const viewer=document.getElementById('rg-art-viewer');
+ if(viewer.open)viewer.close();
+ const full=document.getElementById('rg-full-art');
+ full.removeAttribute('src');
+ full.alt='';
+ document.getElementById('rg-art-title').textContent='';
+}
+function closePlayerRoleGuide(){
+ const dialog=document.getElementById('role-guide');
+ if(!dialog?.classList.contains('rg-player'))return;
+ clearPlayerGuideArt();
+ if(dialog.open)dialog.close();
+}
 let guideReturnFocus = null;
 let guideSelectedId = null;
 function guideCatalog() {
@@ -5399,7 +5568,7 @@ function openRoleGuide() {
     const dialog = document.getElementById('role-guide');
     if (dialog.open) return;
     guideReturnFocus = document.activeElement;
-    dialog.classList.remove('rg-public');
+    dialog.classList.remove('rg-public','rg-player');
     document.getElementById('rg-close').textContent = 'ปิดคู่มือ';
     document.getElementById('rg-show').hidden = false;
     document.getElementById('rg-browse').hidden = false;
@@ -5408,13 +5577,14 @@ function openRoleGuide() {
 }
 function closeRoleGuide() {
     const dialog = document.getElementById('role-guide');
-    if (dialog.classList.contains('rg-public')) browseRoleGuide();
+    if (dialog.classList.contains('rg-player')) closePlayerRoleGuide();
+    else if (dialog.classList.contains('rg-public')) browseRoleGuide();
     else dialog.close();
 }
 document.getElementById('role-guide').addEventListener('cancel', event => {
-    if (event.currentTarget.classList.contains('rg-public')) { event.preventDefault(); browseRoleGuide(); }
+    if (!event.currentTarget.classList.contains('rg-player') && event.currentTarget.classList.contains('rg-public')) { event.preventDefault(); browseRoleGuide(); }
 });
-document.getElementById('role-guide').addEventListener('close', () => { if (guideReturnFocus && guideReturnFocus.isConnected) guideReturnFocus.focus(); });
+document.getElementById('role-guide').addEventListener('close', () => { clearPlayerGuideArt(); if (guideReturnFocus && guideReturnFocus.isConnected) guideReturnFocus.focus(); });
 function guideGroup(r) { return r.guideGroup || setupGroup(r); }
 function isGuideWolfSupporter(r) { return r.category !== 'traveler' && ['sorceress', 'sorcerer', 'the_cloak', 'apprentice_illusionist', 'illusion_artist'].includes(r.id); }
 function renderGuideCategory(category) {
