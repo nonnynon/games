@@ -320,9 +320,11 @@
 #community-mayor details > * + *,#community-mayor [data-mayor-totals] > * + *{margin-top:.5rem}
 #community-mayor summary{min-height:24px;cursor:pointer}
 #community-mayor summary:focus-visible{outline:2px solid #fbbf24;outline-offset:2px}
-#mayor-ballot{font-family:'Prompt',sans-serif;width:min(94vw,32rem);max-height:92dvh;border:1px solid #c8b893;border-radius:.75rem;background:#f6efdc;color:#302b23;padding:0;box-shadow:0 24px 80px #0009}
+#mayor-ballot{font-family:'Prompt',sans-serif;width:min(94vw,32rem);height:calc(100dvh - 2rem);max-height:calc(100dvh - 2rem);box-sizing:border-box;overflow-y:auto;border:1px solid #c8b893;border-radius:.75rem;background:#f6efdc;color:#302b23;padding:0;box-shadow:0 24px 80px #0009}
 #mayor-ballot[open]{display:flex;flex-direction:column}#mayor-ballot::backdrop{background:#020617cc}#mayor-ballot header,#mayor-ballot footer{padding:1rem 1.25rem;flex:none}#mayor-ballot header{border-bottom:1px solid #c8b893}#mayor-ballot h2{font-size:1.2rem;font-weight:600}#mayor-ballot p{font-size:.8rem;line-height:1.65;margin:.35rem 0}#mayor-ballot footer{border-top:1px solid #c8b893;display:grid;gap:.4rem}#mayor-ballot .ballot-footnote{font-size:.68rem;color:#655943}#mayor-ballot .community-button{background:#ece1c5;color:#302b23;border-color:#b4a17b}#mayor-ballot footer .community-button:first-of-type{background:#493f2d;color:#fff9e8}
-.ballot-candidates{overflow-y:auto;min-height:0;flex:1;padding:.75rem 1.25rem;display:grid;gap:.6rem}.ballot-option{position:relative;display:grid;grid-template-columns:2rem minmax(0,1fr);align-items:center;gap:.8rem;padding:.8rem;border:1px solid #c8b893;border-radius:.75rem;min-height:56px;overflow-wrap:anywhere;cursor:pointer}.ballot-option input{position:absolute;width:1px;height:1px;opacity:0}.ballot-cross{position:relative;width:1.8rem;height:1.8rem;border:2px solid #736346;border-radius:.25rem}.ballot-option input:checked + .ballot-cross:before,.ballot-option input:checked + .ballot-cross:after{content:'';position:absolute;left:50%;top:50%;width:1.35rem;height:3px;background:#302b23;transform:translate(-50%,-50%) rotate(45deg)}.ballot-option input:checked + .ballot-cross:after{transform:translate(-50%,-50%) rotate(-45deg)}.ballot-option:has(input:checked){background:#e8ddbf;border-color:#736346}.ballot-option:has(input:disabled){cursor:default}
+.ballot-candidates{overflow-y:auto;min-height:12rem;flex:1 0 12rem;align-content:start;grid-auto-rows:minmax(56px,auto);padding:.75rem 1.25rem;display:grid;gap:.6rem}.ballot-option{position:relative;display:grid;grid-template-columns:2rem minmax(0,1fr);align-items:center;gap:.8rem;padding:.8rem;border:1px solid #c8b893;border-radius:.75rem;min-height:56px;overflow-wrap:anywhere;cursor:pointer}.ballot-option input{position:absolute;width:1px;height:1px;opacity:0}.ballot-cross{position:relative;width:1.8rem;height:1.8rem;border:2px solid #736346;border-radius:.25rem}.ballot-option input:checked + .ballot-cross:before,.ballot-option input:checked + .ballot-cross:after{content:'';position:absolute;left:50%;top:50%;width:1.35rem;height:3px;background:#302b23;transform:translate(-50%,-50%) rotate(45deg)}.ballot-option input:checked + .ballot-cross:after{transform:translate(-50%,-50%) rotate(-45deg)}.ballot-option:has(input:checked){background:#e8ddbf;border-color:#736346}.ballot-option:has(input:disabled){cursor:default}
+/* Short viewports scroll the entire paper, not a squeezed nested list. */
+@media(max-height:620px){#mayor-ballot .ballot-candidates{flex:none;overflow-y:visible;min-height:auto}}
 @media(max-width:360px){#mayor-ballot header,#mayor-ballot footer,.ballot-candidates{padding:.75rem}.community-panel{padding:.75rem}.community-role-row{gap:.3rem}.community-button{padding:.5rem}}
 
 </style>
@@ -1427,10 +1429,10 @@ function renderSurveyPanel(panel,view){
 
 let ballotReturnFocus=null;
 function openMayorBallot(){ballotReturnFocus=document.activeElement;ballotChoice=communityOwn?.ballot??null;let d=document.getElementById('mayor-ballot');if(!d){d=communityNode('dialog');d.id='mayor-ballot';d.setAttribute('aria-labelledby','mayor-ballot-title');d.addEventListener('close',()=>ballotReturnFocus?.focus());document.body.append(d);}renderMayorBallot();d.showModal();}
-function renderMayorBallot(){const d=document.getElementById('mayor-ballot'),e=communityView?.election;if(!d||!e)return;const focused=document.activeElement?.dataset.ballotIndex,scroll=d.querySelector('.ballot-candidates')?.scrollTop||0;d.replaceChildren();const heading=communityNode('h2','บัตรเลือกตั้งผู้ใหญ่บ้าน');heading.id='mayor-ballot-title';const header=communityNode('header');header.append(heading,communityNode('p','เลือกหนึ่งตัวเลือก • โหวตตัวเองได้ • ยืนยันแล้วเปลี่ยนไม่ได้'));d.append(header);const list=communityNode('div',undefined,'ballot-candidates');const confirmed=communityOwn?.ballot!==null&&communityOwn?.ballot!==undefined;[...e.candidates.map(mayorCandidateChoice),'no:'].forEach((name,i)=>{const label=communityNode('label',undefined,'ballot-option');const radio=communityNode('input');radio.type='radio';radio.name='mayor-choice';radio.checked=(confirmed?communityOwn.ballot:ballotChoice)===name;radio.disabled=confirmed||!!communityPending||e.phase!=='open'||!communityOwn?.alive;radio.dataset.ballotIndex=String(i);radio.onchange=()=>{ballotChoice=name;renderMayorBallot();};const box=communityNode('span',undefined,'ballot-cross');box.setAttribute('aria-hidden','true');label.append(radio,box,communityNode('span',name==='no:'?'Vote No — ไม่เลือกผู้ใด':mayorChoiceName(name)));list.append(label);});d.append(list);list.scrollTop=scroll;const footer=communityNode('footer');const status=communityNode('p',confirmed?'Mod รับบัตรแล้ว ✓':communityPending?'กำลังส่ง — รอ Mod ยืนยัน':e.phase!=='open'?'ปิดหีบแล้ว':'Mod สามารถดูได้ว่าใครเลือกใคร');status.setAttribute('role','status');status.dataset.communityMessage='';footer.append(status,communityButton('ยืนยันลงคะแนนเสียง',submitMayorBallot,confirmed||!!communityPending||ballotChoice===null||e.phase!=='open'||!communityOwn?.alive),communityNode('p','เนื่องจาก กกต. ระบุ QR code บนบัตรเลือกตั้ง Mod จึงสามารถดูรายละเอียดการลงคะแนนได้','ballot-footnote'),communityButton('ปิดบัตร',()=>d.close()));d.append(footer);if(focused!==undefined)d.querySelector('[data-ballot-index="'+focused+'"]')?.focus({preventScroll:true});}
+function renderMayorBallot(){const d=document.getElementById('mayor-ballot'),e=communityView?.election;if(!d||!e)return;const focused=document.activeElement?.dataset.ballotIndex,scroll=d.querySelector('.ballot-candidates')?.scrollTop||0;d.replaceChildren();const heading=communityNode('h2','บัตรเลือกตั้งผู้ใหญ่บ้าน');heading.id='mayor-ballot-title';const header=communityNode('header');header.append(heading,communityNode('p','เลือกหนึ่งตัวเลือก • โหวตตัวเองได้ • ยืนยันแล้วเปลี่ยนไม่ได้'));d.append(header);const list=communityNode('div',undefined,'ballot-candidates');const confirmed=communityOwn?.ballot!==null&&communityOwn?.ballot!==undefined;[...e.candidates.map(mayorCandidateChoice),'no:'].forEach((name,i)=>{const label=communityNode('label',undefined,'ballot-option');const radio=communityNode('input');radio.type='radio';radio.name='mayor-choice';radio.checked=(confirmed?communityOwn.ballot:ballotChoice)===name;radio.disabled=confirmed||!!communityPending||e.phase!=='open'||!communityOwn?.alive;radio.dataset.ballotIndex=String(i);radio.onchange=()=>{ballotChoice=name;renderMayorBallot();};const box=communityNode('span',undefined,'ballot-cross');box.setAttribute('aria-hidden','true');label.append(radio,box,communityNode('span',name==='no:'?'Vote No — ไม่เลือกผู้ใด':mayorChoiceName(name)));list.append(label);});d.append(list);list.scrollTop=scroll;const footer=communityNode('footer');const status=communityNode('p',confirmed?'Mod ได้รับบัตรเลือกตั้งแล้ว':communityPending?.type==='MAYOR_BALLOT'?'กำลังส่งบัตรเลือกตั้ง…':e.phase!=='open'?'ปิดหีบแล้ว':'ยังไม่ได้หย่อนบัตรลงหีบเลือกตั้ง');status.setAttribute('role','status');status.dataset.communityMessage='';footer.append(status,communityButton('ยืนยันลงคะแนนเสียง',submitMayorBallot,confirmed||!!communityPending||ballotChoice===null||e.phase!=='open'||!communityOwn?.alive),communityNode('p','เนื่องจาก กกต. ระบุ QR code บนบัตรเลือกตั้ง Mod จึงสามารถดูรายละเอียดการลงคะแนนได้','ballot-footnote'),communityButton('ปิดบัตร',()=>d.close()));d.append(footer);if(focused!==undefined)d.querySelector('[data-ballot-index="'+focused+'"]')?.focus({preventScroll:true});}
 
 function restoreLobbyButtons(){const back=document.querySelector('#screen-role-select .flex.gap-2 > button');if(back){back.onclick=()=>showScreen('screen-home');back.textContent='ย้อนกลับ';}const b=document.querySelector('[onclick="confirmRolesAndCreateRoom()"]');if(b)b.textContent='ตกลง & รับ QR Code';}
-function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn||!data.public||!data.own)return;if(communityView?.epoch===data.public.epoch&&data.public.revision<communityView.revision)return;const changed=communityView?.election?.id!==data.public.election?.id;if(changed){ballotChoice=null;document.getElementById('mayor-ballot')?.close();}communityView=data.public;communityOwn=data.own;if(communityPending?.requestId===data.requestId)communityPending=null;renderCommunity();if(data.error)communityMessage(data.error);}
+function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn||!data.public||!data.own)return;if(communityView?.epoch===data.public.epoch&&data.public.revision<communityView.revision)return;const changed=communityView?.election?.id!==data.public.election?.id;if(changed){communityPending=null;ballotChoice=null;document.getElementById('mayor-ballot')?.close();}communityView=data.public;communityOwn=data.own;if(communityPending?.requestId===data.requestId)communityPending=null;renderCommunity();if(data.error)communityMessage(data.error);}
 
         let timerInterval = null;
         let timeLeft = 60;
@@ -2098,11 +2100,12 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
             if (!isMod && data.type === 'GAME_RESET') {
                 myAssignedRole = null; lastCardDelivery = null; requestedTravelerKind = null;
                 closePlayerRoleGuide();
+                clearRoundCommunity();
+                isGameStarted=false; currentGameSessionId='';
                 closeTravelerModal();
                 try {
                     sessionStorage.removeItem('ww_assigned_role');
                     sessionStorage.removeItem('ww_session_id');
-                    sessionStorage.removeItem('ww_joined_room');
                 } catch(e) {}
                 showScreen('screen-player-waiting');
             }
@@ -4280,65 +4283,59 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
             updateTimerDisplay();
         }
 
-        function resetGame() {
-            if (confirm('คุณต้องการรีเซ็ตและตั้งค่าเกมใหม่ทั้งหมดใช่หรือไม่?')) {
-                stopTimer();
-                if (autoStartTimer) {
-                    clearTimeout(autoStartTimer);
-                    autoStartTimer = null;
-                }
-                isGameStarted = false;
-                currentGameSessionId = '';
-                activeRoleAssignments = {};
-                joinedPlayers = [];
-
-                const btn = document.getElementById('btn-force-start');
-                if (btn) {
-                    btn.disabled = false;
-                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                }
-
-                try {
-                    sessionStorage.removeItem('ww_assigned_role');
-                    sessionStorage.removeItem('ww_session_id');
-                    sessionStorage.removeItem('ww_joined_room');
-                } catch(e) {}
-
-                broadcastMessage({
-                    type: 'GAME_RESET'
-                });
-
-                if (peerInstance) {
-                    try { peerInstance.destroy(); } catch(e){}
-                    peerInstance = null;
-                }
-                connectedPeers = {};
-                playerModConn = null;
-
-                gameState = {
-                    roleSchemaVersion:2,
-                    selectedRoles: [],
-                    players: [],
-                    playerRoleMap: {},
-                    rolePlayerMap: {},
-                    gamePhase: 'night',
-                    dayCount: 1,
-                    playerStatus: {},
-                    lovers: [],
-                    wolfTarget: '',
-                    bodyguardTarget: '',
-                    cursedTurned: [],
-                    toughGuyInjured: null,
-                    wolvesInfected: false,
-                    wolvesInfectedNext: false,
-                    silencedTarget: '',
-                    poisonedTarget: '',
-                    nightKilled: [],
-                    lastNightResultText: ''
-                };
-                showScreen('screen-home');
-            }
-        }
+// End a round, not the room. Replacing state drops every per-round power/role cache.
+function clearRoundCommunity(){
+ community=freshCommunity();communityView=null;communityOwn=null;
+ communityPending=null;ballotChoice=null;lobbyDraft=null;
+ document.getElementById('mayor-ballot')?.close();
+}
+function resetGame(){
+ if(!isMod||!confirm('จบเกมและกลับล็อบบี้เดิม โดยคงผู้เล่นและชุดบทบาทไว้ใช่หรือไม่?'))return;
+ stopTimer();resetTimer();
+ if(autoStartTimer){clearTimeout(autoStartTimer);autoStartTimer=null;}
+ const {selectedRoles,pendingDrunkRole,offlineGame,players}=gameState;
+ gameState={
+            roleSchemaVersion:2,
+            selectedRoles: [],
+            players: [],
+            playerRoleMap: {},
+            rolePlayerMap: {},
+            gamePhase: 'night',
+            dayCount: 1,
+            playerStatus: {},
+            lovers: [],
+            wolfTarget: '',
+            bodyguardTarget: '',
+            cursedTurned: [],
+            toughGuyInjured: null,
+            wolvesInfected: false,
+            wolvesInfectedNext: false,
+            silencedTarget: '',
+            poisonedTarget: '',
+            nightKilled: [],
+            lastNightResultText: '- เริ่มต้นเกมคืนแรก -'
+        };
+ gameState.selectedRoles=selectedRoles;gameState.pendingDrunkRole=pendingDrunkRole;
+ gameState.offlineGame=!!offlineGame;
+ isGameStarted=false;currentGameSessionId='';activeRoleAssignments={};
+ judgeExecutionPending=false;activeMadBomber=null;madBomberContext='manual';
+ closeTravelerOverlay();closeTravelerModal();closePlayerRoleGuide();
+ document.getElementById('judge-power-modal')?.close();
+ document.getElementById('modal-mad-bomber')?.classList.add('hidden');
+ clearRoundCommunity();
+ const btn=document.getElementById('btn-force-start');
+ if(btn){btn.disabled=false;btn.classList.remove('opacity-50','cursor-not-allowed');}
+ if(offlineGame){
+  // Single-device setup retains its names/role controls; never creates a network room.
+  gameState.players=players;
+  document.getElementById('step-1').classList.add('hidden');
+  document.getElementById('step-2').classList.remove('hidden');
+  document.getElementById('step-3').classList.add('hidden');
+  showScreen('screen-offline-setup');return;
+ }
+ broadcastMessage({type:'GAME_RESET'});
+ updateModLobbyUI();broadcastRoomStateUpdate();showScreen('screen-mod-lobby');
+}
 
         // ==========================================
         // TRAVELER ROLE LOGIC
