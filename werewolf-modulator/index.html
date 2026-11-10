@@ -53,8 +53,9 @@
         }
 
         /* Player artwork is mounted only while the private face is revealed. */
-        #screen-player-card .card-perspective { width: 100%; max-width: 300px; margin-inline: auto; aspect-ratio: 2 / 3; }
-        #card-front-content { position: absolute; padding: 1rem; }
+        #screen-player-card .card-perspective { width: 100%; max-width: 300px; margin-inline: auto; aspect-ratio: auto; }
+#player-card-inner { height:auto; }
+        #card-front-content { position: relative; height:auto; min-height:450px; padding:1rem; }
         #player-card-inner:not(.flipped) #card-front-content { visibility: hidden; }
         .player-role-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; pointer-events: none; }
         .player-role-shade { position: absolute; inset: 0; background: linear-gradient(#020617cc, #02061733 35%, #02061799 60%, #020617f2); pointer-events: none; }
@@ -63,7 +64,7 @@
         #card-role-icon { font-size: 2.5rem; }
         #card-role-name { font-size: 1.35rem; overflow-wrap: anywhere; }
         #card-player-name-tag { color: #e2e8f0; max-width: 50%; overflow-wrap: anywhere; }
-        #card-front-content > div:last-child { flex-shrink: 1; overflow-y: auto; }
+        #card-front-content > div:last-child { flex-shrink: 0; overflow:visible; }
 
         /* Shared backs never encode a normal role or a Traveler's private faction. */
         #player-card-back, .waiting-card { background: #191b29; border: 0; }
@@ -142,7 +143,7 @@
         background: transparent;
     }
     
-    /* Balance ability panel spacing; preserve long-text scrolling. */
+    /* Ability text stays in normal flow; the page scrolls, not this panel. */
     #card-front-content > div:last-child {
         display: flex;
         flex-direction: column;
@@ -236,12 +237,12 @@
 #traveler-controls .traveler-role-preview { display:inline-block; width:auto; min-height:0; padding:.125rem .375rem; margin-right:.25rem; font-size:10px; line-height:1.5; border-radius:.25rem; }
 .mod-role-preview { cursor:pointer; text-align:inherit; }
 .mod-role-preview:focus-visible { outline:2px solid #fbbf24; outline-offset:2px; }
-/* v7: keep faces clear; identity and scrollable ability occupy the lower half. */
-#card-front-content { display:grid; grid-template-rows:auto minmax(0,1fr) auto minmax(0, 27%); gap:.5rem; }
+/* Keep artwork space above identity and full-height ability content. */
+#card-front-content { display:grid; grid-template-rows:auto minmax(150px,1fr) auto auto; gap:.5rem; }
 #player-role-artwork { position:absolute; inset:0; }
 #card-front-content > .relative:not(.my-auto):not(:last-child) { grid-row:1; }
 #card-front-content > .my-auto { grid-row:3; margin:0; padding:0; }
-#card-front-content > div:last-child { grid-row:4; min-height:0; overflow-y:auto; overscroll-behavior:contain; }
+#card-front-content > div:last-child { grid-row:4; min-height:0; overflow:visible; overflow-wrap:anywhere; }
 #card-front-content > div:last-child > * { flex-shrink:0; }
 #card-role-icon { font-size:1.75rem; line-height:1.1; }
 #card-role-name { font-size:1.25rem; line-height:1.25; }
@@ -294,7 +295,7 @@
     .rg-role-name { flex: 0 1 auto; min-width: 0; }
 }
 .player-guide-action { display:flex; justify-content:flex-end; margin-top:.4rem; }
-#player-role-guide { background:#334155; color:#e2e8f0; border:1px solid #64748b; border-radius:.5rem; padding:.4rem .55rem; font-size:11px; min-height:36px; }
+#player-role-guide { background:transparent; color:#cbd5e1; border:1px solid #475569; border-radius:.375rem; padding:.125rem .4rem; font-size:11px; min-height:24px; }
 #player-role-guide:focus-visible { outline:2px solid #fbbf24; outline-offset:2px; }
 #role-guide.rg-player .rg-actions { display:none; }
 .community-ranking { white-space:pre-line; }
@@ -304,6 +305,21 @@
 .community-button{font:inherit;min-height:44px;border:1px solid #475569;border-radius:.75rem;padding:.55rem .8rem;background:#334155;color:#f8fafc;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;overflow-wrap:anywhere;white-space:normal;text-align:center;line-height:1.5}
 .community-button:hover:not(:disabled){border-color:#fbbf24;background:#475569}.community-button:disabled{opacity:.5;cursor:not-allowed}.community-button:focus-visible,.ballot-option:focus-within{outline:3px solid #f59e0b;outline-offset:3px}.community-button[aria-pressed=true]{border-color:#fbbf24;background:#78350f}
 .community-role-list{max-height:24rem;overflow-y:auto;padding:.25rem;scrollbar-gutter:stable;display:grid;gap:.5rem}.community-role-row{display:grid;grid-template-columns:minmax(0,1fr) 1.5rem auto;gap:.5rem;align-items:center}.community-role-row>:first-child{justify-content:flex-start;text-align:left;min-width:0}.community-score{text-align:center;font-variant-numeric:tabular-nums}.community-chips{display:flex;flex-wrap:wrap;gap:.5rem}.community-ranking{min-height:5.5rem;padding:.75rem;border-radius:.75rem;background:#0f172a}.community-panel details{padding:.75rem;border:1px solid #475569;border-radius:.75rem}.community-panel summary{cursor:pointer;font-weight:500}
+/* Match the gameplay cards, not the larger survey/ballot controls. */
+#community-mayor{display:block;padding:1rem;margin:0;background:#1e293b;border:1px solid #334155;border-radius:.75rem;box-shadow:0 10px 15px -3px rgb(0 0 0 / .1),0 4px 6px -4px rgb(0 0 0 / .1);font-size:.75rem;line-height:1rem;color:#e2e8f0;text-align:left}
+#gameplay-screen > #community-mayor{margin-top:1rem}
+#screen-player-card > #community-mayor{margin-top:1rem}
+#community-mayor > * + *{margin-top:.75rem}
+#community-mayor > h3{margin:0;padding-bottom:.5rem;border-bottom:1px solid #334155;font-size:.875rem;line-height:1.25rem;font-weight:600;color:#fbbf24}
+#community-mayor .mayor-body{display:grid;gap:.5rem;min-width:0}
+#community-mayor h4,#community-mayor summary{margin:0;font-size:.75rem;line-height:1rem;font-weight:600}
+#community-mayor .community-muted{font-size:.6875rem;line-height:1rem;color:#94a3b8}
+#community-mayor .community-button{justify-self:start;max-width:100%;min-height:32px;padding:.375rem .75rem;border:1px solid #475569;border-radius:.5rem;background:#334155;color:#e2e8f0;font-size:.75rem;line-height:1rem;font-weight:600;transition:background-color .15s,border-color .15s}
+#community-mayor .community-button:hover:not(:disabled){background:#475569;border-color:#475569}
+#community-mayor details,#community-mayor [data-mayor-totals]{padding:.625rem;border:1px solid rgb(51 65 85 / .5);border-radius:.25rem;background:rgb(15 23 42 / .4)}
+#community-mayor details > * + *,#community-mayor [data-mayor-totals] > * + *{margin-top:.5rem}
+#community-mayor summary{min-height:24px;cursor:pointer}
+#community-mayor summary:focus-visible{outline:2px solid #fbbf24;outline-offset:2px}
 #mayor-ballot{font-family:'Prompt',sans-serif;width:min(94vw,32rem);max-height:92dvh;border:1px solid #c8b893;border-radius:.75rem;background:#f6efdc;color:#302b23;padding:0;box-shadow:0 24px 80px #0009}
 #mayor-ballot[open]{display:flex;flex-direction:column}#mayor-ballot::backdrop{background:#020617cc}#mayor-ballot header,#mayor-ballot footer{padding:1rem 1.25rem;flex:none}#mayor-ballot header{border-bottom:1px solid #c8b893}#mayor-ballot h2{font-size:1.2rem;font-weight:600}#mayor-ballot p{font-size:.8rem;line-height:1.65;margin:.35rem 0}#mayor-ballot footer{border-top:1px solid #c8b893;display:grid;gap:.4rem}#mayor-ballot .ballot-footnote{font-size:.68rem;color:#655943}#mayor-ballot .community-button{background:#ece1c5;color:#302b23;border-color:#b4a17b}#mayor-ballot footer .community-button:first-of-type{background:#493f2d;color:#fff9e8}
 .ballot-candidates{overflow-y:auto;min-height:0;flex:1;padding:.75rem 1.25rem;display:grid;gap:.6rem}.ballot-option{position:relative;display:grid;grid-template-columns:2rem minmax(0,1fr);align-items:center;gap:.8rem;padding:.8rem;border:1px solid #c8b893;border-radius:.75rem;min-height:56px;overflow-wrap:anywhere;cursor:pointer}.ballot-option input{position:absolute;width:1px;height:1px;opacity:0}.ballot-cross{position:relative;width:1.8rem;height:1.8rem;border:2px solid #736346;border-radius:.25rem}.ballot-option input:checked + .ballot-cross:before,.ballot-option input:checked + .ballot-cross:after{content:'';position:absolute;left:50%;top:50%;width:1.35rem;height:3px;background:#302b23;transform:translate(-50%,-50%) rotate(45deg)}.ballot-option input:checked + .ballot-cross:after{transform:translate(-50%,-50%) rotate(-45deg)}.ballot-option:has(input:checked){background:#e8ddbf;border-color:#736346}.ballot-option:has(input:disabled){cursor:default}
@@ -675,13 +691,13 @@
                         </div>
 
                         <!-- Bottom Role Ability Details -->
-                        <div tabindex="0" aria-label="ความสามารถของคุณ" class="relative z-10 bg-slate-950/80 backdrop-blur border border-slate-800 rounded-xl p-3 text-left space-y-1 shadow-inner">
+                        <div aria-label="ความสามารถของคุณ" class="relative z-10 bg-slate-950/80 backdrop-blur border border-slate-800 rounded-xl p-3 text-left space-y-1 shadow-inner">
                             <span class="text-[10px] text-amber-400 font-bold uppercase tracking-wider">ความสามารถของคุณ:</span>
                             <p id="traveler-wolf-disclosure" class="hidden text-xs text-slate-200 break-words"></p>
                             <p id="card-role-desc" class="text-[11px] text-slate-300 leading-relaxed">
                                 ตื่นขึ้นมาในตอนกลางคืนเพื่อตรวจสอบบทบาทของผู้เล่น 1 คนว่าเป็นหมาป่าหรือไม่
                             </p>
-                            <div class="player-guide-action"><button id="player-role-guide" type="button" onclick="openPlayerRoleGuide(event)">📖 ดูคู่มือบทบาท</button></div>
+                            <div class="player-guide-action"><button id="player-role-guide" type="button" onclick="openPlayerRoleGuide(event)" aria-label="เพิ่มเติม: คู่มือบทบาทของคุณ">เพิ่มเติม</button></div>
                         </div>
                     </div>
                 </div>
@@ -798,7 +814,7 @@
             </div>
 
             <!-- Player Status Management List -->
-            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 space-y-3 shadow-lg">
+            <div id="player-status-panel" class="bg-slate-800 p-4 rounded-xl border border-slate-700 space-y-3 shadow-lg">
                 <div class="flex items-center justify-between border-b border-slate-700 pb-2">
                     <h4 class="text-sm font-semibold text-amber-400">สถานะผู้เล่นทั้งหมด</h4>
                     <span class="text-[11px] text-slate-400">คลิกปุ่มเพื่อเปลี่ยนสถานะ รอด/ตาย</span>
@@ -1373,11 +1389,11 @@ function renderCommunity(){
  const lobby=document.getElementById(isMod?'screen-mod-lobby':'screen-player-waiting');
  if(lobby){const panel=communityPanel(lobby,'community-survey');renderSurveyPanel(panel,view);}
  const game=document.getElementById(isMod?'gameplay-screen':'screen-player-card');
- if(game){const panel=communityPanel(game,'community-mayor');panel.replaceChildren();panel.append(communityNode('h3','🏅 ผู้ใหญ่บ้านปัจจุบัน'),communityNode('p',view.mayor?view.mayor+' 🏅':view.mayorStatus));if(view.mayor)panel.append(communityNode('p','คะแนนโหวตประหาร ×2','community-muted'));
- if(isMod){if(gameState.offlineGame){panel.append(communityNode('p','โหมดเครื่องเดียว: ยังไม่รองรับเลือกตั้งผู้ใหญ่บ้าน / รับบัตรออนไลน์','community-muted'));return;}const e=community.election;panel.append(communityButton('เปิดเลือกตั้งผู้ใหญ่บ้าน',openMayorElection,!isGameStarted||!!view.mayor||!!e&&e.phase!=='announced'));
- if(view.mayor){panel.append(communityNode('p','ถอดถอนโดยยกมือจริง: ทุกฝ่ายที่มีชีวิตยกเว้นผู้ใหญ่บ้าน คนละ 1 เสียง ต้องอย่างน้อย '+impeachmentThreshold()+' เสียง'),communityButton('ยืนยันผลถอดถอน',impeachMayor));}
- if(e){panel.append(communityNode('p',e.phase==='open'?'กำลังรับบัตร • ยืนยันแล้ว '+Object.keys(e.ballots).length+' ใบ':e.phase==='closed'?'ปิดหีบแล้ว • ผลยังไม่ประกาศ':'ประกาศผลแล้ว'));if(e.phase==='open')panel.append(communityButton('ปิดหีบ',closeMayorElection));if(e.phase==='closed')panel.append(communityButton('ประกาศผล',announceMayor));if(e.phase!=='open'){panel.append(communityNode('h4','คะแนนรวม'));for(const [name,n] of Object.entries(e.totals))panel.append(communityNode('p',mayorChoiceLabel(name)+' · '+n));}const detail=communityNode('details');detail.append(communityNode('summary','รายละเอียดการลงคะแนน'));for(const [id,choice] of Object.entries(e.ballots))detail.append(communityNode('p',(activeRoleAssignments[id]?.playerName||'ผู้เล่น')+' → '+mayorChoiceLabel(choice)));panel.append(detail);}
- }else {const e=view.election;if(e){panel.append(communityNode('p',e.phase==='open'?'เปิดรับบัตรเลือกตั้ง • ไม่แสดงคะแนนสด':e.phase==='closed'?'ปิดหีบแล้ว รอ Mod ประกาศผล':'ผลเลือกตั้ง: '+(e.result||'ไม่มีผู้ใหญ่บ้าน')));if(e.phase==='open')panel.append(communityButton(communityOwn?.ballot!==null&&communityOwn?.ballot!==undefined?'ดูบัตรที่ยืนยันแล้ว':'เปิดบัตรเลือกตั้ง',openMayorBallot,!communityOwn?.alive));}const msg=communityNode('p',undefined,'community-muted');msg.dataset.communityMessage='';msg.setAttribute('role','status');panel.append(msg);}
+ if(game){const panel=communityPanel(game,'community-mayor');if(isMod){const status=document.getElementById('player-status-panel');if(status)game.insertBefore(panel,status);}const previousTotals=panel.querySelector?.('[data-mayor-totals]');const totalsOpen=panel.totalsElectionId===view.election?.id&&!!previousTotals?.open;panel.totalsElectionId=view.election?.id;panel.replaceChildren();const body=communityNode('div',undefined,'mayor-body');panel.append(communityNode('h3','🏅 ผู้ใหญ่บ้านปัจจุบัน'),body);body.append(communityNode('p',view.mayor?view.mayor+' 🏅':view.mayorStatus));if(view.mayor)body.append(communityNode('p','คะแนนโหวตประหาร ×2','community-muted'));
+ if(isMod){if(gameState.offlineGame){body.append(communityNode('p','โหมดเครื่องเดียว: ยังไม่รองรับเลือกตั้งผู้ใหญ่บ้าน / รับบัตรออนไลน์','community-muted'));return;}const e=community.election;body.append(communityButton('เปิดเลือกตั้งผู้ใหญ่บ้าน',openMayorElection,!isGameStarted||!!view.mayor||!!e&&e.phase!=='announced'));
+ if(view.mayor){body.append(communityNode('p','ถอดถอนโดยยกมือจริง: ทุกฝ่ายที่มีชีวิตยกเว้นผู้ใหญ่บ้าน คนละ 1 เสียง ต้องอย่างน้อย '+impeachmentThreshold()+' เสียง'),communityButton('ยืนยันผลถอดถอน',impeachMayor));}
+ if(e){body.append(communityNode('p',e.phase==='open'?'กำลังรับบัตร • ยืนยันแล้ว '+Object.keys(e.ballots).length+' ใบ':e.phase==='closed'?'ปิดหีบแล้ว • ผลยังไม่ประกาศ':'ประกาศผลแล้ว'));if(e.phase==='open')body.append(communityButton('ปิดหีบ',closeMayorElection));if(e.phase==='closed')body.append(communityButton('ประกาศผล',announceMayor));if(e.phase!=='open'){const totals=communityNode(e.phase==='announced'?'details':'div');totals.dataset.mayorTotals='';if(e.phase==='announced'){totals.open=totalsOpen;totals.append(communityNode('summary','คะแนนรวม'));}else totals.append(communityNode('h4','คะแนนรวม'));for(const [name,n] of Object.entries(e.totals))totals.append(communityNode('p',mayorChoiceLabel(name)+' · '+n));body.append(totals);}const detail=communityNode('details');detail.append(communityNode('summary','รายละเอียดการลงคะแนน'));for(const [id,choice] of Object.entries(e.ballots))detail.append(communityNode('p',(activeRoleAssignments[id]?.playerName||'ผู้เล่น')+' → '+mayorChoiceLabel(choice)));body.append(detail);}
+ }else {const e=view.election;if(e){body.append(communityNode('p',e.phase==='open'?'เปิดรับบัตรเลือกตั้ง • ไม่แสดงคะแนนสด':e.phase==='closed'?'ปิดหีบแล้ว รอ Mod ประกาศผล':'ผลเลือกตั้ง: '+(e.result||'ไม่มีผู้ใหญ่บ้าน')));if(e.phase==='open')body.append(communityButton(communityOwn?.ballot!==null&&communityOwn?.ballot!==undefined?'ดูบัตรที่ยืนยันแล้ว':'เปิดบัตรเลือกตั้ง',openMayorBallot,!communityOwn?.alive));}const msg=communityNode('p',undefined,'community-muted');msg.dataset.communityMessage='';msg.setAttribute('role','status');body.append(msg);}
  }
  if(document.getElementById('mayor-ballot')?.open)renderMayorBallot();
 }
