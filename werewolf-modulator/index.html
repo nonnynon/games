@@ -339,14 +339,15 @@
 #royal-pardon{padding:0;border:0;border-radius:1rem;background:#0f172a;color:#f8fafc;width:calc(100% - 2rem);max-width:24rem;max-height:calc(100dvh - 2rem);overflow:auto}
 #royal-pardon::backdrop{background:rgb(2 6 23 / .8);backdrop-filter:blur(4px)}
 
-/* Below all important dialogs (Bomber z-50); never placed in the top layer. */
+/* Main sticky header stays below sync; critical z-50 dialogs stay above it. */
+body>header{z-index:20!important}
 #sync-floating{position:fixed;right:1rem;bottom:max(1rem,env(safe-area-inset-bottom));z-index:30;background:#0f172a;border:1px solid #475569;border-radius:.75rem;padding:.65rem 1rem;color:#e2e8f0;font-size:14px;box-shadow:0 4px 12px #0008}
 #screen-mod-lobby,#gameplay-screen{padding-bottom:5rem}
 #sync-dashboard{position:fixed;right:1rem;bottom:4.5rem;z-index:40;width:min(1080px,calc(100vw - 2rem));max-height:85dvh;overflow:auto;background:#0f172a;color:#e2e8f0;border:1px solid #475569;border-radius:.75rem;box-shadow:0 8px 30px #0009;font-size:12px;padding:0 1rem 1rem}
 #sync-dashboard[hidden],#sync-floating[hidden],#sync-own[hidden],.sync-row[hidden]{display:none!important}
 #sync-dashboard header{position:sticky;top:0;z-index:1;background:#0f172a;padding:1rem 0 .5rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;border-bottom:1px solid #334155}
 #sync-dashboard h2{font-size:16px;font-weight:600;flex:1}#sync-dashboard header p{flex-basis:100%}
-.sync-columns,.sync-row{display:grid;grid-template-columns:minmax(130px,1.4fr) repeat(3,minmax(105px,1fr)) minmax(100px,1fr) 44px;align-items:center;gap:.5rem;padding:.625rem}
+.sync-columns,.sync-row{display:grid;grid-template-columns:minmax(0,1.4fr) repeat(3,minmax(0,1fr)) minmax(0,.8fr) 44px;align-items:center;gap:.5rem;padding:.625rem}
 .sync-row{margin-top:.4rem;background:#0f172a99;border:1px solid #334155;border-radius:.5rem}
 .sync-name{font-size:12px;font-weight:600;color:#f1f5f9;text-align:left;overflow-wrap:anywhere;min-height:32px}
 .sync-badge{font-size:10px;font-weight:400;padding:.125rem .375rem;border:1px solid;border-radius:.25rem;width:fit-content}
@@ -354,25 +355,41 @@
 .sync-send{border:1px solid #475569;border-radius:.25rem;min-width:36px;min-height:36px;font-size:18px}.sync-send:disabled{opacity:.4}
 #sync-dashboard footer{white-space:pre-line;font-size:12px;line-height:1.6;color:#94a3b8;margin-top:1rem}
 #sync-own{border:1px solid #334155;border-radius:.5rem;padding:.6rem;margin-bottom:.75rem;font-size:12px;background:#0f172a}#sync-own summary{cursor:pointer}#sync-own p{white-space:pre-line;margin:.5rem 0}
-@media(max-width:640px){#sync-dashboard{inset:.5rem;width:auto;max-height:none;padding:0 .5rem .5rem}.sync-columns{display:none}.sync-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 36px;gap:.35rem;padding:.5rem}.sync-name{grid-column:1/4;font-size:14px}.sync-send{grid-column:4;grid-row:1/3}.sync-badge{font-size:12px;padding:.25rem;max-width:100%;overflow-wrap:anywhere}.sync-age{display:none}.sync-expanded .sync-age{display:block;grid-column:1/4;font-size:12px}.sync-expanded{padding-block:.8rem}#sync-dashboard header .community-button{min-height:36px}#sync-own{font-size:13px}}
-
+#sync-dashboard{box-sizing:border-box;top:max(.5rem,env(safe-area-inset-top));max-height:none}
+.sync-row>*{min-width:0}.sync-badge{max-width:100%;overflow-wrap:anywhere}.sync-send{width:36px;height:36px;justify-self:end;align-self:center;padding:0}.sync-name{overflow-wrap:anywhere}
+.sync-send-full{display:none}.sync-bot .sync-badge{grid-column:2/6;white-space:nowrap}.sync-row [hidden]{display:none!important}
 #sync-own summary .sync-badge{display:inline-block;margin:.15rem;font-size:12px}
-
-/* One persistent button preserves focus and one handler. */
-.sync-send-full{display:none}
-@media(max-width:640px){.sync-expanded .sync-send{grid-column:1/-1;grid-row:auto;font-size:12px;width:100%}.sync-expanded .sync-send-compact{display:none}.sync-expanded .sync-send-full{display:inline}.sync-expanded .sync-badge{grid-column:1/-1}}
+@media(max-width:800px){
+ #sync-dashboard{left:.5rem;right:.5rem;width:auto;padding:0 .5rem .5rem}
+ .sync-columns,.sync-row{grid-template-columns:repeat(3,minmax(0,1fr)) 36px;gap:.35rem;padding:.5rem}
+ .sync-columns span:first-child,.sync-columns span:nth-child(5){display:none}
+ .sync-name{grid-column:1/4;min-height:0;font-size:12px}.sync-send{grid-column:4;grid-row:1/3}
+ .sync-badge{font-size:10px;padding:.2rem;line-height:1.5}.sync-age{display:none}
+ .sync-expanded .sync-age{display:block;grid-column:1/4;font-size:11px}
+ .sync-bot .sync-badge{grid-column:1/4;white-space:nowrap}
+ #sync-dashboard header{padding:.5rem 0;gap:.35rem}#sync-dashboard header .community-button{min-height:36px;padding:.25rem .5rem}#sync-dashboard h2{font-size:14px}
+}
 #sync-floating.sync-green{color:#6ee7b7;background:#022c22;border-color:#065f46}
 #sync-floating.sync-blue{color:#93c5fd;background:#172554;border-color:#1e40af}
 #sync-floating.sync-amber{color:#fcd34d;background:#451a03;border-color:#92400e}
 #sync-floating.sync-red{color:#fda4af;background:#4c0519;border-color:#9f1239}
 #sync-floating.sync-gray{color:#cbd5e1;background:#1e293b;border-color:#475569}
 
-#dev-lobby{border:1px solid #6366f1;border-radius:.75rem;padding:.65rem;margin:.5rem 0;background:#171d35;color:#c7d2fe;font-size:.8rem}
-#dev-lobby button,.dev-role{min-height:44px;background:#1e293b;color:#e2e8f0;border:1px solid #64748b;border-radius:.6rem;padding:.35rem;margin:.2rem}
-#dev-lobby button:disabled{opacity:.5}.dev-bot{color:#a5b4fc;font-size:.7rem;white-space:nowrap}
-#mod-players-list>div{flex-wrap:wrap;gap:.35rem}#mod-players-list>div>div:first-child{flex:1 1 8rem;flex-wrap:wrap}.dev-role{max-width:100%;width:10rem;min-width:0}#mod-players-list>div>div:last-child{margin-left:auto}
-#rg-viewport{position:relative;min-height:0;flex:1;display:flex;overflow:hidden}
-#rg-scroll{padding-right:calc(60px + env(safe-area-inset-right,0px));padding-bottom:calc(60px + env(safe-area-inset-bottom,0px))}
+.dev-qr-panel{position:relative;padding-top:3.5rem!important}
+#dev-toggle{position:absolute;top:.5rem;right:.75rem;display:flex;align-items:center;gap:.5rem;min-height:36px;color:#e2e8f0;font-size:12px}
+.dev-switch-track{display:block;position:relative;width:40px;height:20px;border-radius:999px;background:#1e293b}
+.dev-switch-track:after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:white;transition:transform .15s}
+#dev-toggle[aria-checked="true"] .dev-switch-track{background:#f59e0b}
+#dev-toggle[aria-checked="true"] .dev-switch-track:after{transform:translateX(20px)}
+#dev-toggle:focus-visible{outline:2px solid #fbbf24;outline-offset:2px}#dev-toggle:disabled{opacity:.5}
+.dev-lobby-tools{flex-wrap:wrap}.dev-lobby-tools button{min-height:36px;max-width:100%}#dev-fill[hidden],#dev-toggle[hidden],#dev-notice[hidden]{display:none}
+#dev-notice{font-size:12px;color:#fbbf24}
+.lobby-player-row{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;background:#02061799;border:1px solid #1e293b;border-radius:.5rem;padding:.5rem;font-size:12px}
+.lobby-player-name{flex:1 1 8rem;min-width:0;overflow-wrap:anywhere}.lobby-player-actions{display:flex;gap:.25rem;margin-left:auto}.lobby-player-actions button{width:32px;height:32px;background:#1e293b;border-radius:.25rem}.lobby-player-actions button:disabled{opacity:.3}
+.dev-role{min-height:36px;background:#1e293b;color:#e2e8f0;border:1px solid #64748b;border-radius:.5rem;padding:.25rem;max-width:100%;width:10rem;min-width:0}
+#rg-viewport{position:relative;min-height:0;min-width:0;flex:1;display:flex;overflow:hidden}
+#rg-scroll{min-width:0;padding:4px 4px calc(56px + env(safe-area-inset-bottom,0px))}
+#rg-navigation{flex-wrap:nowrap;justify-content:center}#rg-navigation button{flex:0 1 7rem;white-space:nowrap;min-height:36px;padding:.375rem .75rem}
 #rg-top{position:absolute;right:max(8px,env(safe-area-inset-right,0px));bottom:max(8px,env(safe-area-inset-bottom,0px));width:44px;height:44px;min-width:44px;min-height:44px;border:1px solid #64748b;border-radius:14px;background:#1e293b;color:#f8fafc;box-shadow:0 3px 12px #0008;z-index:2}
 #rg-top[hidden]{display:none}#rg-top:focus-visible{outline:2px solid #fbbf24;outline-offset:2px}
 
@@ -1441,7 +1458,7 @@ function renderCommunity(){
  const lobby=document.getElementById(isMod?'screen-mod-lobby':'screen-player-waiting');
  if(lobby){const panel=communityPanel(lobby,'community-survey');renderSurveyPanel(panel,view);}
  const game=document.getElementById(isMod?'gameplay-screen':'screen-player-card');
- if(game){const panel=communityPanel(game,'community-mayor');if(isMod){const status=document.getElementById('player-status-panel');if(status)game.insertBefore(panel,status);}const previousTotals=panel.querySelector?.('[data-mayor-totals]');const totalsOpen=panel.totalsElectionId===view.election?.id&&!!previousTotals?.open;panel.totalsElectionId=view.election?.id;panel.replaceChildren();const body=communityNode('div',undefined,'mayor-body');panel.append(communityNode('h3','🏅 ผู้ใหญ่บ้านปัจจุบัน'),body);body.append(communityNode('p',view.mayor?view.mayor+' 🏅':view.mayorStatus));if(view.mayor)body.append(communityNode('p','คะแนนโหวตประหาร ×2','community-muted'));
+ if(game){const panel=communityPanel(game,'community-mayor');if(isMod){const status=document.getElementById('player-status-panel');if(status)game.insertBefore(panel,status);}const previousTotals=panel.querySelector?.('[data-mayor-totals]');const totalsOpen=panel.totalsElectionId===view.election?.id&&!!previousTotals?.open;panel.totalsElectionId=view.election?.id;panel.replaceChildren();const body=communityNode('div',undefined,'mayor-body');panel.append(communityNode('h3','ผู้ใหญ่บ้านปัจจุบัน'),body);body.append(communityNode('p',view.mayor?view.mayor+' 🏅':view.mayorStatus));if(view.mayor)body.append(communityNode('p','คะแนนโหวตประหาร ×2','community-muted'));
  if(isMod){if(gameState.offlineGame){body.append(communityNode('p','โหมดเครื่องเดียว: ยังไม่รองรับเลือกตั้งผู้ใหญ่บ้าน / รับบัตรออนไลน์','community-muted'));return;}const e=community.election;body.append(communityButton('เปิดเลือกตั้งผู้ใหญ่บ้าน',openMayorElection,!isGameStarted||!!view.mayor||!!e&&e.phase!=='announced'));
  if(view.mayor){body.append(communityNode('p','ถอดถอนโดยยกมือจริง: ทุกฝ่ายที่มีชีวิตยกเว้นผู้ใหญ่บ้าน คนละ 1 เสียง ต้องอย่างน้อย '+impeachmentThreshold()+' เสียง'),communityButton('ยืนยันผลถอดถอน',impeachMayor));}
  if(e){body.append(communityNode('p',e.phase==='open'?'กำลังรับบัตร • ยืนยันแล้ว '+Object.keys(e.ballots).length+' ใบ':e.phase==='closed'?'ปิดหีบแล้ว • ผลยังไม่ประกาศ':'ประกาศผลแล้ว'));if(e.phase==='open')body.append(communityButton('ปิดหีบ',closeMayorElection));if(e.phase==='closed')body.append(communityButton('ประกาศผล',announceMayor));if(e.phase!=='open'){const totals=communityNode(e.phase==='announced'?'details':'div');totals.dataset.mayorTotals='';if(e.phase==='announced'){totals.open=totalsOpen;totals.append(communityNode('summary','คะแนนรวม'));}else totals.append(communityNode('h4','คะแนนรวม'));for(const [name,n] of Object.entries(e.totals))totals.append(communityNode('p',mayorChoiceLabel(name)+' · '+n));body.append(totals);}const detail=communityNode('details');detail.append(communityNode('summary','รายละเอียดการลงคะแนน'));for(const [id,choice] of Object.entries(e.ballots))detail.append(communityNode('p',(activeRoleAssignments[id]?.playerName||'ผู้เล่น')+' → '+mayorChoiceLabel(choice)));body.append(detail);}
@@ -1504,7 +1521,7 @@ function syncReceipt(s,applicable=true,since=Date.now()){if(!applicable)return [
 function syncConnection(r){if(r?.conn&&(!r.conn.open||connectedPeers[r.conn.peer]!==r.conn))return ['red','ขาดการเชื่อมต่อ'];if(!r?.lastReply)return Date.now()-(r?.since??Date.now())>10000?['amber','ไม่ตอบกลับ']:['blue','กำลังซิงก์'];if(Date.now()-r.lastReply>10000)return ['amber','ไม่ตอบกลับ'];return ['green','เชื่อมต่อ'];}
 function syncOwnReceipt(kind){const v=syncOwn[kind],e=syncOwn.expected?.[kind];if(v?.conn===playerModConn&&e?.conn===playerModConn&&v.sync.token===e.token&&v.sync.session===e.session&&v.sync.sequence===e.sequence)return ['green','รับแล้ว'];return Date.now()-(e?.since??syncOwn.since??Date.now())>10000?['amber','รอเกิน 10 วิ']:['blue','กำลังซิงก์'];}
 function syncAge(t){return t?Math.floor((Date.now()-t)/1000)+' วิที่แล้ว':'ยังไม่มีการตอบกลับ';}
-function syncPaint(n,status,label){n.className='sync-badge sync-'+status[0];n.textContent=(label?label+': ':'')+({green:'✓ ',blue:'↻ ',amber:'⚠ ',red:'✕ ',gray:'— '}[status[0]])+status[1];}
+function syncPaint(n,status,label){n.className='sync-badge sync-'+status[0];n.textContent=(label?label+': ':'')+({green:'🟢 ',blue:'🔵 ',amber:'⚠️ ',red:'🔴 ',gray:'⚪ '}[status[0]])+status[1];}
 const syncHelp=`สี: เขียว รับข้อมูลล่าสุดแล้ว / น้ำเงิน กำลังซิงก์ / เหลือง รอเกิน 10 วินาทีหรือไม่ตอบกลับ (ไม่ยืนยันว่าหลุด) / แดง ขาดการเชื่อมต่อ / เทา ไม่ทราบหรือยังไม่เกี่ยวข้อง
 หากการ์ดไม่อัปเดตหรือไม่มีแผงเลือกตั้ง ให้ส่งซ้ำรายคนหรือทุกคน หากหลุด ให้เชื่อมต่อใหม่ เปิดเกม และตรวจอินเทอร์เน็ตก่อน
 “รับแล้ว” คืออุปกรณ์ยืนยันข้อมูลล่าสุด ไม่ใช่อ่านแล้วหรือโหวตแล้ว ซิงก์ไม่แจกใหม่ ไม่เปิดเผยการ์ด ไม่ลงคะแนน และไม่เปิดบัตรเลือกตั้งอัตโนมัติ`;
@@ -1516,9 +1533,9 @@ function renderSyncDashboard(){
  let floating=document.getElementById('sync-floating'),panel=document.getElementById('sync-dashboard');
  if(!floating){floating=communityButton('',()=>{panel.hidden=false;renderSyncDashboard();panel.closeButton.focus();});floating.id='sync-floating';document.body.append(floating);}
  floating.hidden=!modVisible;
- if(!panel){panel=communityNode('section');panel.id='sync-dashboard';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-label','การเชื่อมต่อและการรับข้อมูล');panel.rows=new Map();const header=communityNode('header'),title=communityNode('h2','การเชื่อมต่อและซิงก์');panel.summary=communityNode('p');panel.closeButton=communityButton('ปิด',()=>{panel.hidden=true;floating.focus();});panel.filter=communityButton('ทั้งหมด',()=>{panel.attentionOnly=!panel.attentionOnly;panel.filter.textContent=panel.attentionOnly?'ต้องดูแล':'ทั้งหมด';panel.filter.setAttribute('aria-pressed',String(!!panel.attentionOnly));renderSyncDashboard();});panel.filter.setAttribute('aria-label','สลับทั้งหมด / ต้องดูแล');panel.all=communityButton('ซิงก์ทุกคน',syncResendAll);header.append(title,panel.closeButton,panel.summary,panel.filter,panel.all);panel.append(header);const headings=communityNode('div',undefined,'sync-columns');['ชื่อ #ที่นั่ง','การเชื่อมต่อ','การ์ดล่าสุด','เลือกตั้งล่าสุด','ตอบกลับล่าสุด','ส่งซ้ำ'].forEach(t=>headings.append(communityNode('span',t)));panel.append(headings);panel.list=communityNode('div');panel.append(panel.list,communityNode('footer',syncHelp));panel.addEventListener('keydown',e=>{if(e.key==='Escape'){panel.hidden=true;floating.focus();}});document.body.append(panel);}
+ if(!panel){panel=communityNode('section');panel.id='sync-dashboard';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-label','การเชื่อมต่อและการรับข้อมูล');panel.rows=new Map();const header=communityNode('header'),title=communityNode('h2','การเชื่อมต่อและซิงก์');panel.summary=communityNode('p');panel.closeButton=communityButton('ปิด',()=>{panel.hidden=true;floating.focus();});panel.filter=communityButton('ทั้งหมด',()=>{panel.attentionOnly=!panel.attentionOnly;panel.filter.textContent=panel.attentionOnly?'ต้องดูแล':'ทั้งหมด';panel.filter.setAttribute('aria-pressed',String(!!panel.attentionOnly));renderSyncDashboard();});panel.filter.setAttribute('aria-label','สลับทั้งหมด / ต้องดูแล');panel.all=communityButton('ซิงก์ทุกคน',syncResendAll);header.append(title,panel.closeButton,panel.summary,panel.filter,panel.all);panel.append(header);const headings=communityNode('div',undefined,'sync-columns');['ชื่อ #ที่นั่ง','เน็ต','การ์ด','เลือกตั้ง','ตอบกลับล่าสุด','ส่งซ้ำ'].forEach(t=>headings.append(communityNode('span',t)));panel.append(headings);panel.list=communityNode('div');panel.append(panel.list,communityNode('footer',syncHelp));panel.addEventListener('keydown',e=>{if(e.key==='Escape'){panel.hidden=true;floating.focus();}});document.body.append(panel);}
  if(!modVisible)panel.hidden=true;
- if(modVisible){const roster=syncRoster();let connected=0,attention=0,ready=0,severity='green';const ids=new Set(roster.map(p=>p.id));for(const [id,u] of panel.rows)if(!ids.has(id)){u.row.remove();panel.rows.delete(id);}roster.forEach((p,i)=>{if(p.testBot){let u=panel.rows.get(p.id);if(!u){u=syncMakeRow(p);panel.rows.set(p.id,u);}if(panel.list.children[i]!==u.row)panel.list.insertBefore(u.row,panel.list.children[i]||null);const seat=gameState.players.indexOf(p.name);u.name.textContent=p.name+' #'+(seat<0?i+1:seat+1);u.statuses.forEach(n=>syncPaint(n,['gray','🤖 จำลอง'],''));u.age.textContent='ไม่มีอุปกรณ์';u.send.hidden=true;u.send.disabled=true;u.row.hidden=!!panel.attentionOnly;return;}const r=syncRecord(p.id),connection=syncConnection(r),card=syncReceipt(r.card,!!activeRoleAssignments[p.id],r.since),election=syncReceipt(r.election,!!community.election,r.since),states=[connection,card,election];if(r.conn?.open&&connectedPeers[r.conn.peer]===r.conn)connected++;const needs=states.some(s=>['amber','red'].includes(s[0]));if(needs)attention++;for(const s of states)if(['green','gray','blue','amber','red'].indexOf(s[0])>['green','gray','blue','amber','red'].indexOf(severity)&&s[1]!=='ไม่เกี่ยวข้อง')severity=s[0];if(states.every(s=>s[0]==='green'||s[1]==='ไม่เกี่ยวข้อง'))ready++;let u=panel.rows.get(p.id);if(!u){u=syncMakeRow(p);panel.rows.set(p.id,u);}if(panel.list.children[i]!==u.row)panel.list.insertBefore(u.row,panel.list.children[i]||null);const seat=gameState.players.indexOf(p.name);u.name.textContent=p.name+' #'+(seat<0?i+1:seat+1);states.forEach((s,j)=>syncPaint(u.statuses[j],s,u.row.classList.contains('sync-expanded')?['การเชื่อมต่อ','การ์ดล่าสุด','เลือกตั้งล่าสุด'][j]:window.innerWidth<=640?['เน็ต','การ์ด','เลือกตั้ง'][j]:''));u.age.textContent=syncAge(r.lastReply);u.row.hidden=!!panel.attentionOnly&&!needs;u.send.disabled=!r.conn?.open||Date.now()-r.cooldown<5000;});floating.className='sync-'+severity;floating.textContent='📶 '+connected+'/'+roster.filter(p=>!p.testBot).length+(attention?'  ⚠️ '+attention:'');panel.summary.textContent='พร้อม '+ready+' / ต้องดูแล '+attention+' / อุปกรณ์ '+roster.filter(p=>!p.testBot).length+' / จำลอง '+roster.filter(p=>p.testBot).length;panel.all.disabled=!roster.filter(p=>!p.testBot).some(p=>{const r=syncRecord(p.id);return r.conn?.open&&Date.now()-r.cooldown>=5000;});}
+ if(modVisible){const roster=syncRoster();let connected=0,attention=0,ready=0,severity='green';const ids=new Set(roster.map(p=>p.id));for(const [id,u] of panel.rows)if(!ids.has(id)){u.row.remove();panel.rows.delete(id);}roster.forEach((p,i)=>{if(p.testBot){let u=panel.rows.get(p.id);if(!u){u=syncMakeRow(p);panel.rows.set(p.id,u);}if(panel.list.children[i]!==u.row)panel.list.insertBefore(u.row,panel.list.children[i]||null);const seat=gameState.players.indexOf(p.name);u.name.textContent=p.name+' #'+(seat<0?i+1:seat+1);u.row.className='sync-row sync-bot';u.statuses[0].className='sync-badge sync-gray';u.statuses[0].textContent='🤖 จำลอง';u.statuses[1].hidden=true;u.statuses[2].hidden=true;u.age.hidden=true;u.send.hidden=true;u.send.disabled=true;u.row.hidden=!!panel.attentionOnly;return;}const r=syncRecord(p.id),connection=syncConnection(r),card=syncReceipt(r.card,!!activeRoleAssignments[p.id],r.since),election=syncReceipt(r.election,!!community.election,r.since),states=[connection,card,election];if(r.conn?.open&&connectedPeers[r.conn.peer]===r.conn)connected++;const needs=states.some(s=>['amber','red'].includes(s[0]));if(needs)attention++;for(const s of states)if(['green','gray','blue','amber','red'].indexOf(s[0])>['green','gray','blue','amber','red'].indexOf(severity)&&s[1]!=='ไม่เกี่ยวข้อง')severity=s[0];if(states.every(s=>s[0]==='green'||s[1]==='ไม่เกี่ยวข้อง'))ready++;let u=panel.rows.get(p.id);if(!u){u=syncMakeRow(p);panel.rows.set(p.id,u);}if(panel.list.children[i]!==u.row)panel.list.insertBefore(u.row,panel.list.children[i]||null);const seat=gameState.players.indexOf(p.name);u.name.textContent=p.name+' #'+(seat<0?i+1:seat+1);states.forEach((s,j)=>syncPaint(u.statuses[j],s,u.row.classList.contains('sync-expanded')?['การเชื่อมต่อ','การ์ดล่าสุด','เลือกตั้งล่าสุด'][j]:''));u.age.textContent=syncAge(r.lastReply);u.row.hidden=!!panel.attentionOnly&&!needs;u.send.disabled=!r.conn?.open||Date.now()-r.cooldown<5000;});floating.className='sync-'+severity;floating.textContent='📶 '+connected+'/'+roster.filter(p=>!p.testBot).length+(attention?'  ⚠️ '+attention:'');panel.summary.textContent='พร้อม '+ready+' / ต้องดูแล '+attention+' / อุปกรณ์ '+roster.filter(p=>!p.testBot).length+' / จำลอง '+roster.filter(p=>p.testBot).length;panel.all.disabled=!roster.filter(p=>!p.testBot).some(p=>{const r=syncRecord(p.id);return r.conn?.open&&Date.now()-r.cooldown>=5000;});}
  let own=document.getElementById('sync-own');const ownVisible=enabled&&!isMod&&syncVisible('screen-player-card');if(!own&&ownVisible){own=communityNode('details');own.id='sync-own';own.summary=communityNode('summary');own.statuses=[0,1,2].map(()=>communityNode('span'));own.summary.append(...own.statuses);own.info=communityNode('p');own.send=communityButton('↻ ขอซิงก์ของฉัน',syncRequestOwn);own.append(own.summary,own.info,own.send,communityNode('p',syncHelp));document.getElementById('screen-player-card').prepend(own);}if(own){own.hidden=!ownVisible;if(ownVisible){if(syncOwn.conn!==playerModConn){syncOwn.conn=playerModConn;syncOwn.since=Date.now();syncOwn.lastReply=0;}const live=playerModConn?.open,latest=syncOwn.lastReply&&Date.now()-syncOwn.lastReply<=10000;const connection=live?(latest?['green','เชื่อมต่อ']:(Date.now()-(syncOwn.lastReply||syncOwn.since)>10000?['amber','ไม่ตอบกลับ']:['blue','กำลังซิงก์'])):(syncOwn.disconnected?['red','ขาดการเชื่อมต่อ']:['gray','ยังไม่ทราบ']);const receipt=syncOwnReceipt;syncPaint(own.statuses[0],connection,'เน็ต');syncPaint(own.statuses[1],myAssignedRole?receipt('card'):['gray','ไม่เกี่ยวข้อง'],'การ์ด');syncPaint(own.statuses[2],communityView?.election?receipt('election'):['gray','ไม่เกี่ยวข้อง'],'เลือกตั้ง');own.info.textContent='ตอบกลับล่าสุด '+syncAge(syncOwn.lastReply);own.send.disabled=!live||Date.now()-syncOwnCooldown<5000;}}
 }
 
@@ -1566,25 +1583,52 @@ function devRolesPool(){
  for(let i=remaining.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[remaining[i],remaining[j]]=[remaining[j],remaining[i]];}
  return joinedPlayers.map(p=>devMode&&devReservations.has(p.id)?devReservations.get(p.id):remaining.shift());
 }
+// Keyed rows and cached option signatures survive the normal lobby heartbeat.
+function renderLobbyRows(list){
+ list.lobbyRows ||= new Map();
+ const ids=new Set(joinedPlayers.map(p=>p.id));
+ for(const [id,u] of list.lobbyRows)if(!ids.has(id)){u.row.remove();list.lobbyRows.delete(id);}
+ if(!joinedPlayers.length){if(!list.empty){list.empty=document.createElement('p');list.empty.textContent='กำลังรอให้ผู้เล่นสแกนเข้าร่วมห้อง...';list.empty.className='text-xs text-slate-500 text-center py-2';list.append(list.empty);}return;}
+ list.empty?.remove();list.empty=null;
+ joinedPlayers.forEach((p,i)=>{
+  let u=list.lobbyRows.get(p.id);
+  if(!u){const row=document.createElement('div'),name=document.createElement('span'),actions=document.createElement('div');row.className='lobby-player-row';name.className='lobby-player-name';name.tabIndex=0;actions.className='lobby-player-actions';
+   const make=(text,fn)=>{const b=document.createElement('button');b.type='button';b.textContent=text;b.onclick=fn;actions.append(b);return b;};
+   const up=make('↑',()=>moveLobbyPlayer(p.id,-1)),down=make('↓',()=>moveLobbyPlayer(p.id,1)),remove=make('❌',()=>removePlayerFromLobby(p.id));row.append(name,actions);u={row,name,actions,up,down,remove};list.lobbyRows.set(p.id,u);
+  }
+  if(list.children[i]!==u.row)list.insertBefore(u.row,list.children[i]||null);
+  const label='#'+(i+1)+' '+p.name+(p.testBot?' · 🤖 จำลอง':'');if(u.name.textContent!==label)u.name.textContent=label;
+  u.name.title=p.name;u.up.disabled=!devEditable()||i===0;u.down.disabled=!devEditable()||i===joinedPlayers.length-1;u.remove.disabled=!devEditable();
+  u.up.setAttribute('aria-label','เลื่อน '+p.name+' ขึ้น');u.down.setAttribute('aria-label','เลื่อน '+p.name+' ลง');u.remove.setAttribute('aria-label','ลบ '+p.name);
+ });
+}
 function renderDevLobby(){
  const list=document.getElementById('mod-players-list');if(!list)return;
  devReconcile();
- let panel=document.getElementById('dev-lobby');
- if(!panel){panel=document.createElement('section');panel.id='dev-lobby';list.before(panel);}
- panel.hidden=!isMod;panel.replaceChildren();
- const toggle=document.createElement('button');toggle.type='button';toggle.textContent=devMode?'🧪 Dev mode — ทดสอบ ON':'Dev mode — OFF';toggle.setAttribute('aria-pressed',String(devMode));toggle.disabled=!devEditable();toggle.onclick=devToggle;panel.append(toggle);
- if(devMode){const fill=document.createElement('button');fill.type='button';fill.textContent='⚡️ เติมผู้เล่นจำลองให้ครบ';fill.disabled=!devEditable()||joinedPlayers.length>=gameState.selectedRoles.length;fill.onclick=devFill;panel.append(fill);const note=document.createElement('p');note.textContent='🧪 ห้องทดสอบ · 🤖 จำลอง: Mod ควบคุมเอง ไม่มีอุปกรณ์ / ไม่โหวตหรือใช้พลังเอง';panel.append(note);}
- const notice=document.createElement('p');notice.setAttribute('role','status');notice.textContent=devNotice;panel.append(notice);
- const legacy=document.querySelector('[onclick="simulatePlayerBot()"]');if(legacy){legacy.hidden=!devMode;legacy.disabled=!devEditable();}
- for(const [i,p] of joinedPlayers.entries()){
-  const row=list.children[i];if(!row)continue;
-  row.querySelector('.dev-role')?.remove();
-  if(p.testBot&&!row.querySelector('.dev-bot')){const badge=document.createElement('span');badge.className='dev-bot';badge.textContent='🤖 จำลอง';row.firstElementChild.append(badge);}
-  if(!devMode)continue;
-  const select=document.createElement('select');select.className='dev-role';select.setAttribute('aria-label','กำหนดบทบาททดสอบให้ '+p.name);select.disabled=!devEditable();
-  for(const role of ['',...new Set(gameState.selectedRoles)]){const option=document.createElement('option');option.value=role;const r=ROLES_DATABASE.find(r=>r.id===role);option.textContent=role?(r?.name||role):'🎲 สุ่ม';option.disabled=!!role&&[...devReservations].filter(([id,r])=>id!==p.id&&r===role).length>=gameState.selectedRoles.filter(r=>r===role).length;select.append(option);}
-  select.value=devReservations.get(p.id)||'';select.onchange=()=>devReserve(p.id,select.value);
-  row.insertBefore(select,row.lastElementChild);
+ const legacy=document.querySelector('[onclick="simulatePlayerBot()"]');
+ if(!legacy)return;
+ let toggle=document.getElementById('dev-toggle');
+ if(!toggle){
+  const qr=document.getElementById('mod-room-code-display').parentElement.parentElement;qr.classList.add('dev-qr-panel');
+  toggle=document.createElement('button');toggle.id='dev-toggle';toggle.type='button';toggle.setAttribute('role','switch');toggle.onclick=devToggle;
+  const label=document.createElement('span');label.textContent='Dev mode';const track=document.createElement('span');track.className='dev-switch-track';toggle.append(label,track);qr.prepend(toggle);
+  const fill=document.createElement('button');fill.id='dev-fill';fill.type='button';fill.textContent='⚡ เติมให้ครบ';fill.className=legacy.className;fill.onclick=devFill;legacy.after(fill);legacy.parentElement.classList.add('dev-lobby-tools');
+  const notice=document.createElement('p');notice.id='dev-notice';notice.setAttribute('role','status');list.before(notice);
+ }
+ toggle.hidden=!isMod;toggle.disabled=!devEditable();toggle.setAttribute('aria-checked',String(devMode));
+ legacy.hidden=false;legacy.disabled=!devEditable()||joinedPlayers.length>=gameState.selectedRoles.length;
+ const fill=document.getElementById('dev-fill');fill.hidden=!devMode;fill.disabled=!devEditable()||joinedPlayers.length>=gameState.selectedRoles.length;
+ const notice=document.getElementById('dev-notice');notice.hidden=!devNotice;notice.textContent=devNotice;
+ for(const p of joinedPlayers){
+  const u=list.lobbyRows?.get(p.id);if(!u)continue;
+  if(!devMode){u.select?.remove();u.select=null;continue;}
+  let select=u.select;
+  if(!select){select=document.createElement('select');select.className='dev-role';select.onchange=()=>devReserve(p.id,select.value);u.row.insertBefore(select,u.actions);u.select=select;}
+  select.setAttribute('aria-label','กำหนดบทบาททดสอบให้ '+p.name);select.disabled=!devEditable();
+  const options=['',...new Set(gameState.selectedRoles)].map(role=>({role,disabled:!!role&&[...devReservations].filter(([id,r])=>id!==p.id&&r===role).length>=gameState.selectedRoles.filter(r=>r===role).length}));
+  const signature=JSON.stringify(options);
+  if(select.optionSignature!==signature){select.replaceChildren();for(const {role,disabled} of options){const option=document.createElement('option');option.value=role;option.textContent=role?(ROLES_DATABASE.find(r=>r.id===role)?.name||role):'🎲 สุ่ม';option.disabled=disabled;select.append(option);}select.optionSignature=signature;}
+  const value=devReservations.get(p.id)||'';if(select.value!==value)select.value=value;
  }
 }
 
@@ -2560,7 +2604,7 @@ function renderDevLobby(){
         }
 
         function simulatePlayerBot(batch=false) {
-            if(!devEditable()||!devMode)return;
+            if(!devEditable())return;
             const total = getTotalPlayersCount();
             if (joinedPlayers.length >= total) {
                 alert('ผู้เล่นครบจำนวนแล้ว');
@@ -2595,29 +2639,7 @@ function renderDevLobby(){
             document.getElementById('mod-lobby-progress').style.width = `${pct}%`;
 
             const listContainer = document.getElementById('mod-players-list');
-            listContainer.innerHTML = '';
-
-            if (joinedPlayers.length === 0) {
-                renderDevLobby();
-                listContainer.innerHTML = `<p class="text-[11px] text-slate-500 text-center py-2">กำลังรอให้ผู้เล่นสแกนเข้าร่วมห้อง...</p>`;
-                return;
-            }
-
-            joinedPlayers.forEach((p, idx) => {
-                listContainer.innerHTML += `
-                    <div class="flex items-center justify-between bg-slate-950/60 px-3 py-1.5 rounded-lg border border-slate-800 text-xs">
-                        <div class="flex items-center space-x-2 min-w-0">
-                            <span class="text-amber-400 font-mono text-[10px]">#${idx+1}</span>
-                            <span class="font-semibold text-slate-200 truncate" tabindex="0" title="${p.name}" aria-label="${p.name}">${p.name}</span>                        </div>
-                        <div class="flex items-center space-x-1.5">
-                            <button onclick="moveLobbyPlayer('${p.id}', -1)" ${!isMod || isGameStarted || idx === 0 ? 'disabled' : ''} aria-label="เลื่อน ${p.name} ขึ้น" style="width:32px;height:32px;flex-shrink:0" class="inline-flex items-center justify-center rounded bg-slate-800 disabled:opacity-30">↑</button>
-                            <button onclick="moveLobbyPlayer('${p.id}', 1)" ${!isMod || isGameStarted || idx === joinedPlayers.length - 1 ? 'disabled' : ''} aria-label="เลื่อน ${p.name} ลง" style="width:32px;height:32px;flex-shrink:0" class="inline-flex items-center justify-center rounded bg-slate-800 disabled:opacity-30">↓</button>
-                            <span class="text-[10px] text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-900">พร้อม</span>
-                            <button ${!isMod || isGameStarted ? 'disabled' : ''} onclick="removePlayerFromLobby('${p.id}')" title="ลบผู้เล่นนี้ออกจากห้อง" style="width:32px;height:32px;flex-shrink:0" class="text-xs text-slate-500 hover:text-rose-400 p-1 hover:bg-slate-800 rounded transition">❌</button>
-                        </div>
-                    </div>
-                `;
-            });
+            renderLobbyRows(listContainer);
             renderDevLobby();
         }
 
@@ -5061,7 +5083,7 @@ function resetGame(){
   <article id="rg-detail" tabindex="-1"></article>
   <div class="rg-toolbar rg-actions"><button id="rg-show" type="button" onclick="showGuideToPlayer()">อ่านเฉพาะบทบาทนี้</button><button id="rg-browse" type="button" onclick="browseRoleGuide()">กลับไปเลือกบทบาท</button></div>
   </div>
-  <button id="rg-top" type="button" aria-label="กลับไปต้นเนื้อหาบทบาทนี้" hidden>⬆️</button>
+  <button id="rg-top" type="button" aria-label="กลับไปด้านบนคู่มือ" hidden>⬆️</button>
   </div>
 </dialog>
 <dialog id="rg-art-viewer" aria-labelledby="rg-art-title"><div class="rg-toolbar"><h2 id="rg-art-title">ภาพเต็ม</h2><button type="button" onclick="document.getElementById('rg-art-viewer').close()">ปิดภาพขยาย</button></div><img id="rg-full-art" alt=""></dialog>
@@ -5885,7 +5907,7 @@ function renderGuideNavigation(role){
  const roles=guideCatalog().filter(r=>r.category===role.category).sort((a,b)=>ROLE_GROUP_ORDER.indexOf(guideGroup(a))-ROLE_GROUP_ORDER.indexOf(guideGroup(b)));
  const index=roles.findIndex(r=>r.id===role.id);
  for(const [label,destination] of [['Previous',roles[index-1]],['Next',roles[index+1]]]){
-  const button=document.createElement('button');button.type='button';button.disabled=!destination;button.textContent=label+(destination?' — '+destination.name:'');
+  const button=document.createElement('button');button.type='button';button.disabled=!destination;button.textContent=label;
   button.onclick=()=>{if(!destination||document.getElementById('role-guide').classList.contains('rg-public'))return;renderGuideRole(destination.id,true);};nav.append(button);
  }
 }
@@ -5904,10 +5926,10 @@ function browseRoleGuide() {
     document.getElementById('rg-show').hidden = false;
     document.getElementById('rg-browse').hidden = false;
 }
-// This control only scrolls the current public guide content; never changes selection/focus/card.
-function guideContentTop(){const viewport=document.getElementById('rg-scroll'),detail=document.getElementById('rg-detail');return Math.max(0,viewport.scrollTop+detail.getBoundingClientRect().top-viewport.getBoundingClientRect().top);}
-function updateGuideTop(){const viewport=document.getElementById('rg-scroll');document.getElementById('rg-top').hidden=document.getElementById('rg-art-viewer').open||viewport.scrollTop-guideContentTop()<160;}
-function guideBackToTop(){const viewport=document.getElementById('rg-scroll');viewport.scrollTop=guideContentTop();updateGuideTop();}
+// Scroll only: private guide visibility and selected role are unchanged.
+function guideContentTop(){return 0;}
+function updateGuideTop(){const viewport=document.getElementById('rg-scroll');document.getElementById('rg-top').hidden=document.getElementById('rg-art-viewer').open||viewport.scrollTop<160;}
+function guideBackToTop(){document.getElementById('rg-scroll').scrollTop=0;updateGuideTop();}
 document.getElementById('rg-top').onclick=guideBackToTop;
 document.getElementById('rg-scroll').addEventListener('scroll',updateGuideTop,{passive:true});
 document.getElementById('rg-art-viewer').addEventListener('close',updateGuideTop);
