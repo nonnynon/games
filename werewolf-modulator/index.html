@@ -327,6 +327,55 @@
 @media(max-height:620px){#mayor-ballot .ballot-candidates{flex:none;overflow-y:visible;min-height:auto}}
 @media(max-width:360px){#mayor-ballot header,#mayor-ballot footer,.ballot-candidates{padding:.75rem}.community-panel{padding:.75rem}.community-role-row{gap:.3rem}.community-button{padding:.5rem}}
 
+/* Fixed guide chrome; only the bounded content viewport scrolls. Zoom is not disabled. */
+#role-guide{overflow:hidden;max-height:calc(100dvh - 1rem);height:calc(100dvh - 1rem)}
+#role-guide[open]{display:flex;flex-direction:column}
+#role-guide > .rg-toolbar{flex:none;margin-bottom:.75rem}
+#rg-scroll{min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;flex:1}
+#rg-navigation{display:flex;gap:.5rem;flex-wrap:wrap}
+#rg-navigation button{flex:1;min-width:0;overflow-wrap:anywhere}
+#rg-navigation button:disabled{opacity:.45}
+#role-guide.rg-public #rg-navigation,#role-guide.rg-player #rg-navigation{display:none}
+#royal-pardon{padding:0;border:0;border-radius:1rem;background:#0f172a;color:#f8fafc;width:calc(100% - 2rem);max-width:24rem;max-height:calc(100dvh - 2rem);overflow:auto}
+#royal-pardon::backdrop{background:rgb(2 6 23 / .8);backdrop-filter:blur(4px)}
+
+/* Below all important dialogs (Bomber z-50); never placed in the top layer. */
+#sync-floating{position:fixed;right:1rem;bottom:max(1rem,env(safe-area-inset-bottom));z-index:30;background:#0f172a;border:1px solid #475569;border-radius:.75rem;padding:.65rem 1rem;color:#e2e8f0;font-size:14px;box-shadow:0 4px 12px #0008}
+#screen-mod-lobby,#gameplay-screen{padding-bottom:5rem}
+#sync-dashboard{position:fixed;right:1rem;bottom:4.5rem;z-index:40;width:min(1080px,calc(100vw - 2rem));max-height:85dvh;overflow:auto;background:#0f172a;color:#e2e8f0;border:1px solid #475569;border-radius:.75rem;box-shadow:0 8px 30px #0009;font-size:12px;padding:0 1rem 1rem}
+#sync-dashboard[hidden],#sync-floating[hidden],#sync-own[hidden],.sync-row[hidden]{display:none!important}
+#sync-dashboard header{position:sticky;top:0;z-index:1;background:#0f172a;padding:1rem 0 .5rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;border-bottom:1px solid #334155}
+#sync-dashboard h2{font-size:16px;font-weight:600;flex:1}#sync-dashboard header p{flex-basis:100%}
+.sync-columns,.sync-row{display:grid;grid-template-columns:minmax(130px,1.4fr) repeat(3,minmax(105px,1fr)) minmax(100px,1fr) 44px;align-items:center;gap:.5rem;padding:.625rem}
+.sync-row{margin-top:.4rem;background:#0f172a99;border:1px solid #334155;border-radius:.5rem}
+.sync-name{font-size:12px;font-weight:600;color:#f1f5f9;text-align:left;overflow-wrap:anywhere;min-height:32px}
+.sync-badge{font-size:10px;font-weight:400;padding:.125rem .375rem;border:1px solid;border-radius:.25rem;width:fit-content}
+.sync-green{color:#6ee7b7;background:#022c2299;border-color:#065f4680}.sync-blue{color:#93c5fd;background:#17255499;border-color:#1e408080}.sync-amber{color:#fcd34d;background:#451a0399;border-color:#92400e80}.sync-red{color:#fda4af;background:#4c051999;border-color:#9f123980}.sync-gray{color:#cbd5e1;background:#1e293b;border-color:#475569}
+.sync-send{border:1px solid #475569;border-radius:.25rem;min-width:36px;min-height:36px;font-size:18px}.sync-send:disabled{opacity:.4}
+#sync-dashboard footer{white-space:pre-line;font-size:12px;line-height:1.6;color:#94a3b8;margin-top:1rem}
+#sync-own{border:1px solid #334155;border-radius:.5rem;padding:.6rem;margin-bottom:.75rem;font-size:12px;background:#0f172a}#sync-own summary{cursor:pointer}#sync-own p{white-space:pre-line;margin:.5rem 0}
+@media(max-width:640px){#sync-dashboard{inset:.5rem;width:auto;max-height:none;padding:0 .5rem .5rem}.sync-columns{display:none}.sync-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 36px;gap:.35rem;padding:.5rem}.sync-name{grid-column:1/4;font-size:14px}.sync-send{grid-column:4;grid-row:1/3}.sync-badge{font-size:12px;padding:.25rem;max-width:100%;overflow-wrap:anywhere}.sync-age{display:none}.sync-expanded .sync-age{display:block;grid-column:1/4;font-size:12px}.sync-expanded{padding-block:.8rem}#sync-dashboard header .community-button{min-height:36px}#sync-own{font-size:13px}}
+
+#sync-own summary .sync-badge{display:inline-block;margin:.15rem;font-size:12px}
+
+/* One persistent button preserves focus and one handler. */
+.sync-send-full{display:none}
+@media(max-width:640px){.sync-expanded .sync-send{grid-column:1/-1;grid-row:auto;font-size:12px;width:100%}.sync-expanded .sync-send-compact{display:none}.sync-expanded .sync-send-full{display:inline}.sync-expanded .sync-badge{grid-column:1/-1}}
+#sync-floating.sync-green{color:#6ee7b7;background:#022c22;border-color:#065f46}
+#sync-floating.sync-blue{color:#93c5fd;background:#172554;border-color:#1e40af}
+#sync-floating.sync-amber{color:#fcd34d;background:#451a03;border-color:#92400e}
+#sync-floating.sync-red{color:#fda4af;background:#4c0519;border-color:#9f1239}
+#sync-floating.sync-gray{color:#cbd5e1;background:#1e293b;border-color:#475569}
+
+#dev-lobby{border:1px solid #6366f1;border-radius:.75rem;padding:.65rem;margin:.5rem 0;background:#171d35;color:#c7d2fe;font-size:.8rem}
+#dev-lobby button,.dev-role{min-height:44px;background:#1e293b;color:#e2e8f0;border:1px solid #64748b;border-radius:.6rem;padding:.35rem;margin:.2rem}
+#dev-lobby button:disabled{opacity:.5}.dev-bot{color:#a5b4fc;font-size:.7rem;white-space:nowrap}
+#mod-players-list>div{flex-wrap:wrap;gap:.35rem}#mod-players-list>div>div:first-child{flex:1 1 8rem;flex-wrap:wrap}.dev-role{max-width:100%;width:10rem;min-width:0}#mod-players-list>div>div:last-child{margin-left:auto}
+#rg-viewport{position:relative;min-height:0;flex:1;display:flex;overflow:hidden}
+#rg-scroll{padding-right:calc(60px + env(safe-area-inset-right,0px));padding-bottom:calc(60px + env(safe-area-inset-bottom,0px))}
+#rg-top{position:absolute;right:max(8px,env(safe-area-inset-right,0px));bottom:max(8px,env(safe-area-inset-bottom,0px));width:44px;height:44px;min-width:44px;min-height:44px;border:1px solid #64748b;border-radius:14px;background:#1e293b;color:#f8fafc;box-shadow:0 3px 12px #0008;z-index:2}
+#rg-top[hidden]{display:none}#rg-top:focus-visible{outline:2px solid #fbbf24;outline-offset:2px}
+
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-amber-500 selection:text-slate-950">
@@ -1075,7 +1124,7 @@ function normalCan(p){return isMod&&gameState.gamePhase==='night'&&actorAvailabl
 function validDrunkRole(id){const role=ROLES_DATABASE.find(r=>r.id===id);if(!role||['drunk','beholder','direwolf','doppelganger','cupid','bodyguard','seer','spellcaster','cult_leader'].includes(id))return false;return role.team!=='wolf'||['werewolf','wolf_cub','sorceress','sorcerer'].includes(id);}
 function validateSavedDrunkChoices(state){const invalid={};if(state.pendingDrunkRole&&!validDrunkRole(state.pendingDrunkRole))invalid.pregame=state.pendingDrunkRole;for(const [player,id] of Object.entries(state.normal?.trueRoles||{}))if(!validDrunkRole(id))invalid[player]=id;state.invalidDrunkChoices=invalid;return state;}
 function awakenDrunks(){if(gameState.gamePhase!=='night'||gameState.dayCount<3)return;const n=normalState();gameState.players.filter(p=>gameState.rolePlayerMap[p]==='drunk'&&actorAvailable(p)&&validDrunkRole(n.trueRoles[p])).forEach(p=>normalAcquire(p,n.trueRoles[p]));}
-function normalAcquire(p,id){const n=normalState(),r=ROLES_DATABASE.find(r=>r.id===id);if(!r)return;const previous=gameState.rolePlayerMap[p];gameState.rolePlayerMap[p]=id;n.used[p]={};(n.inherited||(n.inherited={}))[p]=true;delete gameState.deathPowers?.[p];delete gameState.bomberPowers?.[p];if(['drunk','doppelganger'].includes(previous))recordTransformation(previous,p,id);publishAcquiredCard(p,id);}
+function normalAcquire(p,id){const n=normalState(),r=ROLES_DATABASE.find(r=>r.id===id);if(!r)return;const previous=gameState.rolePlayerMap[p];gameState.rolePlayerMap[p]=id;n.used[p]={};(n.inherited||(n.inherited={}))[p]=true;delete gameState.deathPowers?.[p];delete gameState.bomberPowers?.[p];publishAcquiredCard(p,id);if(['drunk','doppelganger'].includes(previous))recordTransformation(previous,p,id);}
 function normalCommittedDeaths(){syncCultChoices();const n=normalState();let changed=true,pass=0;
  while(changed&&pass++<=gameState.players.length){changed=false;for(const p of gameState.players){const link=n.links[p];if(!link||gameState.playerStatus[link]?.alive||(gameState.nightKilled||[]).includes(link)||!gameState.playerStatus[p]?.alive)continue;
  const role=gameState.rolePlayerMap[p];if(role==='doppelganger'&&!isBedridden(p)&&!isPoisoned(p)){const copied=actualRoleForCopy(link);if(!copied)continue;normalAcquire(p,copied);delete n.links[p];changed=true;}
@@ -1273,7 +1322,7 @@ function renderTransformationNotices(){document.querySelectorAll('[data-transfor
  for(const kind of ['apprentice_seer','cursed','doppelganger','drunk']){const items=pending.filter(e=>e.kind===kind);if(!items.length)continue;const result=document.createElement('div');result.className='text-xs p-2.5 rounded-lg border border-amber-700 bg-amber-950/80 text-amber-300 space-y-1';for(const event of items){const text=document.createElement('div');const from=ROLES_DATABASE.find(r=>r.id===kind)?.name||kind,to=ROLES_DATABASE.find(r=>r.id===event.to)?.name||event.to;const outcome=document.createElement('b');outcome.textContent=event.player+' — '+from+' → '+to;text.append(outcome);const signal=document.createElement('div');signal.className='text-[10px] text-slate-400';signal.textContent='👉 Mod: สะกิด '+event.player+' และแจ้งบทบาทใหม่เป็นการส่วนตัว';const ack=document.createElement('button');ack.className='bg-amber-700 rounded px-2 py-1 text-xs';ack.textContent='สะกิดแล้ว';ack.onclick=()=>acknowledgeTransformation(event.id);result.append(text,signal,ack);}box.append(result);}
 }
 function commitCursedConversion(player){if(!player||!gameState.cursedTurned.includes(player))return;const n=normalState();if(n.cursedCommitted?.[player])return;(n.cursedCommitted||(n.cursedCommitted={}))[player]=true;recordTransformation('cursed',player,'werewolf');publishAcquiredCard(player,'werewolf','cursed_turned');}
-function publishAcquiredCard(player,id,artRoleId=id){const n=normalState(),r=ROLES_DATABASE.find(r=>r.id===id);if(!r)return;const device=Object.keys(activeRoleAssignments).find(k=>activeRoleAssignments[k].playerName===player);if(!device)return;const old=activeRoleAssignments[device];activeRoleAssignments[device]={...old,roleSchemaVersion:2,roleId:id,roleName:r.name,roleThai:r.thai,roleIcon:r.icon,team:r.team,desc:'บทบาทใหม่ของคุณคือ '+r.name+' — '+r.desc+(['cupid','beholder','direwolf','doppelganger'].includes(id)?' (พลังเฉพาะคืนแรกใช้ไม่ได้หลังรับบทบาท)':''),originalRoleId:n.original[player]||old.originalRoleId||old.roleId,artRoleId};gameState.rolePlayerMap[device]=id;Object.values(connectedPeers).filter(c=>c.wwPlayerId===device).forEach(sendPrivateAssignment);}
+function publishAcquiredCard(player,id,artRoleId=id,send=true){const n=normalState(),r=ROLES_DATABASE.find(r=>r.id===id);if(!r)return;(n.acquiredCards||(n.acquiredCards={}))[player]={id,artRoleId};const device=Object.keys(activeRoleAssignments).find(k=>activeRoleAssignments[k].playerName===player);if(!device)return;const old=activeRoleAssignments[device];activeRoleAssignments[device]={...old,roleSchemaVersion:2,roleId:id,roleName:r.name,roleThai:r.thai,roleIcon:r.icon,team:r.team,desc:'บทบาทใหม่ของคุณคือ '+r.name+' — '+r.desc+(['cupid','beholder','direwolf','doppelganger'].includes(id)?' (พลังเฉพาะคืนแรกใช้ไม่ได้หลังรับบทบาท)':''),originalRoleId:n.original[player]||old.originalRoleId||old.roleId,artRoleId};gameState.rolePlayerMap[device]=id;if(send)Object.values(connectedPeers).filter(c=>c.open&&c.wwPlayerId===device).forEach(c=>{try{sendPrivateAssignment(c);}catch(e){console.warn('Private card send failed; replay on reconnect',e);}});}
 function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.roleId==='werewolf'?'cursed_turned':info.roleId;}
 
         // APPLICATION STATE
@@ -1345,7 +1394,7 @@ function communityReconcile(){if(community.mayor&&!communityAlive().includes(com
 function communityTotals(){const counts=Object.fromEntries(ROLES_DATABASE.map(r=>[r.id,0]));for(const [id,roles] of Object.entries(community.survey.votes))if(joinedPlayers.some(p=>p.id===id))for(const r of roles)counts[r]++;return counts;}
 function communityPublic(){communityReconcile();const e=community.election;return {epoch:community.epoch,revision:community.revision,started:isGameStarted||!!gameState.offlineGame,mayor:community.mayor,mayorStatus:community.mayorStatus,election:e?{id:e.id,phase:e.phase,candidates:e.candidates.filter(p=>communityAlive().includes(p)),result:e.phase==='announced'?e.result:null}:null,survey:{id:community.survey.id,open:community.survey.open,locked:community.survey.locked,totals:communityTotals()}};}
 function communityPrivate(id){const p=activeRoleAssignments[id]?.playerName;return {ballot:community.election?.ballots[id]??null,alive:!!gameState.playerStatus[p]?.alive,selected:community.survey.votes[id]||[],version:community.survey.versions[id]||0};}
-function communitySend(conn,requestId=null,error=''){if(!conn?.open||!conn.wwPlayerId||!joinedPlayers.some(p=>p.id===conn.wwPlayerId)&&!activeRoleAssignments[conn.wwPlayerId])return;conn.send({type:'COMMUNITY_STATE',room:activeRoomCode,public:communityPublic(),own:communityPrivate(conn.wwPlayerId),requestId,error});}
+function communitySend(conn,requestId=null,error=''){if(!conn?.open||!conn.wwPlayerId||!joinedPlayers.some(p=>p.id===conn.wwPlayerId)&&!activeRoleAssignments[conn.wwPlayerId])return;const pub=communityPublic(),own=communityPrivate(conn.wwPlayerId);const sync=pub.election&&typeof syncEnvelope==='function'?syncEnvelope(conn,'election',{election:pub.election,mayor:pub.mayor,mayorStatus:pub.mayorStatus}):undefined;const card=typeof privateAssignmentPayload==='function'?privateAssignmentPayload(conn):null;if(card&&typeof syncEnvelope==='function')syncEnvelope(conn,'card',card);const r=typeof syncRecord==='function'?syncRecord(conn.wwPlayerId):null,expected={card:card&&r?.card?{revision:r.card.revision,sequence:r.card.sequence}:null,election:pub.election&&r?.election?{revision:r.election.revision,sequence:r.election.sequence}:null};const presence=typeof syncEnvelope==='function'?syncEnvelope(conn,'presence',expected):undefined;conn.send({type:'COMMUNITY_STATE',room:activeRoomCode,public:pub,own,requestId,error,sync:pub.election?sync:presence,presence,expected});}
 function communityPublish(){if(!isMod)return;community.revision++;Object.values(connectedPeers).forEach(c=>communitySend(c));renderCommunity();}
 function communityRequest(data,conn){
  if(!isMod||!conn||connectedPeers[conn.peer]!==conn||!conn.open)return;
@@ -1385,8 +1434,9 @@ function cancelLobbyEdit(){finishLobbyEdit(false);}
 // DOM is constructed with textContent for all names/labels. No role pool or secret card enters these panels.
 function communityNode(tag,text,cls){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;}
 function communityButton(text,fn,disabled=false){const b=communityNode('button',text,'community-button');b.type='button';b.onclick=fn;b.disabled=disabled;return b;}
-function communityPanel(host,id){let p=document.getElementById(id);if(!p){p=communityNode('section',undefined,'community-panel');p.id=id;host.append(p);}return p;}
+function communityPanel(host,id){let p=document.getElementById(id);if(!p){p=communityNode('section',undefined,'community-panel');p.id=id;}if(p.parentElement!==host)host.append(p);return p;}
 function renderCommunity(){
+ if(typeof renderSyncDashboard==="function")renderSyncDashboard();
  const view=isMod?communityPublic():communityView;if(!view)return;
  const lobby=document.getElementById(isMod?'screen-mod-lobby':'screen-player-waiting');
  if(lobby){const panel=communityPanel(lobby,'community-survey');renderSurveyPanel(panel,view);}
@@ -1432,7 +1482,111 @@ function openMayorBallot(){ballotReturnFocus=document.activeElement;ballotChoice
 function renderMayorBallot(){const d=document.getElementById('mayor-ballot'),e=communityView?.election;if(!d||!e)return;const focused=document.activeElement?.dataset.ballotIndex,scroll=d.querySelector('.ballot-candidates')?.scrollTop||0;d.replaceChildren();const heading=communityNode('h2','บัตรเลือกตั้งผู้ใหญ่บ้าน');heading.id='mayor-ballot-title';const header=communityNode('header');header.append(heading,communityNode('p','เลือกหนึ่งตัวเลือก • โหวตตัวเองได้ • ยืนยันแล้วเปลี่ยนไม่ได้'));d.append(header);const list=communityNode('div',undefined,'ballot-candidates');const confirmed=communityOwn?.ballot!==null&&communityOwn?.ballot!==undefined;[...e.candidates.map(mayorCandidateChoice),'no:'].forEach((name,i)=>{const label=communityNode('label',undefined,'ballot-option');const radio=communityNode('input');radio.type='radio';radio.name='mayor-choice';radio.checked=(confirmed?communityOwn.ballot:ballotChoice)===name;radio.disabled=confirmed||!!communityPending||e.phase!=='open'||!communityOwn?.alive;radio.dataset.ballotIndex=String(i);radio.onchange=()=>{ballotChoice=name;renderMayorBallot();};const box=communityNode('span',undefined,'ballot-cross');box.setAttribute('aria-hidden','true');label.append(radio,box,communityNode('span',name==='no:'?'Vote No — ไม่เลือกผู้ใด':mayorChoiceName(name)));list.append(label);});d.append(list);list.scrollTop=scroll;const footer=communityNode('footer');const status=communityNode('p',confirmed?'Mod ได้รับบัตรเลือกตั้งแล้ว':communityPending?.type==='MAYOR_BALLOT'?'กำลังส่งบัตรเลือกตั้ง…':e.phase!=='open'?'ปิดหีบแล้ว':'ยังไม่ได้หย่อนบัตรลงหีบเลือกตั้ง');status.setAttribute('role','status');status.dataset.communityMessage='';footer.append(status,communityButton('ยืนยันลงคะแนนเสียง',submitMayorBallot,confirmed||!!communityPending||ballotChoice===null||e.phase!=='open'||!communityOwn?.alive),communityNode('p','เนื่องจาก กกต. ระบุ QR code บนบัตรเลือกตั้ง Mod จึงสามารถดูรายละเอียดการลงคะแนนได้','ballot-footnote'),communityButton('ปิดบัตร',()=>d.close()));d.append(footer);if(focused!==undefined)d.querySelector('[data-ballot-index="'+focused+'"]')?.focus({preventScroll:true});}
 
 function restoreLobbyButtons(){const back=document.querySelector('#screen-role-select .flex.gap-2 > button');if(back){back.onclick=()=>showScreen('screen-home');back.textContent='ย้อนกลับ';}const b=document.querySelector('[onclick="confirmRolesAndCreateRoom()"]');if(b)b.textContent='ตกลง & รับ QR Code';}
-function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn||!data.public||!data.own)return;if(communityView?.epoch===data.public.epoch&&data.public.revision<communityView.revision)return;const changed=communityView?.election?.id!==data.public.election?.id;if(changed){communityPending=null;ballotChoice=null;document.getElementById('mayor-ballot')?.close();}communityView=data.public;communityOwn=data.own;if(communityPending?.requestId===data.requestId)communityPending=null;renderCommunity();if(data.error)communityMessage(data.error);}
+function requestCommunitySync(){if(!isMod&&joinIntent&&activeRoomCode&&playerModConn?.open)playerModConn.send({type:'COMMUNITY_SYNC',room:activeRoomCode});}
+function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn||!data.public||!data.own)return;if(typeof syncAccept==='function'&&!syncAccept(data,conn))return;if(communityView?.epoch===data.public.epoch&&data.public.revision<communityView.revision)return;const changed=communityView?.election?.id!==data.public.election?.id;if(changed){communityPending=null;ballotChoice=null;document.getElementById('mayor-ballot')?.close();}if(!data.public.started&&typeof myAssignedRole!=='undefined'&&myAssignedRole){myAssignedRole=null;lastCardDelivery=null;requestedTravelerKind=null;closePlayerRoleGuide();closeTravelerModal();try{sessionStorage.removeItem('ww_assigned_role');sessionStorage.removeItem('ww_session_id');}catch(e){}showScreen('screen-player-waiting');}communityView=data.public;communityOwn=data.own;if(typeof syncReceived==='function'){syncReceived(data,conn);if(data.presence)syncReceived({...data,sync:data.presence},conn);}if(communityPending?.requestId===data.requestId)communityPending=null;renderCommunity();if(data.error)communityMessage(data.error);}
+
+// Receipt evidence is per room epoch, join attempt, connection and meaningful payload revision.
+// Payload fingerprints stay on the host; the wire ACK contains no role or vote.
+let syncHost = new Map(), syncOwn = {}, syncEpoch = '', syncOwnCooldown = 0, syncRetiredEpochs = new Set(), syncPlayerEpoch = '';
+function syncReset(){if(syncPlayerEpoch)syncRetiredEpochs.add(syncPlayerEpoch);syncPlayerEpoch='';syncHost.clear();syncOwn={};syncEpoch='';syncOwnCooldown=0;document.getElementById('sync-dashboard')?.setAttribute('hidden','');}
+function syncRecord(id){if(syncEpoch!==community.epoch){syncHost.clear();syncEpoch=community.epoch;}if(!syncHost.has(id))syncHost.set(id,{lastReply:0,cooldown:0,since:Date.now()});return syncHost.get(id);}
+function syncBind(conn){const r=syncRecord(conn.wwPlayerId);if(r.conn!==conn||r.requestId!==conn.wwJoinRequestId){r.conn=conn;r.requestId=conn.wwJoinRequestId;r.token=crypto.randomUUID();r.lastReply=0;r.since=Date.now();r.sequence=0;r.card=null;r.election=null;r.presence=null;}return r;}
+function syncEnvelope(conn,kind,payload){const r=syncBind(conn),key=JSON.stringify([currentGameSessionId,payload]);let s=r[kind];if(!s||s.key!==key){s=r[kind]={key,sequence:++r.sequence,revision:(s?.revision||0)+1,since:Date.now(),acked:false};}return {epoch:community.epoch,session:currentGameSessionId,token:r.token,requestId:conn.wwJoinRequestId,kind,sequence:s.sequence,revision:s.revision};}
+function syncValidHost(conn){return !!(isMod&&conn?.open&&connectedPeers[conn.peer]===conn&&conn.wwPlayerId&&(joinedPlayers.some(p=>p.id===conn.wwPlayerId)||activeRoleAssignments[conn.wwPlayerId]));}
+function syncHostMessage(data,conn){if(data.room!==activeRoomCode||!syncValidHost(conn))return;const r=syncRecord(conn.wwPlayerId),s=data.sync;if(!s||r.conn!==conn||s.epoch!==community.epoch||s.session!==currentGameSessionId||s.token!==r.token||s.requestId!==r.requestId)return;if(data.type==='SYNC_ACK'){if(!['card','election','presence'].includes(s.kind))return;const v=r[s.kind];if(!v||s.revision!==v.revision||s.sequence!==v.sequence)return;v.acked=true;r.lastReply=Date.now();}else if(data.type==='SYNC_REQUEST'){r.lastReply=Date.now();syncResend(conn.wwPlayerId);}renderSyncDashboard();}
+function syncAccept(data,conn){const s=data.sync;if(isMod||!joinIntent||!conn?.open||conn!==playerModConn||data.room!==activeRoomCode||!s||s.requestId!==joinRequestId)return false;if(!['card','election','presence'].includes(s.kind))return false;const fence=syncOwn.fence;if(fence&&fence.conn===conn&&fence.token===s.token&&fence.session!==s.session&&s.sequence<=fence.sequence)return false;const expected=syncOwn.expected?.[s.kind];if(expected&&expected.token===s.token&&s.sequence<expected.sequence)return false;const old=syncOwn[s.kind];if(syncRetiredEpochs.has(s.epoch))return false;if(old&&old.conn===conn&&old.sync.epoch===s.epoch&&old.sync.token===s.token&&old.sync.revision>s.revision)return false;return true;}
+function syncReceived(data,conn){if(!syncAccept(data,conn))return;const s=data.sync;if(syncPlayerEpoch&&syncPlayerEpoch!==s.epoch){syncRetiredEpochs.add(syncPlayerEpoch);syncOwn={};}syncPlayerEpoch=s.epoch;const fence=syncOwn.fence;if(!fence||fence.conn!==conn||s.sequence>fence.sequence)syncOwn.fence={conn,token:s.token,session:s.session,sequence:s.sequence};const old=syncOwn[s.kind],now=Date.now();syncOwn[s.kind]={sync:s,conn,received:now};if(s.kind==='presence'&&data.expected){const previous=syncOwn.expected||{};syncOwn.expected={};for(const kind of ['card','election']){const v=data.expected[kind];if(v)syncOwn.expected[kind]={...v,token:s.token,session:s.session,conn,since:previous[kind]?.sequence===v.sequence&&previous[kind]?.conn===conn?previous[kind].since:now};}}syncOwn.conn=conn;syncOwn.since??=now;syncOwn.lastReply=now;syncOwn.disconnected=false;if(!old||old.conn!==conn||JSON.stringify(old.sync)!==JSON.stringify(s)||now-(old.ackAt||0)>=5000){try{conn.send({type:'SYNC_ACK',room:activeRoomCode,sync:s});syncOwn[s.kind].ackAt=now;}catch(e){syncOwn[s.kind].ackAt=0;}}else syncOwn[s.kind].ackAt=old.ackAt;renderSyncDashboard();}
+function syncResend(id){if(!isMod||joinedPlayers.some(p=>p.id===id&&p.testBot))return;const r=syncRecord(id),now=Date.now();if(now-r.cooldown<5000)return;const c=r.conn;if(!syncValidHost(c))return;r.cooldown=now;try{sendPrivateAssignment(c);communitySend(c);}catch(e){console.warn('Sync replay deferred until reconnect',e);}renderSyncDashboard();}
+function syncResendAll(){if(isMod)syncRoster().filter(p=>!p.testBot).forEach(p=>syncResend(p.id));}
+function syncRequestOwn(){const now=Date.now(),v=[syncOwn.presence,syncOwn.card,syncOwn.election].filter(Boolean).sort((a,b)=>(b.received||0)-(a.received||0))[0];if(isMod||now-syncOwnCooldown<5000||!v||v.conn!==playerModConn||!playerModConn?.open)return;syncOwnCooldown=now;playerModConn.send({type:'SYNC_REQUEST',room:activeRoomCode,sync:v.sync});renderSyncDashboard();}
+function syncRoster(){const roster=joinedPlayers.map(p=>({...p}));for(const [id,a] of Object.entries(activeRoleAssignments))if(!roster.some(p=>p.id===id))roster.push({id,name:a.playerName});return roster.sort((a,b)=>{const x=gameState.players.indexOf(a.name),y=gameState.players.indexOf(b.name);return (x<0?100000+joinedPlayers.findIndex(p=>p.id===a.id):x)-(y<0?100000+joinedPlayers.findIndex(p=>p.id===b.id):y);});}
+function syncReceipt(s,applicable=true,since=Date.now()){if(!applicable)return ['gray','ไม่เกี่ยวข้อง'];if(!s)return Date.now()-since>10000?['amber','รอเกิน 10 วิ']:['blue','กำลังซิงก์'];if(s.acked)return ['green','รับแล้ว'];return Date.now()-s.since>10000?['amber','รอเกิน 10 วิ']:['blue','กำลังซิงก์'];}
+function syncConnection(r){if(r?.conn&&(!r.conn.open||connectedPeers[r.conn.peer]!==r.conn))return ['red','ขาดการเชื่อมต่อ'];if(!r?.lastReply)return Date.now()-(r?.since??Date.now())>10000?['amber','ไม่ตอบกลับ']:['blue','กำลังซิงก์'];if(Date.now()-r.lastReply>10000)return ['amber','ไม่ตอบกลับ'];return ['green','เชื่อมต่อ'];}
+function syncOwnReceipt(kind){const v=syncOwn[kind],e=syncOwn.expected?.[kind];if(v?.conn===playerModConn&&e?.conn===playerModConn&&v.sync.token===e.token&&v.sync.session===e.session&&v.sync.sequence===e.sequence)return ['green','รับแล้ว'];return Date.now()-(e?.since??syncOwn.since??Date.now())>10000?['amber','รอเกิน 10 วิ']:['blue','กำลังซิงก์'];}
+function syncAge(t){return t?Math.floor((Date.now()-t)/1000)+' วิที่แล้ว':'ยังไม่มีการตอบกลับ';}
+function syncPaint(n,status,label){n.className='sync-badge sync-'+status[0];n.textContent=(label?label+': ':'')+({green:'✓ ',blue:'↻ ',amber:'⚠ ',red:'✕ ',gray:'— '}[status[0]])+status[1];}
+const syncHelp=`สี: เขียว รับข้อมูลล่าสุดแล้ว / น้ำเงิน กำลังซิงก์ / เหลือง รอเกิน 10 วินาทีหรือไม่ตอบกลับ (ไม่ยืนยันว่าหลุด) / แดง ขาดการเชื่อมต่อ / เทา ไม่ทราบหรือยังไม่เกี่ยวข้อง
+หากการ์ดไม่อัปเดตหรือไม่มีแผงเลือกตั้ง ให้ส่งซ้ำรายคนหรือทุกคน หากหลุด ให้เชื่อมต่อใหม่ เปิดเกม และตรวจอินเทอร์เน็ตก่อน
+“รับแล้ว” คืออุปกรณ์ยืนยันข้อมูลล่าสุด ไม่ใช่อ่านแล้วหรือโหวตแล้ว ซิงก์ไม่แจกใหม่ ไม่เปิดเผยการ์ด ไม่ลงคะแนน และไม่เปิดบัตรเลือกตั้งอัตโนมัติ`;
+function syncVisible(id){const n=document.getElementById(id);return n&&!n.classList.contains('hidden');}
+function syncMakeRow(p){const row=communityNode('div',undefined,'sync-row'),name=communityButton('',()=>{row.classList.toggle('sync-expanded');name.setAttribute('aria-expanded',String(row.classList.contains('sync-expanded')));renderSyncDashboard();});name.className='sync-name';name.setAttribute('aria-expanded','false');const statuses=[0,1,2].map(()=>communityNode('span')),age=communityNode('span',undefined,'sync-age'),send=communityButton('↻',()=>syncResend(p.id));send.className='sync-send';const compact=communityNode('span','↻','sync-send-compact'),full=communityNode('span','ส่งข้อมูลล่าสุดอีกครั้ง','sync-send-full');send.textContent='';send.append(compact,full);send.setAttribute('aria-label','ส่งซ้ำให้ '+p.name);row.append(name,...statuses,age,send);return {row,name,statuses,age,send};}
+function renderSyncDashboard(){
+ if(typeof document==='undefined'||!document.body)return;
+ const enabled=!!activeRoomCode&&!gameState.offlineGame,modVisible=enabled&&isMod&&(syncVisible('screen-mod-lobby')||syncVisible('gameplay-screen'));
+ let floating=document.getElementById('sync-floating'),panel=document.getElementById('sync-dashboard');
+ if(!floating){floating=communityButton('',()=>{panel.hidden=false;renderSyncDashboard();panel.closeButton.focus();});floating.id='sync-floating';document.body.append(floating);}
+ floating.hidden=!modVisible;
+ if(!panel){panel=communityNode('section');panel.id='sync-dashboard';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-label','การเชื่อมต่อและการรับข้อมูล');panel.rows=new Map();const header=communityNode('header'),title=communityNode('h2','การเชื่อมต่อและซิงก์');panel.summary=communityNode('p');panel.closeButton=communityButton('ปิด',()=>{panel.hidden=true;floating.focus();});panel.filter=communityButton('ทั้งหมด',()=>{panel.attentionOnly=!panel.attentionOnly;panel.filter.textContent=panel.attentionOnly?'ต้องดูแล':'ทั้งหมด';panel.filter.setAttribute('aria-pressed',String(!!panel.attentionOnly));renderSyncDashboard();});panel.filter.setAttribute('aria-label','สลับทั้งหมด / ต้องดูแล');panel.all=communityButton('ซิงก์ทุกคน',syncResendAll);header.append(title,panel.closeButton,panel.summary,panel.filter,panel.all);panel.append(header);const headings=communityNode('div',undefined,'sync-columns');['ชื่อ #ที่นั่ง','การเชื่อมต่อ','การ์ดล่าสุด','เลือกตั้งล่าสุด','ตอบกลับล่าสุด','ส่งซ้ำ'].forEach(t=>headings.append(communityNode('span',t)));panel.append(headings);panel.list=communityNode('div');panel.append(panel.list,communityNode('footer',syncHelp));panel.addEventListener('keydown',e=>{if(e.key==='Escape'){panel.hidden=true;floating.focus();}});document.body.append(panel);}
+ if(!modVisible)panel.hidden=true;
+ if(modVisible){const roster=syncRoster();let connected=0,attention=0,ready=0,severity='green';const ids=new Set(roster.map(p=>p.id));for(const [id,u] of panel.rows)if(!ids.has(id)){u.row.remove();panel.rows.delete(id);}roster.forEach((p,i)=>{if(p.testBot){let u=panel.rows.get(p.id);if(!u){u=syncMakeRow(p);panel.rows.set(p.id,u);}if(panel.list.children[i]!==u.row)panel.list.insertBefore(u.row,panel.list.children[i]||null);const seat=gameState.players.indexOf(p.name);u.name.textContent=p.name+' #'+(seat<0?i+1:seat+1);u.statuses.forEach(n=>syncPaint(n,['gray','🤖 จำลอง'],''));u.age.textContent='ไม่มีอุปกรณ์';u.send.hidden=true;u.send.disabled=true;u.row.hidden=!!panel.attentionOnly;return;}const r=syncRecord(p.id),connection=syncConnection(r),card=syncReceipt(r.card,!!activeRoleAssignments[p.id],r.since),election=syncReceipt(r.election,!!community.election,r.since),states=[connection,card,election];if(r.conn?.open&&connectedPeers[r.conn.peer]===r.conn)connected++;const needs=states.some(s=>['amber','red'].includes(s[0]));if(needs)attention++;for(const s of states)if(['green','gray','blue','amber','red'].indexOf(s[0])>['green','gray','blue','amber','red'].indexOf(severity)&&s[1]!=='ไม่เกี่ยวข้อง')severity=s[0];if(states.every(s=>s[0]==='green'||s[1]==='ไม่เกี่ยวข้อง'))ready++;let u=panel.rows.get(p.id);if(!u){u=syncMakeRow(p);panel.rows.set(p.id,u);}if(panel.list.children[i]!==u.row)panel.list.insertBefore(u.row,panel.list.children[i]||null);const seat=gameState.players.indexOf(p.name);u.name.textContent=p.name+' #'+(seat<0?i+1:seat+1);states.forEach((s,j)=>syncPaint(u.statuses[j],s,u.row.classList.contains('sync-expanded')?['การเชื่อมต่อ','การ์ดล่าสุด','เลือกตั้งล่าสุด'][j]:window.innerWidth<=640?['เน็ต','การ์ด','เลือกตั้ง'][j]:''));u.age.textContent=syncAge(r.lastReply);u.row.hidden=!!panel.attentionOnly&&!needs;u.send.disabled=!r.conn?.open||Date.now()-r.cooldown<5000;});floating.className='sync-'+severity;floating.textContent='📶 '+connected+'/'+roster.filter(p=>!p.testBot).length+(attention?'  ⚠️ '+attention:'');panel.summary.textContent='พร้อม '+ready+' / ต้องดูแล '+attention+' / อุปกรณ์ '+roster.filter(p=>!p.testBot).length+' / จำลอง '+roster.filter(p=>p.testBot).length;panel.all.disabled=!roster.filter(p=>!p.testBot).some(p=>{const r=syncRecord(p.id);return r.conn?.open&&Date.now()-r.cooldown>=5000;});}
+ let own=document.getElementById('sync-own');const ownVisible=enabled&&!isMod&&syncVisible('screen-player-card');if(!own&&ownVisible){own=communityNode('details');own.id='sync-own';own.summary=communityNode('summary');own.statuses=[0,1,2].map(()=>communityNode('span'));own.summary.append(...own.statuses);own.info=communityNode('p');own.send=communityButton('↻ ขอซิงก์ของฉัน',syncRequestOwn);own.append(own.summary,own.info,own.send,communityNode('p',syncHelp));document.getElementById('screen-player-card').prepend(own);}if(own){own.hidden=!ownVisible;if(ownVisible){if(syncOwn.conn!==playerModConn){syncOwn.conn=playerModConn;syncOwn.since=Date.now();syncOwn.lastReply=0;}const live=playerModConn?.open,latest=syncOwn.lastReply&&Date.now()-syncOwn.lastReply<=10000;const connection=live?(latest?['green','เชื่อมต่อ']:(Date.now()-(syncOwn.lastReply||syncOwn.since)>10000?['amber','ไม่ตอบกลับ']:['blue','กำลังซิงก์'])):(syncOwn.disconnected?['red','ขาดการเชื่อมต่อ']:['gray','ยังไม่ทราบ']);const receipt=syncOwnReceipt;syncPaint(own.statuses[0],connection,'เน็ต');syncPaint(own.statuses[1],myAssignedRole?receipt('card'):['gray','ไม่เกี่ยวข้อง'],'การ์ด');syncPaint(own.statuses[2],communityView?.election?receipt('election'):['gray','ไม่เกี่ยวข้อง'],'เลือกตั้ง');own.info.textContent='ตอบกลับล่าสุด '+syncAge(syncOwn.lastReply);own.send.disabled=!live||Date.now()-syncOwnCooldown<5000;}}
+}
+
+// Host-only draft reservations: never included in room/community payloads.
+let devMode=false, devReservations=new Map(), devNotice='';
+function devEditable(){return isMod&&!isGameStarted&&!lobbyDraft;}
+function devReset(){devMode=false;devReservations.clear();devNotice='';}
+function devReconcile(){
+ if(isGameStarted||lobbyDraft)return;
+ const ids=new Set(joinedPlayers.map(p=>p.id)),remaining=[...gameState.selectedRoles],removed=[];
+ for(const [id,role] of devReservations){
+  if(!ids.has(id)){devReservations.delete(id);continue;}
+  const i=remaining.indexOf(role);
+  if(i<0){devReservations.delete(id);removed.push(joinedPlayers.find(p=>p.id===id).name);}else remaining.splice(i,1);
+ }
+ if(removed.length)devNotice='บทบาทที่จองไม่อยู่ในชุดหรือเกินจำนวน — กลับเป็น 🎲 สุ่ม: '+removed.join(', ');
+}
+function devToggle(){
+ if(!devEditable())return;
+ if(devMode){
+  if(!confirm('ปิด Dev mode: ลบผู้เล่นจำลองและล้างบทบาทที่จองไว้ โดยคงผู้เล่นจริง ห้องและ QR เดิม?'))return;
+  joinedPlayers=joinedPlayers.filter(p=>!p.testBot);devReset();
+ }else devMode=true;
+ updateModLobbyUI();broadcastRoomStateUpdate();
+}
+function devReserve(id,role){
+ if(!devEditable()||!devMode||!joinedPlayers.some(p=>p.id===id))return;
+ const available=gameState.selectedRoles.filter(r=>r===role).length;
+ const used=[...devReservations].filter(([other,r])=>other!==id&&r===role).length;
+ if(role&&used>=available){devNotice='บทบาทนี้ถูกจองครบแล้ว — กรุณาเลือกใหม่';renderDevLobby();return;}
+ if(role)devReservations.set(id,role);else devReservations.delete(id);
+ devNotice='';renderDevLobby();
+}
+function devFill(){
+ if(!devEditable()||!devMode)return;
+ // Reuse the existing one-player simulator; batch UI/network publication once.
+ const missing=Math.max(0,gameState.selectedRoles.length-joinedPlayers.length);
+ for(let i=0;i<missing;i++)simulatePlayerBot(true);
+ updateModLobbyUI();broadcastRoomStateUpdate();
+}
+function devRolesPool(){
+ devReconcile();
+ const remaining=[...gameState.selectedRoles];
+ if(devMode)for(const role of devReservations.values()){const i=remaining.indexOf(role);if(i>=0)remaining.splice(i,1);}
+ for(let i=remaining.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[remaining[i],remaining[j]]=[remaining[j],remaining[i]];}
+ return joinedPlayers.map(p=>devMode&&devReservations.has(p.id)?devReservations.get(p.id):remaining.shift());
+}
+function renderDevLobby(){
+ const list=document.getElementById('mod-players-list');if(!list)return;
+ devReconcile();
+ let panel=document.getElementById('dev-lobby');
+ if(!panel){panel=document.createElement('section');panel.id='dev-lobby';list.before(panel);}
+ panel.hidden=!isMod;panel.replaceChildren();
+ const toggle=document.createElement('button');toggle.type='button';toggle.textContent=devMode?'🧪 Dev mode — ทดสอบ ON':'Dev mode — OFF';toggle.setAttribute('aria-pressed',String(devMode));toggle.disabled=!devEditable();toggle.onclick=devToggle;panel.append(toggle);
+ if(devMode){const fill=document.createElement('button');fill.type='button';fill.textContent='⚡️ เติมผู้เล่นจำลองให้ครบ';fill.disabled=!devEditable()||joinedPlayers.length>=gameState.selectedRoles.length;fill.onclick=devFill;panel.append(fill);const note=document.createElement('p');note.textContent='🧪 ห้องทดสอบ · 🤖 จำลอง: Mod ควบคุมเอง ไม่มีอุปกรณ์ / ไม่โหวตหรือใช้พลังเอง';panel.append(note);}
+ const notice=document.createElement('p');notice.setAttribute('role','status');notice.textContent=devNotice;panel.append(notice);
+ const legacy=document.querySelector('[onclick="simulatePlayerBot()"]');if(legacy){legacy.hidden=!devMode;legacy.disabled=!devEditable();}
+ for(const [i,p] of joinedPlayers.entries()){
+  const row=list.children[i];if(!row)continue;
+  row.querySelector('.dev-role')?.remove();
+  if(p.testBot&&!row.querySelector('.dev-bot')){const badge=document.createElement('span');badge.className='dev-bot';badge.textContent='🤖 จำลอง';row.firstElementChild.append(badge);}
+  if(!devMode)continue;
+  const select=document.createElement('select');select.className='dev-role';select.setAttribute('aria-label','กำหนดบทบาททดสอบให้ '+p.name);select.disabled=!devEditable();
+  for(const role of ['',...new Set(gameState.selectedRoles)]){const option=document.createElement('option');option.value=role;const r=ROLES_DATABASE.find(r=>r.id===role);option.textContent=role?(r?.name||role):'🎲 สุ่ม';option.disabled=!!role&&[...devReservations].filter(([id,r])=>id!==p.id&&r===role).length>=gameState.selectedRoles.filter(r=>r===role).length;select.append(option);}
+  select.value=devReservations.get(p.id)||'';select.onchange=()=>devReserve(p.id,select.value);
+  row.insertBefore(select,row.lastElementChild);
+ }
+}
 
         let timerInterval = null;
         let timeLeft = 60;
@@ -1695,6 +1849,7 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
                         conn.on('data', (data) => {
                             if (connectedPeers[conn.peer] !== conn) return;
                             handleIncomingMessage(data, conn);
+                            if(["SYNC_ACK","SYNC_REQUEST"].includes(data?.type))return;
                             setTimeout(() => sendRoomStateToConn(conn), 200);
                             setTimeout(() => sendRoomStateToConn(conn), 800);
                         });
@@ -1856,6 +2011,7 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
                 const current = () => playerModConn === conn && activeRoomCode === roomCode && !isMod;
                 const failed = () => {
                     if (!current()) return;
+                    syncOwn.disconnected=true;
                     playerModConn = null;
                     clearTimeout(connectDeadline); connectDeadline = null;
                     joinAdmitted = false;
@@ -1869,6 +2025,7 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
                     clearTimeout(connectDeadline); connectDeadline = null;
                     updatePlayerConnBadge(false, joinIntent ? 'กำลังเข้าร่วมห้อง…' : 'กรอกชื่อแล้วกดเข้าร่วม');
                     sendPlayerJoinMessage();
+                    requestCommunitySync();
                 });
                 conn.on('data', data => { if (current()) handleIncomingMessage(data, conn); });
                 conn.on('close', failed); conn.on('error', failed);
@@ -1882,7 +2039,9 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
                     connectPlayerToMod(activeRoomCode);
                 } else {
                     sendPlayerJoinMessage();
+                    requestCommunitySync();
                 }
+                renderCommunity();
             }
         };
         document.addEventListener('visibilitychange', () => {
@@ -1896,6 +2055,7 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
             if (syncHeartbeatInterval) clearInterval(syncHeartbeatInterval);
             syncHeartbeatInterval = setInterval(() => {
                 if (!activeRoomCode) return;
+                renderSyncDashboard();
                 if (isMod) {
                     const lobbyScreen = document.getElementById('screen-mod-lobby');
                     if (lobbyScreen && !lobbyScreen.classList.contains('hidden') && !isGameStarted) {
@@ -1949,6 +2109,9 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
 
         function handleIncomingMessage(data, conn) {
             if (!data || data.room !== activeRoomCode) return;
+            if(isMod&&joinedPlayers.some(p=>p.testBot&&(p.id===data.id||p.id===conn?.wwPlayerId)))return;
+            if(!isMod&&data.type==="GAME_RESET"&&conn!==playerModConn)return;
+            if(["SYNC_ACK","SYNC_REQUEST"].includes(data.type)){syncHostMessage(data,conn);return;}
             if(["COMMUNITY_SYNC","MAYOR_BALLOT","ROLE_SURVEY"].includes(data.type)){communityRequest(data,conn);return;}
             if(data.type==="COMMUNITY_STATE"){receiveCommunityState(data,conn);return;}
             if (!isMod && ['GAME_STARTED_ASSIGNMENTS','TRAVELER_OFFER','JOIN_ERROR','JOIN_ACK','PLAYER_KICKED'].includes(data.type) && (!conn || conn !== playerModConn)) return;
@@ -2065,7 +2228,7 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
 
             // PLAYERS RECEIVE ROLE ASSIGNMENTS & GAME START
             if (!isMod && data.type === 'GAME_STARTED_ASSIGNMENTS') {
-                if (!data.assignments) return;
+                if (!data.assignments || (data.sync&&!syncAccept(data,conn))) return;
 
                 // 1. Direct device ID lookup
                 let myAssignment = normalizeRoleAssignment(data.assignments[myDeviceId]);
@@ -2078,8 +2241,9 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
                     const repeatedCard = myAssignedRole && lastCardDelivery &&
                         lastCardDelivery.conn === conn && lastCardDelivery.key === cardKey;
                     acceptJoin(myAssignment.playerName);
+                    if(data.sync)syncReceived(data,conn);
                     // Heartbeats acknowledge liveness, not a new card/UI event.
-                    if (repeatedCard) return;
+                    if (repeatedCard) {renderCommunity();return;}
                     requestedTravelerKind = null;
                     myAssignedRole = myAssignment;
                     try {
@@ -2292,6 +2456,7 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
         // ---------------------------------------------
         function confirmRolesAndCreateRoom() {
             if(lobbyDraft){finishLobbyEdit(true);return;}
+            devReset();
             community=freshCommunity(); gameState.offlineGame=false;
             const totalPlayers = getTotalPlayersCount();
             if (totalPlayers < 3) {
@@ -2394,7 +2559,8 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
             });
         }
 
-        function simulatePlayerBot() {
+        function simulatePlayerBot(batch=false) {
+            if(!devEditable()||!devMode)return;
             const total = getTotalPlayersCount();
             if (joinedPlayers.length >= total) {
                 alert('ผู้เล่นครบจำนวนแล้ว');
@@ -2402,14 +2568,14 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
             }
             const botNum = joinedPlayers.length + 1;
             const botNames = ['น้ำหวาน', 'ก้อง', 'บาส', 'พลอย', 'แมน', 'มายด์', 'วิน', 'โอ๊ค', 'มิว', 'ปอนด์', 'ฟ้า', 'เบียร์'];
-            const randomName = botNames[(botNum - 1) % botNames.length] + ' #' + botNum;
+            let serial=botNum,randomName;
+            do {randomName=botNames[(serial-1)%botNames.length]+' #'+serial++;} while(joinedPlayers.some(p=>p.name===randomName));
             
             joinedPlayers.push({
-                id: 'bot_' + Math.random().toString(36).substr(2, 6),
+                id: 'bot_' + crypto.randomUUID(), testBot:true,
                 name: randomName
             });
-            updateModLobbyUI();
-            broadcastRoomStateUpdate();
+            if(!batch){updateModLobbyUI();broadcastRoomStateUpdate();}
 
             // Auto start if full (Disabled by user request - require manual start)
             // if (joinedPlayers.length >= total) {
@@ -2432,6 +2598,7 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
             listContainer.innerHTML = '';
 
             if (joinedPlayers.length === 0) {
+                renderDevLobby();
                 listContainer.innerHTML = `<p class="text-[11px] text-slate-500 text-center py-2">กำลังรอให้ผู้เล่นสแกนเข้าร่วมห้อง...</p>`;
                 return;
             }
@@ -2451,6 +2618,7 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
                     </div>
                 `;
             });
+            renderDevLobby();
         }
 
         function removePlayerFromLobby(playerId) {
@@ -2475,6 +2643,7 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
                 }
                 isGameStarted = false;
                 activeRoleAssignments = {};
+                devReset();
                 if (peerInstance) {
                     try { peerInstance.destroy(); } catch(e){}
                     peerInstance = null;
@@ -2565,6 +2734,7 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
                 return;
             }
 
+            const devDealtRoles=devMode?devRolesPool():null;
             isGameStarted = true;
             community.survey.open=false;community.survey.locked=true;
             currentGameSessionId = activeRoomCode + '_' + Date.now();
@@ -2610,7 +2780,7 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
 
             joinedPlayers.forEach((playerObj, idx) => {
                 const pName = playerObj.name;
-                const assignedRoleId = rolesPool[idx];
+                const assignedRoleId = devMode?devDealtRoles[idx]:rolesPool[idx];
                 const roleObj = ROLES_DATABASE.find(r => r.id === assignedRoleId) || {
                     id: assignedRoleId,
                     name: assignedRoleId,
@@ -2882,6 +3052,7 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
         }
 
         function startOfflineGame() {
+            devReset();
             community=freshCommunity();
             if([...document.querySelectorAll('.match-select-offline')].some(s=>s.dataset.role==='drunk')&&!validDrunkRole(gameState.pendingDrunkRole)){alert('กรุณากำหนดบทบาทจริงของ Drunk ก่อนเริ่มเกม');return;}
             isMod = true;
@@ -3670,8 +3841,25 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
 
         function getAdjacentLivingPlayers(targetPlayer) {
             // Preserve original left/right seats; a dead neighbor leaves an empty slot.
-            return fixedNeighbors(targetPlayer).map(p => gameState.playerStatus[p]?.alive ? p : '');
+            const seats=gameState.players,index=seats.indexOf(targetPlayer);
+            if(index<0)return [];
+            return [seats[(index+seats.length-1)%seats.length],seats[(index+1)%seats.length]].map(p=>p!==targetPlayer&&gameState.playerStatus[p]?.alive?p:'');
         }
+
+function askRoyalPardon(prince,victim){
+ return new Promise(resolve=>{
+  const prior=document.activeElement,d=document.createElement('dialog');d.id='royal-pardon';d.setAttribute('aria-labelledby','royal-pardon-title');
+  const box=document.createElement('div');box.className='bg-slate-900 border w-full max-w-sm rounded-2xl p-5 shadow-2xl space-y-4';box.style.borderColor='#fbbf24';
+  const seat=p=>p+' (#'+(gameState.players.indexOf(p)+1)+')';
+  const title=document.createElement('h3');title.id='royal-pardon-title';title.className='text-lg font-bold text-center';title.textContent='Persian Prince — '+seat(prince);
+  const text=document.createElement('p');text.className='text-sm text-center';text.textContent='เปิดเผยตัวเพื่อพระราชทานอภัยโทษให้ '+seat(victim)+' หรือไม่?';
+  let done=false;const finish=value=>{if(done)return;done=true;if(d.open)d.close();d.remove();if(prior?.isConnected)prior.focus({preventScroll:true});resolve(value);};
+  const buttons=document.createElement('div');buttons.className='space-y-2 pt-2';
+  for(const [label,value] of [['Yes / ใช่',true],['No / ไม่',false],['ปิด / ยกเลิก',null]]){const b=document.createElement('button');b.type='button';b.textContent=label;b.className='w-full bg-slate-800 text-slate-100 font-semibold py-3 rounded-xl border border-slate-700 text-sm';b.onclick=()=>finish(value);buttons.append(b);}
+  d.addEventListener('cancel',e=>{e.preventDefault();finish(null);});d.addEventListener('close',()=>finish(null));
+  box.append(title,text,buttons);d.append(box);document.body.append(d);d.showModal();
+ });
+}
 
         let judgeExecutionPending = false;
         async function executeDayVote() {
@@ -3694,7 +3882,11 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
             if (!isMod || gameState.gamePhase !== 'day' || !gameState.playerStatus[victim]?.alive || activeMadBomber) return;
             const nn=normalState();
             const prince=gameState.players.find(p=>p!==victim&&effectiveRole(p)==='persian_prince'&&gameState.playerStatus[p]?.alive&&!isPoisoned(p)&&!nn.used[p]?.pardon);
-            if(prince&&confirm(prince+' เปิดเผยตัวใช้ Royal Pardon ช่วย '+victim+' หรือไม่?')){(nn.used[prince]||(nn.used[prince]={})).pardon=true;nn.endedDay=gameState.dayCount;alert('ยกเลิกประหาร จบวัน ไม่มีโหวตใหม่');renderGameplay();return;}
+            const pardonDay=gameState.dayCount,pardonSeats=JSON.stringify(gameState.players);
+            const pardon=prince?await askRoyalPardon(prince,victim):false;
+            if(pardon===null||gameState!==executionState||!isMod||gameState.gamePhase!=='day'||gameState.dayCount!==pardonDay||JSON.stringify(gameState.players)!==pardonSeats||!gameState.playerStatus[victim]?.alive||activeMadBomber||nn.endedDay===gameState.dayCount)return;
+            if(prince&&(!gameState.playerStatus[prince]?.alive||effectiveRole(prince)!=='persian_prince'||isPoisoned(prince)||nn.used[prince]?.pardon))return;
+            if(pardon){(nn.used[prince]||(nn.used[prince]={})).pardon=true;nn.endedDay=gameState.dayCount;alert('ยกเลิกประหาร จบวัน ไม่มีโหวตใหม่');renderGameplay();return;}
             if(effectiveRole(victim)==='prince'&&!isPoisoned(victim)){nn.endedDay=gameState.dayCount;playModSound('fanfare');alert(victim+' เปิดเผยตัวเป็น Prince ฝ่ายชาวบ้าน รอดจากการประหาร');renderGameplay();return;}
             if (await cancelExecutionWithJudge(victim)) return;
             if (gameState !== executionState || !isMod || gameState.gamePhase !== 'day' || !gameState.playerStatus[victim]?.alive || activeMadBomber) return;
@@ -4041,6 +4233,7 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
         }
 
         let activeMadBomber = null;
+        let bomberSeatSnapshot = null;
         let madBomberContext = 'manual'; // 'manual' | 'vote' | 'night'
 
         function openMadBomberModal(playerName, context) {
@@ -4052,6 +4245,7 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
             bombs[playerName] = 'resolving';
             activeMadBomber = playerName;
             madBomberContext = context || 'manual';
+            bomberSeatSnapshot = JSON.stringify(gameState.players);
             
             const leftSelect = document.getElementById('mad-bomber-target-left');
             const rightSelect = document.getElementById('mad-bomber-target-right');
@@ -4111,6 +4305,7 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
 
         function triggerMadBomberBlast() {
             if (!activeMadBomber) return;
+            if(bomberSeatSnapshot!==JSON.stringify(gameState.players)){const p=activeMadBomber,ctx=madBomberContext;activeMadBomber=null;gameState.bomberPowers[p]="pending";openMadBomberModal(p,ctx);return;}
             const adjacent = getAdjacentLivingPlayers(activeMadBomber);
             for (const [index,id] of ['mad-bomber-target-left','mad-bomber-target-right'].entries()) {
                 const selected = document.getElementById(id).value;
@@ -4160,7 +4355,7 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
         }
 
         function nextPhase() {
-            if (!isMod || activeMadBomber || !['day', 'night'].includes(gameState.gamePhase)) return;
+            if (!isMod || judgeExecutionPending || activeMadBomber || !['day', 'night'].includes(gameState.gamePhase)) return;
             // Advisory helper: pending abilities never impose a sequential phase lock.
             // Moderator may skip unfinished checklist items and advance freely.
             if (gameState.gamePhase === 'night') {
@@ -4285,6 +4480,7 @@ function receiveCommunityState(data,conn){if(isMod||conn!==playerModConn||!conn|
 
 // End a round, not the room. Replacing state drops every per-round power/role cache.
 function clearRoundCommunity(){
+ if(typeof syncReset==="function")syncReset();
  community=freshCommunity();communityView=null;communityOwn=null;
  communityPending=null;ballotChoice=null;lobbyDraft=null;
  document.getElementById('mayor-ballot')?.close();
@@ -4318,6 +4514,7 @@ function resetGame(){
  gameState.selectedRoles=selectedRoles;gameState.pendingDrunkRole=pendingDrunkRole;
  gameState.offlineGame=!!offlineGame;
  isGameStarted=false;currentGameSessionId='';activeRoleAssignments={};
+ devReservations.clear();devNotice='';
  judgeExecutionPending=false;activeMadBomber=null;madBomberContext='manual';
  closeTravelerOverlay();closeTravelerModal();closePlayerRoleGuide();
  document.getElementById('judge-power-modal')?.close();
@@ -4479,15 +4676,25 @@ function resetGame(){
         }
         function isTraveler(name) { return !!travelerState().admitted[name]; }
         function travelerRole(kind) { return TRAVELER_ROLES[kind + '_good']; }
-        function sendPrivateAssignment(conn) {
+        function privateAssignmentPayload(conn) {
+            if(joinedPlayers.some(p=>p.id===conn?.wwPlayerId&&p.testBot))return;
             normalizeLegacyRoles();
+            const stored=conn&&activeRoleAssignments[conn.wwPlayerId];
+            if(stored){const n=normalState(),p=stored.playerName;
+                const acquired=n.acquiredCards?.[p] || (n.cursedCommitted?.[p]?{id:'werewolf',artRoleId:'cursed_turned'}:n.inherited?.[p]?{id:gameState.rolePlayerMap[p],artRoleId:gameState.rolePlayerMap[p]}:null);
+                if(acquired)publishAcquiredCard(p,acquired.id,acquired.artRoleId,false);
+            }
             const a = conn && Object.prototype.hasOwnProperty.call(activeRoleAssignments, conn.wwPlayerId) && activeRoleAssignments[conn.wwPlayerId];
             if (!conn || !conn.open || !a) return;
             const card = {...a,roleSchemaVersion:2};
             if((conn.wwRoleSchemaVersion||1)<2){const legacy=id=>id==='sorceress'?'sorcerer':id==='sorcerer'?'sorcerer2':id;card.roleId=legacy(card.roleId);if(card.originalRoleId)card.originalRoleId=legacy(card.originalRoleId);card.roleSchemaVersion=1;}
             if (card.team !== 'wolf' || !travelerKinds.includes(card.roleId)) delete card.wolfDisclosure;
+            return card;
+        }
+        function sendPrivateAssignment(conn) {
+            const card=privateAssignmentPayload(conn);if(!card)return;
             conn.send({ type: 'GAME_STARTED_ASSIGNMENTS', room: activeRoomCode,
-                requestId: conn.wwJoinRequestId, gameSessionId: currentGameSessionId, assignments: { [conn.wwPlayerId]: card } });
+                sync: typeof syncEnvelope==='function'?syncEnvelope(conn,'card',card):undefined, requestId: conn.wwJoinRequestId, gameSessionId: currentGameSessionId, assignments: { [conn.wwPlayerId]: card } });
         }
         function offerTraveler(conn) {
             if (conn && conn.open) conn.send({ type: 'TRAVELER_OFFER', room: activeRoomCode, requestId: conn.wwJoinRequestId });
@@ -4569,7 +4776,7 @@ function resetGame(){
             }
             state.admitted[p.name] = { id, kind: p.kind, team, testBot:!!p.testBot, used: false, target: '', exiled: false };
             state.pending = state.pending.filter(p => p.id !== id);
-            joinedPlayers.push({ id, name: p.name });
+            joinedPlayers.push({ id, name: p.name, testBot:!!p.testBot });
             gameState.players.push(p.name);
             gameState.rolePlayerMap[p.name] = p.kind;
             gameState.rolePlayerMap[id] = p.kind;
@@ -4846,10 +5053,16 @@ function resetGame(){
 <!-- Public catalog only: never populated from the room roster. -->
 <dialog id="role-guide" aria-labelledby="rg-title">
   <div class="rg-toolbar"><h2 id="rg-title">📖 Role Guide — คู่มือบทบาท</h2><button type="button" id="rg-close" onclick="closeRoleGuide()">ปิดคู่มือ</button></div>
+  <nav id="rg-navigation" class="rg-toolbar" aria-label="เปลี่ยนบทบาท"></nav>
+  <div id="rg-viewport">
+  <div id="rg-scroll">
   <div id="rg-categories" class="rg-toolbar" aria-label="ประเภทบทบาท"><button id="rg-normal" type="button" onclick="renderGuideCategory('normal')">Normal</button><button id="rg-traveler" type="button" onclick="renderGuideCategory('traveler')">Traveler</button><button id="rg-expansion" type="button" onclick="renderGuideCategory('expansion')">Expansion — Coming Soon</button></div>
   <div id="rg-list" class="rg-list" aria-label="บทบาท"></div>
   <article id="rg-detail" tabindex="-1"></article>
   <div class="rg-toolbar rg-actions"><button id="rg-show" type="button" onclick="showGuideToPlayer()">อ่านเฉพาะบทบาทนี้</button><button id="rg-browse" type="button" onclick="browseRoleGuide()">กลับไปเลือกบทบาท</button></div>
+  </div>
+  <button id="rg-top" type="button" aria-label="กลับไปต้นเนื้อหาบทบาทนี้" hidden>⬆️</button>
+  </div>
 </dialog>
 <dialog id="rg-art-viewer" aria-labelledby="rg-art-title"><div class="rg-toolbar"><h2 id="rg-art-title">ภาพเต็ม</h2><button type="button" onclick="document.getElementById('rg-art-viewer').close()">ปิดภาพขยาย</button></div><img id="rg-full-art" alt=""></dialog>
 <script>
@@ -5620,6 +5833,7 @@ function renderGuideCategory(category) {
 function renderGuideRole(id, focus) {
     const r = guideCatalog().find(r => r.id === id); if (!r) return;
     guideSelectedId = id;
+    renderGuideNavigation(r);
     const copy = ROLE_GUIDE_COPY[id];
     const detail = document.getElementById('rg-detail'); detail.replaceChildren();
     detail.style.setProperty('--role-color', guideColor(r));
@@ -5633,7 +5847,7 @@ function renderGuideRole(id, focus) {
     image.onerror = () => { image.hidden = true; image.style.display = 'none'; enlarge.hidden = true; fallback.hidden = false; };
     image.src = guideArtPath(r);
     const enlarge = document.createElement('button'); enlarge.type = 'button'; enlarge.className = 'rg-enlarge'; enlarge.hidden = false; enlarge.setAttribute('aria-label', 'ขยายภาพ ' + r.name); enlarge.title = 'แตะเพื่อขยายภาพ';
-    enlarge.onclick = () => { const viewer = document.getElementById('rg-art-viewer'); const full = document.getElementById('rg-full-art'); full.src = image.src; full.alt = image.alt; document.getElementById('rg-art-title').textContent = r.name; viewer.showModal(); };
+    enlarge.onclick = () => { const viewer = document.getElementById('rg-art-viewer'); const full = document.getElementById('rg-full-art'); full.src = image.src; full.alt = image.alt; document.getElementById('rg-art-title').textContent = r.name; viewer.showModal(); updateGuideTop(); };
     enlarge.append(image); figure.append(enlarge, fallback); detail.append(title, figure);
     if(r.category==='expansion'){const upcoming=document.createElement('p');upcoming.textContent='Coming Soon · คู่มือเท่านั้น';detail.append(upcoming);}
     if (copy && copy['คำอธิบาย/เรื่องราว']) {
@@ -5656,6 +5870,7 @@ function renderGuideRole(id, focus) {
         }); detail.append(facts);
     } else { const note = document.createElement('p'); note.textContent = r.desc || 'ยังไม่มีคำอธิบายที่ยืนยัน'; detail.append(note); }
     if (focus) focusGuideSection(detail);
+    updateGuideTop();
 }
 function showGuideToPlayer() {
     // Native modal + opaque backdrop keeps the underlying moderator/private view inert and invisible.
@@ -5665,19 +5880,38 @@ function showGuideToPlayer() {
     document.getElementById('rg-browse').hidden = false;
     focusGuideSection(document.getElementById('rg-detail'));
 }
+function renderGuideNavigation(role){
+ const nav=document.getElementById('rg-navigation');nav.replaceChildren();
+ const roles=guideCatalog().filter(r=>r.category===role.category).sort((a,b)=>ROLE_GROUP_ORDER.indexOf(guideGroup(a))-ROLE_GROUP_ORDER.indexOf(guideGroup(b)));
+ const index=roles.findIndex(r=>r.id===role.id);
+ for(const [label,destination] of [['Previous',roles[index-1]],['Next',roles[index+1]]]){
+  const button=document.createElement('button');button.type='button';button.disabled=!destination;button.textContent=label+(destination?' — '+destination.name:'');
+  button.onclick=()=>{if(!destination||document.getElementById('role-guide').classList.contains('rg-public'))return;renderGuideRole(destination.id,true);};nav.append(button);
+ }
+}
+
 function focusGuideSection(element) {
     const dialog = document.getElementById('role-guide');
     element.focus({ preventScroll: true });
-    dialog.scrollTop += element.getBoundingClientRect().top - dialog.getBoundingClientRect().top - 24;
+    const viewport=document.getElementById('rg-scroll');
+    viewport.scrollTop += element.getBoundingClientRect().top - viewport.getBoundingClientRect().top;
 }
 function browseRoleGuide() {
     document.getElementById('role-guide').classList.remove('rg-public');
     document.getElementById('rg-close').textContent = 'ปิดคู่มือ';
     const selected = [...document.querySelectorAll('#rg-list button')].find(b => b.dataset.roleId === guideSelectedId);
-    if (selected) { selected.focus({preventScroll:true}); document.getElementById('role-guide').scrollTop = 0; }
+    if (selected) { selected.focus({preventScroll:true}); document.getElementById('rg-scroll').scrollTop = 0; }
     document.getElementById('rg-show').hidden = false;
     document.getElementById('rg-browse').hidden = false;
 }
+// This control only scrolls the current public guide content; never changes selection/focus/card.
+function guideContentTop(){const viewport=document.getElementById('rg-scroll'),detail=document.getElementById('rg-detail');return Math.max(0,viewport.scrollTop+detail.getBoundingClientRect().top-viewport.getBoundingClientRect().top);}
+function updateGuideTop(){const viewport=document.getElementById('rg-scroll');document.getElementById('rg-top').hidden=document.getElementById('rg-art-viewer').open||viewport.scrollTop-guideContentTop()<160;}
+function guideBackToTop(){const viewport=document.getElementById('rg-scroll');viewport.scrollTop=guideContentTop();updateGuideTop();}
+document.getElementById('rg-top').onclick=guideBackToTop;
+document.getElementById('rg-scroll').addEventListener('scroll',updateGuideTop,{passive:true});
+document.getElementById('rg-art-viewer').addEventListener('close',updateGuideTop);
+
 // ROLE GUIDE END
 </script>
 </body>
