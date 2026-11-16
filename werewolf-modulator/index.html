@@ -320,6 +320,7 @@
 #community-mayor .mayor-body{display:grid;gap:.5rem;min-width:0}
 #community-mayor h4,#community-mayor summary{margin:0;font-size:.75rem;line-height:1rem;font-weight:600}
 #community-mayor .community-muted{font-size:.6875rem;line-height:1rem;color:#94a3b8}
+#community-mayor .community-button[data-mayor-open]{font-weight:400;font-size:.875rem;background:#fff9e8;color:#302b23;border-color:#b4a17b}
 #community-mayor .community-button{justify-self:start;max-width:100%;min-height:32px;padding:.375rem .75rem;border:1px solid #475569;border-radius:.5rem;background:#334155;color:#e2e8f0;font-size:.75rem;line-height:1rem;font-weight:600;transition:background-color .15s,border-color .15s}
 #community-mayor .community-button:hover:not(:disabled){background:#475569;border-color:#475569}
 #community-mayor details,#community-mayor [data-mayor-totals]{padding:.625rem;border:1px solid rgb(51 65 85 / .5);border-radius:.25rem;background:rgb(15 23 42 / .4)}
@@ -342,7 +343,7 @@
 #hunter-powers::backdrop,#cutthroat-choice::backdrop,#grave-choice::backdrop{background:rgb(2 6 23 / .8);backdrop-filter:blur(4px)}
 
 #victory-panel[hidden]{display:none!important}
-.game-summary{max-width:48rem;text-align:left}.summary-player{display:flex;align-items:center;flex-wrap:wrap;gap:.5rem;border-bottom:1px solid #334155;padding:.75rem 0;font-size:.875rem}.game-summary .summary-role{display:inline-flex;width:auto;margin:0;align-items:center;gap:.5rem}.summary-history{border:1px solid #334155;border-radius:.5rem;padding:.75rem;margin-top:1rem}.summary-history summary{cursor:pointer;font-weight:600;font-size:.875rem}.summary-history p{overflow-wrap:anywhere}.summary-art{width:100%;border-radius:.75rem;margin-bottom:1rem}
+.game-summary{max-width:48rem;text-align:left}.summary-player{display:flex;align-items:center;flex-wrap:wrap;gap:.5rem;border-bottom:1px solid #334155;padding:.75rem 0;font-size:.875rem}.game-summary .summary-role{display:inline-flex;width:auto;margin:0;align-items:center;gap:.5rem}.summary-history{border:1px solid #334155;border-radius:.5rem;padding:.75rem;margin-top:1rem}.summary-history summary{cursor:pointer;font-weight:600;font-size:calc(.875rem - 1pt)}.summary-history p{overflow-wrap:anywhere}.summary-art{width:100%;border-radius:.75rem;margin-bottom:1rem}
 /* Summary topics use existing type and spacing, not individual action cards. */
 .summary-topic{margin-top:1rem}.summary-topic h4{font-size:.875rem}.summary-topic p{margin:.375rem 0}.summary-history ul,.summary-history ol{padding-left:1.25rem;list-style:disc;font-size:.875rem}.summary-history li{margin:.375rem 0;overflow-wrap:anywhere}.summary-history hr{border-color:#334155;margin:1rem 0}
 
@@ -355,11 +356,24 @@
 /* Template: original Mod status panel amber role chip and emerald/rose/purple boxes. */
 #game-summary .summary-player{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center}
 #game-summary .summary-identity{display:flex;align-items:center;flex-wrap:wrap;gap:.375rem .5rem;min-width:0;overflow-wrap:anywhere}
-#game-summary .summary-identity .summary-role{font-size:inherit;padding:.125rem .375rem;min-height:0;border-radius:.25rem;color:#fbbf24;background:rgb(69 26 3 / .6);border-color:rgb(120 53 15 / .5)}
+#game-summary .summary-identity .summary-role,#game-summary .summary-topic h4 .summary-role{font-size:inherit;padding:.125rem .375rem;min-height:0;border-radius:.25rem;color:#fbbf24;background:rgb(69 26 3 / .6);border-color:rgb(120 53 15 / .5)}
 #game-summary .summary-status{display:inline-flex;align-items:center;justify-content:center;justify-self:end;white-space:nowrap;font-size:.75rem;line-height:1.25rem;font-weight:600;border:1px solid;border-radius:.25rem;padding:.125rem .375rem;min-width:4.5rem;box-sizing:border-box}
 #game-summary .summary-status-alive{background:#022c22;color:#34d399;border-color:#065f46}
 #game-summary .summary-status-dead{background:#4c0519;color:#fb7185;border-color:#9f1239}
 #game-summary .summary-status-bedridden{background:#3b0764;color:#c084fc;border-color:#6b21a8}
+
+/* Approved summary heading reduction; roster role chips retain their original style. */
+#game-summary > h2{font-size:calc(1.25rem - 1pt)}
+#game-summary .summary-roster > h3{font-size:calc(1rem - 1pt)}
+
+/* Approved action controls only; preserve target names and private role cards. */
+#wolf-target-buttons > .community-button:first-of-type,
+[data-panel-role="mentalist"] > div > .community-button:first-of-type,
+[data-panel-role="cutthroat"] > div > .community-button {font-weight:700}
+#wolf-target-buttons > .community-button + .community-button,
+[data-panel-role="mentalist"] > div > .community-button + .community-button {font-weight:400}
+#phase-next-bottom {display:block;width:100%;min-height:44px}
+#phase-next-bottom:disabled {opacity:.5;cursor:not-allowed}
 
 /* Main sticky header stays below sync; critical z-50 dialogs stay above it. */
 body>header{z-index:20!important}
@@ -435,7 +449,7 @@ body>header{z-index:20!important}
 #role-guide.rg-public #rg-navigation,#role-guide.rg-player #rg-navigation{display:none}
 #rg-viewport{position:relative;min-height:0;min-width:0;flex:1;display:flex;overflow:hidden}
 #rg-scroll{min-width:0;padding:4px 4px calc(56px + env(safe-area-inset-bottom,0px))}
-.victory-dialog{font-family:Prompt,sans-serif;text-align:center;padding:1.5rem;border:1px solid #475569;border-radius:1rem;background:#0f172a;color:#f8fafc;width:calc(100% - 2rem);max-width:24rem;max-height:calc(100dvh - 2rem);overflow:auto}.victory-dialog::backdrop{background:#020617cc}.victory-icon{font-size:3rem;margin-bottom:.75rem}.victory-dialog h2{font-size:1.25rem;font-weight:700}.victory-dialog p{margin:.75rem 0;font-size:.875rem}.victory-dialog button{display:block;width:100%;margin-top:.5rem}#card-team-badge[data-faction=none]{color:#e2e8f0;border-color:#94a3b8;background:#334155} #game-summary .summary-history,#game-summary .summary-history *{text-align:left} #game-summary .summary-topic>h4{font-size:calc(1em + 1pt)} .summary-verb-red{color:#f87171}.summary-verb-light-red{color:#fca5a5}.summary-verb-blue{color:#60a5fa}.summary-result-good{color:#4ade80}.summary-result-bad{color:#f87171}
+.victory-dialog{font-family:Prompt,sans-serif;text-align:center;padding:1.5rem;border:1px solid #475569;border-radius:1rem;background:#0f172a;color:#f8fafc;width:calc(100% - 2rem);max-width:24rem;max-height:calc(100dvh - 2rem);overflow:auto}.victory-dialog::backdrop{background:#020617cc}.victory-icon{font-size:3rem;margin-bottom:.75rem}.victory-dialog h2{font-size:1.25rem;font-weight:700}.victory-dialog p{margin:.75rem 0;font-size:.875rem}.victory-dialog button{display:block;width:100%;margin-top:.5rem}#card-team-badge[data-faction=none]{color:#e2e8f0;border-color:#94a3b8;background:#334155} #game-summary .summary-history,#game-summary .summary-history *{text-align:left} #game-summary .summary-topic>h4{font-size:1em} .summary-verb-red{color:#f87171}.summary-verb-light-red{color:#fca5a5}.summary-verb-blue{color:#60a5fa}.summary-result-good{color:#4ade80}.summary-result-bad{color:#f87171}
 #player-status-list>div{min-width:0;flex-wrap:wrap;gap:.5rem}#player-status-list>div>div:first-child{min-width:0;flex:1 1 10rem;overflow-wrap:anywhere}#player-status-list>div>button{margin-left:auto}.mod-role-chain{display:inline-flex;align-items:center;flex-wrap:wrap;gap:.25rem;max-width:100%;min-width:0}.mod-role-chain .mod-role-preview{white-space:normal;overflow-wrap:anywhere;max-width:100%} /* One scroll owner includes the header, content and close controls. */
 #role-guide{height:auto;max-height:calc(100dvh - 1rem);overflow:auto;scroll-padding-top:1rem}
 #role-guide[open]{display:block}
@@ -458,6 +472,28 @@ body>header{z-index:20!important}
  #role-guide,#mayor-ballot{position:fixed;top:calc(var(--modal-top,0px) + .5rem);bottom:auto;margin-top:0;margin-bottom:0;max-height:calc(var(--modal-height,100dvh) - 1rem);width:calc(var(--modal-width,100vw) - 1rem);left:calc(var(--modal-left,0px) + .5rem);right:auto;margin-left:0;margin-right:0}
  #role-guide{max-width:56rem;left:calc(var(--modal-left,0px) + max(.5rem,(var(--modal-width,100vw) - 56rem)/2))}
  #mayor-ballot{max-width:32rem;left:calc(var(--modal-left,0px) + max(.5rem,(var(--modal-width,100vw) - 32rem)/2))}
+}
+
+/* Native target selects only; owner/setup/Dev/Insomniac/power dialogs stay untouched. */
+select.master-target-select,#actions-checklist [data-panel-role="prairie_wolf"] select{appearance:none;-webkit-appearance:none;font-size:15px;line-height:1.5;padding:10px 40px 10px 12px;background-color:#1e293b;color:#f1f5f9;border:1px solid #334155;border-radius:12px;min-width:0;max-width:100%;box-sizing:border-box;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='20' viewBox='0 0 16 20' fill='none' stroke='%2394a3b8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 7 4-4 4 4M4 13l4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:16px 20px}
+#actions-checklist .night-target-row,#actions-checklist div:has(>select.master-target-select):not(:has(>[data-actor-selector])){display:flex;align-items:center;justify-content:flex-start;gap:12px}
+#actions-checklist .night-target-row>select,#actions-checklist div:has(>select.master-target-select)>select.master-target-select{flex:1;width:auto}
+#actions-checklist .night-owner-label{display:inline;margin-right:8px;color:#94a3b8;font-size:11px}
+#actions-checklist [data-actor-selector]{display:inline-block;vertical-align:middle}
+#actions-checklist #cupid-dropdowns>div{display:flex;flex-direction:column;align-items:stretch;gap:6px}
+#actions-checklist #cupid-dropdowns select{width:100%;flex:none}
+#day-vote-box div:has(>#day-vote-target-select){display:flex;flex-wrap:nowrap;gap:8px}
+#day-vote-target-select{flex:1;width:0}
+#traveler-controls .traveler-select-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+#traveler-controls .traveler-select-row>.traveler-summary,#traveler-controls .traveler-select-row>p{flex-basis:100%}
+#traveler-controls .traveler-select-row>select{flex:1;width:0}
+#traveler-controls .traveler-select-row>select+button{flex:none}
+#traveler-controls .traveler-select-row>select+button+button{flex-basis:100%}
+.traveler-add-controls{display:grid;align-content:start;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:8px;align-items:center}
+.traveler-add-controls>:not(#local-traveler-kind):not(#local-traveler-team):not(.traveler-add-action){grid-column:1/-1}
+@media(max-width:600px){
+ #actions-checklist .night-target-row,#actions-checklist div:has(>select.master-target-select):not(:has(>[data-actor-selector])){flex-direction:column;align-items:stretch;gap:6px}
+ #actions-checklist .night-target-row>select,#actions-checklist div:has(>select.master-target-select)>select.master-target-select{width:100%;flex:none}
 }
 
 /* Last scoped overrides: no guide, zoom or page scroll changes. */
@@ -515,19 +551,26 @@ body>header{z-index:20!important}
 #role-guide .preset-catalog-card>.rg-thumb{object-position:center;opacity:.25}
 #role-guide .preset-catalog-card>:not(.rg-thumb){position:relative}
 #role-guide.rg-presets-view #rg-detail h2,#role-guide.rg-presets-view #rg-detail h3{color:#facc15}
-#role-guide .preset-artwork{margin:16px;width:calc(100% - 32px)}
-#role-guide .preset-artwork img{display:block;width:100%;height:auto;max-height:none;object-fit:contain}
+#role-guide .preset-artwork{margin:16px;width:calc(100% - 32px);border-radius:.75rem;overflow:hidden}
+#role-guide .preset-artwork img{display:block;width:100%;height:auto;max-height:none;object-fit:contain;border-radius:.75rem}
+#role-guide #rg-navigation{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+#role-guide #rg-navigation button:nth-child(2){width:auto;padding:.625rem .5rem}
+#role-guide #rg-navigation button:not(:nth-child(2)){background:#facc15;color:#0f172a;border-color:#eab308}
+.summary-verb-pink{color:#f9a8d4}.summary-verb-purple{color:#d8b4fe}.summary-verb-olive{color:#b4b16a}
 
-.community-role-list{max-height:none!important;height:auto!important;overflow:visible!important}.community-role-row{align-items:stretch}.community-role-row>.community-button{min-height:40px;padding:7px 10px;white-space:normal;overflow-wrap:anywhere}.community-role-row [data-survey-faction="wolf"]{background:#35232b;color:#f87171}.community-role-row [data-survey-faction="wolf_support"]{background:#382b30;color:#fda4af}.community-role-row [data-survey-faction="villager"]{background:#172b45;color:#93c5fd}.community-role-row [data-survey-faction="changing"]{background:#2e2042;color:#d8b4fe}.community-role-row [data-survey-faction="independent"]{background:#302e1b;color:#b4b16a}.community-role-row [data-survey-selected="true"]{border-color:#f59e0b!important}#wolf-target-buttons .wolf-name-button{min-height:44px;padding:7px 10px;gap:2px}.wolf-name-button small:empty{display:none}.mentalist-targets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.mentalist-targets button{min-height:40px;white-space:normal;overflow-wrap:anywhere}.mentalist-targets [aria-pressed="true"]{border-color:#818cf8;background:#312e81}#dev-unlock{background:#0f172a;color:#e2e8f0;border:1px solid #475569;border-radius:12px;padding:20px;max-width:90vw}#dev-unlock input{display:block;background:#020617;color:#e2e8f0;margin:12px 0;padding:10px;width:100%}
+.community-role-list{max-height:none!important;height:auto!important;overflow:visible!important}.community-role-row{align-items:stretch}.community-role-row>.community-button{min-height:40px;padding:7px 10px;white-space:normal;overflow-wrap:anywhere}.community-role-row [data-survey-faction="wolf"]{background:#35232b;color:#f87171}.community-role-row [data-survey-faction="wolf_support"]{background:#382b30;color:#fda4af}.community-role-row [data-survey-faction="villager"]{background:#172b45;color:#93c5fd}.community-role-row [data-survey-faction="changing"]{background:#2e2042;color:#d8b4fe}.community-role-row [data-survey-faction="independent"]{background:#302e1b;color:#b4b16a}.community-role-row [data-survey-selected="true"]{border-color:#f59e0b!important}#wolf-target-buttons .wolf-name-button{min-height:44px;padding:7px 10px;gap:2px}.wolf-name-button small:empty{display:none}.mentalist-targets .wolf-name-button{border-radius:.6rem;min-height:44px;padding:7px 10px;border:2px solid #334155;background:#1e293b;color:#f1f5f9;text-align:left;display:flex;flex-direction:column;gap:2px;width:100%;white-space:normal;overflow-wrap:anywhere}.mentalist-targets .wolf-name-button:disabled{border-style:dashed;color:#94a3b8;cursor:not-allowed}.mentalist-targets .wolf-name-button[aria-pressed="true"]{border-color:#818cf8;background:#312e81}#dev-unlock{background:#0f172a;color:#e2e8f0;border:1px solid #475569;border-radius:12px;padding:20px;max-width:90vw}#dev-unlock input{display:block;background:#020617;color:#e2e8f0;margin:12px 0;padding:10px;width:100%}
 
 /* Compact role actions; only confirmations carry the role color. */
 #wolf-target-buttons>button,[data-panel-role="mentalist"]>div>button,[data-panel-role="cutthroat"]>div>button,#cutthroat-choice button{min-height:32px;padding:6px 12px;font-size:12px;line-height:1.5;border-radius:8px}
 #wolf-target-buttons>button:first-of-type,[data-panel-role="cutthroat"]>div>button,#cutthroat-choice-confirm{background:#e11d48;color:#fff;border-color:#be123c}
 [data-panel-role="mentalist"]>div>button:first-of-type{background:#4338ca;color:#fff;border-color:#6366f1}
 #wolf-target-buttons>button:last-of-type,[data-panel-role="mentalist"]>div>button:last-of-type,#cutthroat-choice-skip{background:#1e293b;color:#e2e8f0;border-color:#475569}
-[data-panel-role="mentalist"]>div{display:flex;flex-wrap:wrap;gap:.75rem}
-[data-panel-role="mentalist"]>div>.mentalist-targets,[data-panel-role="mentalist"]>div>p,[data-panel-role="mentalist"] [data-auto-inspection]{flex-basis:100%}
-[data-panel-role="mentalist"]>div>button{flex:1 1 9rem;margin:0}
+[data-panel-role="mentalist"]>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem}
+[data-panel-role="mentalist"]>div>.mentalist-targets,[data-panel-role="mentalist"]>div>p,[data-panel-role="mentalist"] [data-auto-inspection]{grid-column:1/-1;margin:0}
+[data-panel-role="mentalist"]>div>button{width:100%;min-width:0;white-space:normal;margin:0}
+
+
+#dev-unlock .dev-unlock-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:16px;flex-wrap:wrap}
 
 </style>
 </head>
@@ -979,7 +1022,7 @@ body>header{z-index:20!important}
                     <span id="day-night-indicator" class="text-xs px-2.5 py-1 rounded bg-indigo-900 text-indigo-300 font-semibold">🌙 คืนที่ 1</span>
                     <h3 id="phase-title" class="text-base font-bold text-slate-200 mt-1">ช่วงเวลากลางคืน (Night Phase)</h3>
                 </div>
-                <button onclick="nextPhase()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition shadow">
+                <button id="phase-next-top" type="button" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition shadow">
                     เปลี่ยนรอบ ➡️
                 </button>
             </div>
@@ -1015,6 +1058,7 @@ body>header{z-index:20!important}
                 <div class="space-y-2 text-xs" id="actions-checklist">
                     <!-- Checklist generated via JS -->
                 </div>
+                <button id="phase-next-bottom" type="button" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3 py-3 rounded-lg transition shadow" disabled>เปลี่ยนรอบ ➡️</button>
             </div>
 
             <!-- Player Status Management List -->
@@ -1163,7 +1207,7 @@ body>header{z-index:20!important}
             { id: 'sorceress', name: 'Sorceress', thai: 'พ่อมดฝ่ายมืด', icon: '🧙', team: 'wolf', points: -3, multi: false, defaultCount: 0, desc: 'อยู่ฝ่ายหมาป่า ตื่นตอนกลางคืนเพื่อค้นหาว่าใครคือ Seer (ผู้หยั่งรู้)' },
             { id: 'sorcerer', name: 'Sorcerer', thai: 'พ่อมดวางยา', icon: '🧪', team: 'wolf', points: -4, multi: false, defaultCount: 1, desc: 'อยู่ฝ่ายหมาป่า ตื่นหลังหมาป่าเพื่อเลือกวางยาผู้เล่น 1 คน ผู้ถูกวางยาจะถูกบล็อกความสามารถทันที (Seer ส่องจะเห็นผลตรงข้าม / หากถูกหมาป่าฆ่า ความสามารถตอนตายจะไม่ทำงาน)' },
             { id: 'seer', name: 'Seer', thai: 'ผู้หยั่งรู้', icon: '🔮', team: 'good', points: 7, multi: false, defaultCount: 1, desc: 'ตื่นขึ้นมาในตอนกลางคืนเพื่อส่องตรวจดูว่าผู้เล่น 1 คนเป็นหมาป่าหรือไม่' },
-            { id: 'apprentice_seer', name: 'Apprentice Seer', thai: 'ผู้ช่วยหยั่งรู้', icon: '🔮', team: 'good', points: 4, multi: false, defaultCount: 1, desc: 'หาก Seer ตัวจริงเสียชีวิต ผู้ช่วยหยั่งรู้จะได้รับพลังและกลายร่างเป็น Seer คนใหม่ทันที' },
+            { id: 'apprentice_seer', name: 'Apprentice Seer', thai: 'ผู้ช่วยหยั่งรู้', icon: '🔮', team: 'good', points: 4, multi: false, defaultCount: 1, desc: 'หาก Seer ตัวจริงเสียชีวิต ผู้ช่วยหยั่งรู้ที่ยังมีชีวิตจะรับช่วงเป็น Seer เมื่อเริ่มคืนถัดไป' },
             { id: 'bodyguard', name: 'Bodyguard', thai: 'บอดี้การ์ด', icon: '🛡️', team: 'good', points: 3, multi: false, defaultCount: 1, desc: 'ตื่นขึ้นมาในตอนกลางคืนเพื่อเลือกปกป้องผู้เล่น 1 คนจากการถูกหมาป่าฆ่า' },
             { id: 'hunter', name: 'Hunter', thai: 'นายพราน', icon: '🏹', team: 'good', points: 3, multi: false, defaultCount: 1, desc: 'หากนายพรานเสียชีวิต จะสามารถใช้พลังยิงผู้เล่น 1 คนให้ตายตามทันที' },
             { id: 'spellcaster', name: 'Spellcaster', thai: 'ผู้ร่ายมนตร์', icon: '🤫', team: 'good', points: 1, multi: false, defaultCount: 0, desc: 'เป็นฝ่ายชาวบ้าน ตื่นตอนกลางคืนเพื่อเลือกผู้เล่น 1 คนให้ติดสถานะใบ้ (ห้ามพูดตลอดช่วงกลางวันถัดไป)' },
@@ -1207,7 +1251,7 @@ body>header{z-index:20!important}
         }
         function roleDisplay(role) { return { ...role, ...ROLE_DISPLAY[role.id] }; }
         // Pending new artwork; role-only filenames, relative to this index.html.
-        const ROLE_ARTWORK = Object.freeze({prairie_wolf: './Assets/role-card/prairie_wolf.webp',cutthroat: './Assets/role-card/cutthroat.webp',mentalist: './Assets/role-card/mentalist.webp',grave_robber: './Assets/role-card/grave_robber.webp',beholder: './Assets/role-card/beholder.webp',direwolf: './Assets/role-card/direwolf.webp',doppelganger: './Assets/role-card/doppelganger.webp',pi: './Assets/role-card/pi.webp',priest: './Assets/role-card/priest.webp',witch: './Assets/role-card/witch.webp',cult_leader: './Assets/role-card/cult_leader.webp',prince: './Assets/role-card/prince.webp',persian_prince: './Assets/role-card/persian_prince.webp',drunk: './Assets/role-card/drunk.webp',insomniac: './Assets/role-card/insomniac.webp',
+        const ROLE_ARTWORK = Object.freeze({alpha_wolf:'./Assets/role-card/alpha_wolf.webp',prairie_wolf: './Assets/role-card/prairie_wolf.webp',cutthroat: './Assets/role-card/cutthroat.webp',mentalist: './Assets/role-card/mentalist.webp',grave_robber: './Assets/role-card/grave_robber.webp',beholder: './Assets/role-card/beholder.webp',direwolf: './Assets/role-card/direwolf.webp',doppelganger: './Assets/role-card/doppelganger.webp',pi: './Assets/role-card/pi.webp',priest: './Assets/role-card/priest.webp',witch: './Assets/role-card/witch.webp',cult_leader: './Assets/role-card/cult_leader.webp',prince: './Assets/role-card/prince.webp',persian_prince: './Assets/role-card/persian_prince.webp',drunk: './Assets/role-card/drunk.webp',insomniac: './Assets/role-card/insomniac.webp',
             werewolf: './Assets/role-card/werewolf.webp',
             wolf_cub: './Assets/role-card/wolf_cub.webp',
             sorceress: './Assets/role-card/sorceress.webp',
@@ -1260,7 +1304,7 @@ const NORMAL_ADDITIONS = [
  ['insomniac','Insomniac','หน่องนอนไม่หลับ','👀','good',3,'รู้เพียงว่ามีใครเยี่ยมบ้านคุณหรือเพื่อนบ้านที่นั่งเดิมหรือไม่']
 ].map(([id,name,thai,icon,team,points,desc])=>({id,name,thai,icon,team,points,desc,multi:false,defaultCount:0}));
 ROLES_DATABASE.push(...NORMAL_ADDITIONS);
-const PLAYABLE_EXPANSION=[{"id":"cutthroat","name":"Cutthroat","thai":"นักเชือด","icon":"🗡️","points":4,"team":"good","desc":"หนึ่งครั้งกลางคืน ฆ่าเพื่อนบ้านที่นั่งเดิม Mod ปลุกเหยื่อให้เห็นผู้ฆ่าเป็นส่วนตัว","category":"normal","multi":false,"defaultCount":0},{"id":"mentalist","name":"Mentalist","thai":"นักอ่านจิต","icon":"🧠","points":6,"team":"good","desc":"แต่ละคืนเปรียบเทียบผู้เล่นอื่นสองคนว่าอยู่ฝ่ายเดียวกันหรือไม่","category":"normal","multi":false,"defaultCount":0},{"id":"prairie_wolf","name":"Prairie Wolf","thai":"หมาป่าทุ่งหญ้า","icon":"🐺","points":-7,"team":"wolf","desc":"คืนแรกตรวจหนึ่งคนว่าเป็น Seer หรือไม่","category":"normal","multi":false,"defaultCount":0},{"id":"grave_robber","name":"Grave Robber","thai":"โจรปล้นสุสาน","icon":"🪦","points":2,"team":"special","desc":"เมื่อคุณถูกกำจัด เปิดเผยบทบาท Grave Robber แล้วเลือกผู้เล่นอื่นที่ยังอยู่ในเกมและไม่ใช่ Traveler ต่อหน้าทุกคน ผู้เล่นนั้นถูกกำจัดทันทีแทนคุณ และคุณรับการ์ดของเขามาเป็นบทบาทใหม่ พร้อมฝ่ายและพลังของบทบาทนั้น เลือก Traveler ไม่ได้ หากไม่มีเป้าหมายที่เลือกได้ ให้เสียชีวิตตามปกติ","category":"normal","guideGroup":"changing","multi":false,"defaultCount":0}];PLAYABLE_EXPANSION.push({"id":"kamikaze_wolf","name":"Kamikaze Wolf","thai":"หมาป่ากามิกาเซ่","icon":"🐺","points":-10,"team":"wolf","desc":"เมื่อ Seer ตรวจคุณและยังมีหมาป่าตัวอื่นมีชีวิต คุณและ Seer ตายทั้งคู่ หากเป็นหมาป่าตัวสุดท้ายไม่ทำงาน","category":"normal","multi":false,"defaultCount":0});ROLES_DATABASE.push(...PLAYABLE_EXPANSION);
+const PLAYABLE_EXPANSION=[{"id":"cutthroat","name":"Cutthroat","thai":"นักเชือด","icon":"🗡️","points":4,"team":"good","desc":"หนึ่งครั้งกลางคืน ฆ่าเพื่อนบ้านที่นั่งเดิม Mod ปลุกเหยื่อให้เห็นผู้ฆ่าเป็นส่วนตัว","category":"normal","multi":false,"defaultCount":0},{"id":"mentalist","name":"Mentalist","thai":"นักอ่านจิต","icon":"🧠","points":6,"team":"good","desc":"แต่ละคืนเปรียบเทียบผู้เล่นอื่นสองคนว่าอยู่ฝ่ายเดียวกันหรือไม่","category":"normal","multi":false,"defaultCount":0},{"id":"prairie_wolf","name":"Prairie Wolf","thai":"หมาป่าทุ่งหญ้า","icon":"🐺","points":-7,"team":"wolf","desc":"คืนแรกตรวจหนึ่งคนว่าเป็น Seer หรือไม่","category":"normal","multi":false,"defaultCount":0},{"id":"grave_robber","name":"Grave Robber","thai":"โจรปล้นสุสาน","icon":"🪦","points":2,"team":"special","desc":"เมื่อคุณถูกกำจัด เปิดเผยบทบาท Grave Robber แล้วเลือกผู้เล่นอื่นที่ยังอยู่ในเกมและไม่ใช่ Traveler ต่อหน้าทุกคน ผู้เล่นนั้นถูกกำจัดทันทีแทนคุณ และคุณรับการ์ดของเขามาเป็นบทบาทใหม่ พร้อมฝ่ายและพลังของบทบาทนั้น เลือก Traveler ไม่ได้ หากไม่มีเป้าหมายที่เลือกได้ ให้เสียชีวิตตามปกติ","category":"normal","guideGroup":"changing","multi":false,"defaultCount":0}];PLAYABLE_EXPANSION.push({"id":"kamikaze_wolf","name":"Kamikaze Wolf","thai":"หมาป่ากามิกาเซ่","icon":"🐺","points":-10,"team":"wolf","desc":"เมื่อ Seer ตรวจคุณและยังมีหมาป่าตัวอื่นมีชีวิต คุณและ Seer ตายทั้งคู่ หากเป็นหมาป่าตัวสุดท้ายไม่ทำงาน","category":"normal","multi":false,"defaultCount":0});PLAYABLE_EXPANSION.push(...[{"id":"aura_seer","name":"Aura Seer","thai":"ผู้หยั่งรู้มนตรา","icon":"🔮","points":9,"team":"good","desc":"ทุกคืน เรียนรู้บทบาทปัจจุบันที่แท้จริงของผู้เล่นหนึ่งคน","category":"normal","multi":false,"defaultCount":0},{"id":"alpha_wolf","name":"Alpha Wolf","thai":"จ่าฝูง","icon":"🐺","points":-12,"team":"wolf","desc":"ร่วมล่าทุกคืน หนึ่งครั้งต่อเกม แปลงเหยื่อหนึ่งคนแทนการฆ่าได้เฉพาะคืนหลังหมาป่าถูกประหารจริง","category":"normal","multi":false,"defaultCount":0}]);ROLES_DATABASE.push(...PLAYABLE_EXPANSION);
 function normalState() {
  return gameState.normal || (gameState.normal={original:{...gameState.rolePlayerMap},seats:[...gameState.players],used:{},links:{},trueRoles:Object.fromEntries(gameState.players.filter(p=>gameState.rolePlayerMap[p]==='drunk'&&gameState.pendingDrunkRole).map(p=>[p,gameState.pendingDrunkRole])),blessings:{},cult:{},visits:[],night:gameState.dayCount,witch:null,blessSpent:[],endedDay:0});
 }
@@ -1273,7 +1317,7 @@ function fixedNeighbors(p){const a=normalState().seats,i=a.indexOf(p);return i<0
 
 
 function insomniacResult(p,invert=false){const houses=[p,...fixedNeighbors(p)];const truth=normalVisits().some(v=>v.actor!==p&&houses.includes(v.target));return isPoisoned(p)&&invert?!truth:truth;}
-function actualWolf(p){return ['werewolf','wolf_cub','direwolf','prairie_wolf','kamikaze_wolf'].includes(effectiveRole(p))||gameState.cursedTurned.includes(p);}
+function actualWolf(p){return ['werewolf','wolf_cub','direwolf','prairie_wolf','kamikaze_wolf','alpha_wolf'].includes(effectiveRole(p))||gameState.cursedTurned.includes(p);}
 function normalCan(p){return isMod&&gameState.gamePhase==='night'&&actorAvailable(p)&&!isPoisoned(p);}
 function validDrunkRole(id){const role=ROLES_DATABASE.find(r=>r.id===id);if(!role||['drunk','beholder','direwolf','doppelganger','cupid','bodyguard','seer','spellcaster','cult_leader'].includes(id))return false;return role.team!=='wolf'||['werewolf','wolf_cub','sorceress','sorcerer'].includes(id);}
 function validateSavedDrunkChoices(state){const invalid={};if(state.pendingDrunkRole&&!validDrunkRole(state.pendingDrunkRole))invalid.pregame=state.pendingDrunkRole;for(const [player,id] of Object.entries(state.normal?.trueRoles||{}))if(!validDrunkRole(id))invalid[player]=id;state.invalidDrunkChoices=invalid;return state;}
@@ -1284,7 +1328,7 @@ function normalCommittedDeaths(){syncCultChoices();const n=normalState();let cha
  const role=gameState.rolePlayerMap[p];if(role==='doppelganger'&&!isBedridden(p)&&!isPoisoned(p)){const copied=actualRoleForCopy(link);if(!copied)continue;normalAcquire(p,copied);delete n.links[p];changed=true;}
  else if(role==='direwolf'&&!isPoisoned(p)){killWithLover(p);changed=true;}}
  }
- markApprenticeSuccession();
+
  for(const leader of Object.keys(n.cult)){if(!gameState.playerStatus[leader]?.alive&&!(gameState.nightKilled||[]).includes(leader)){delete n.cult[leader];if(n.cultWinner===leader)delete n.cultWinner;continue;}if(gameState.playerStatus[leader]?.alive&&gameState.players.every(p=>p===leader||(!gameState.playerStatus[p]?.alive&&!(gameState.nightKilled||[]).includes(p))||n.cult[leader].includes(p)))n.cultWinner=leader;}
 }
 function normalAct(p,kind,target){const n=normalNight(),role=gameState.rolePlayerMap[p];if(!isMod||gameState.gamePhase!=='night'||!actorAvailable(p))return false;
@@ -1322,11 +1366,11 @@ function killWithLover(player){
  return partner&&applyDeath(partner,deathAtNight())?partner:null;
 }
 function nightKill(player){if(!gameState.playerStatus[player]?.alive)return false;if(normalState().blessings[player]&&!isPoisoned(player)){normalBlessBlock(player,true);return false;}if(offerBedridden(player,true))return false;return applyDeath(player,false,true);}
-function actualRoleForCopy(player){const n=normalState();if(gameState.cursedTurned.includes(player))return 'werewolf';if(gameState.rolePlayerMap[player]==='drunk')return validDrunkRole(n.trueRoles[player])?n.trueRoles[player]:null;if(gameState.rolePlayerMap[player]==='apprentice_seer'&&n.apprenticeAwakened?.[player])return 'seer';return gameState.rolePlayerMap[player];}
-function markApprenticeSuccession(){const n=normalState(),seers=gameState.players.filter(p=>gameState.rolePlayerMap[p]==='seer'||n.apprenticeAwakened?.[p]);if(!seers.some(p=>!gameState.playerStatus[p]?.alive&&!(gameState.nightKilled||[]).includes(p)))return;if(seers.some(p=>gameState.playerStatus[p]?.alive||(gameState.nightKilled||[]).includes(p)))return;n.apprenticeAwakened=n.apprenticeAwakened||{};for(const p of gameState.players.filter(p=>gameState.rolePlayerMap[p]==='apprentice_seer'&&actorAvailable(p))){if(n.apprenticeAwakened[p])continue;n.apprenticeAwakened[p]=true;recordTransformation('apprentice_seer',p,'seer');publishAcquiredCard(p,'seer');}}
+function deathRole(player){return isBedridden(player)?'__bedridden__':actualRoleForCopy(player);}function actualRoleForCopy(player){const n=normalState();if(gameState.cursedTurned.includes(player))return 'werewolf';if(gameState.rolePlayerMap[player]==='drunk')return validDrunkRole(n.trueRoles[player])?n.trueRoles[player]:null;if(gameState.rolePlayerMap[player]==='apprentice_seer'&&n.apprenticeAwakened?.[player])return 'seer';return gameState.rolePlayerMap[player];}
+function markApprenticeSuccession(){if(!isMod||gameState.gamePhase!=='night'||victoryLocked())return;const n=normalState();if(n.apprenticeStart!==currentGameSessionId+':'+gameState.dayCount)return;delete n.apprenticeStart;const seers=gameState.players.filter(p=>gameState.rolePlayerMap[p]==='seer'||n.apprenticeAwakened?.[p]);if(!seers.some(p=>!gameState.playerStatus[p]?.alive&&!(gameState.nightKilled||[]).includes(p)))return;if(seers.some(p=>gameState.playerStatus[p]?.alive||(gameState.nightKilled||[]).includes(p)))return;n.apprenticeAwakened=n.apprenticeAwakened||{};for(const p of gameState.players.filter(p=>gameState.rolePlayerMap[p]==='apprentice_seer'&&actorAvailable(p))){if(n.apprenticeAwakened[p])continue;n.apprenticeAwakened[p]=true;recordTransformation('apprentice_seer',p,'seer');publishAcquiredCard(p,'seer');}}
 function normalRoleActors(role){return gameState.players.filter(p=>gameState.rolePlayerMap[p]===role&&actorAvailable(p));}
 function getPlayerByRole(role){return normalRoleActors(role).find(p=>!isPoisoned(p))||normalRoleActors(role)[0]||gameState.players.find(p=>gameState.rolePlayerMap[p]===role)||'';}
-function normalInspect(actor,target){if(!actorAvailable(actor))return null;if(!target){normalVisit(actor,[],actor+':inspect');return null;}if(!gameState.playerStatus[target])return null;normalVisit(actor,[target],actor+':inspect');const role=gameState.rolePlayerMap[actor];if(role==='sorceress')return actualRoleForCopy(target)==='seer';const trueRole=gameState.rolePlayerMap[target]==='drunk'?normalState().trueRoles[target]:gameState.rolePlayerMap[target];const wolf=['werewolf','wolf_cub','direwolf','lycan','prairie_wolf','kamikaze_wolf'].includes(trueRole)||gameState.cursedTurned.includes(target);return isPoisoned(actor)?!wolf:wolf;}
+function normalInspect(actor,target){if(!actorAvailable(actor))return null;if(!target){normalVisit(actor,[],actor+':inspect');return null;}if(!gameState.playerStatus[target])return null;normalVisit(actor,[target],actor+':inspect');const role=gameState.rolePlayerMap[actor];if(role==='sorceress')return actualRoleForCopy(target)==='seer';const trueRole=gameState.rolePlayerMap[target]==='drunk'?normalState().trueRoles[target]:gameState.rolePlayerMap[target];const wolf=['werewolf','wolf_cub','direwolf','lycan','prairie_wolf','kamikaze_wolf','alpha_wolf'].includes(trueRole)||gameState.cursedTurned.includes(target);return isPoisoned(actor)?!wolf:wolf;}
 
 // Per-actor supplemental powers for inherited/multiple owners. Pack hunting remains shared.
 function actorPowers(){const n=normalNight();return n.actions||(n.actions={});}
@@ -1346,7 +1390,7 @@ function commitActorHistory(){const n=normalNight();n.history=n.history||{};for(
 const ROLE_GROUP_ORDER=['wolf','wolf_support','villager','changing','independent'];
 const ROLE_GROUP_LABELS={wolf:'หมาป่า',wolf_support:'ผู้ช่วยหมาป่า',villager:'ชาวบ้าน',changing:'ผู้เปลี่ยนฝ่าย',independent:'อิสระ'};
 function setupGroup(r){if(['drunk','doppelganger','cursed','grave_robber'].includes(r.id))return 'changing';if(['sorceress','sorcerer'].includes(r.id))return 'wolf_support';if(r.team==='wolf')return 'wolf';if(['tanner','cult_leader'].includes(r.id))return 'independent';return 'villager';}
-function orderedSetupRoles(){return [...ROLES_DATABASE].sort((a,b)=>ROLE_GROUP_ORDER.indexOf(setupGroup(a))-ROLE_GROUP_ORDER.indexOf(setupGroup(b)));}
+function seerRoleRank(r){return ({aura_seer:0,seer:1,apprentice_seer:2})[r.id]??3;}function orderedSetupRoles(){return [...ROLES_DATABASE].sort((a,b)=>ROLE_GROUP_ORDER.indexOf(setupGroup(a))-ROLE_GROUP_ORDER.indexOf(setupGroup(b))||seerRoleRank(a)-seerRoleRank(b));}
 function setupPoints(role){if(role.id!=='drunk')return role.points;return validDrunkRole(gameState.pendingDrunkRole)?ROLES_DATABASE.find(r=>r.id===gameState.pendingDrunkRole).points:0;}
 function renderDrunkSetup(containerId){
  const online=containerId==='screen-role-select',host=document.getElementById(containerId);if(!host)return;
@@ -1360,7 +1404,7 @@ function renderDrunkSetup(containerId){
  orderedSetupRoles().filter(r=>validDrunkRole(r.id)).forEach(r=>{const o=document.createElement('option');o.value=r.id;o.textContent=r.name+' ('+(r.points>0?'+':'')+r.points+')';select.append(o);});if(gameState.pendingDrunkRole&&!validDrunkRole(gameState.pendingDrunkRole)){const invalid=document.createElement('option');invalid.value=gameState.pendingDrunkRole;invalid.textContent='ตัวเลือกเดิมใช้ไม่ได้: '+gameState.pendingDrunkRole+' — กรุณาเลือกใหม่';invalid.disabled=true;select.append(invalid);}select.value=gameState.pendingDrunkRole||'';
  select.onchange=()=>{gameState.pendingDrunkRole=select.value;if(online){updateBalanceCalculations();renderRolesBuilder();}};box.append(caption,select);parent.append(box);
 }
-const NIGHT_ROLE_META={transform:{first:0,later:0},cupid:{first:5},direwolf:{first:6},doppelganger:{first:7},beholder:{first:8},sorcerer:{first:32,later:32},bodyguard:{first:33,later:33},priest:{first:34,later:34},wolf:{first:30,later:30},witch:{first:40,later:40},seer:{first:50,later:50},sorceress:{first:31,later:31},pi:{first:52,later:52},spellcaster:{first:60,later:60},cult_leader:{first:70,later:70},insomniac:{first:100,later:100}};
+const NIGHT_ROLE_META={transform:{first:0,later:0},cupid:{first:5},direwolf:{first:6},doppelganger:{first:7},beholder:{first:8},sorcerer:{first:32,later:32},bodyguard:{first:33,later:33},priest:{first:34,later:34},wolf:{first:30,later:30},witch:{first:40,later:40},aura_seer:{first:49,later:49},alpha_wolf:{first:30.5,later:30.5},seer:{first:50,later:50},sorceress:{first:31,later:31},pi:{first:52,later:52},spellcaster:{first:60,later:60},cult_leader:{first:70,later:70},insomniac:{first:100,later:100}};
 function normalPanel(){
  document.querySelectorAll('[data-normal-panel],#normal-controls').forEach(e=>e.remove());if(!isMod)return;
  const host=document.getElementById('actions-checklist'),n=normalNight(),night=gameState.gamePhase==='night';
@@ -1368,17 +1412,17 @@ function normalPanel(){
  const selectClass='bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100 max-w-full';
  const buttonClass='bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition shadow whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed';
  const make=(name,key,role)=>{const box=document.createElement('div');box.dataset.normalPanel='1';box.dataset.panelRole=role;box.dataset.priority=String(night?(NIGHT_ROLE_META[role]?.[gameState.dayCount===1?'first':'later']??80):50);box.className=panelClass;const heading=document.createElement('label');heading.className='flex items-center space-x-2 cursor-pointer';const cb=document.createElement('input');cb.type='checkbox';cb.dataset.normalNarration='true';cb.className='w-4 h-4 text-indigo-500 rounded bg-slate-900 border-slate-700';const done=nightNarrationState();bindManualNarration(cb,key.startsWith('normal:')?'actor:'+key.slice(7):'step:'+key);const title=document.createElement('span');title.className='text-slate-300 font-semibold';title.textContent=name;heading.append(cb,title);const body=document.createElement('div');body.className='pl-6 space-y-2 text-[11px]';box.append(heading,body);host.append(box);return {box,body,cb,done,key};};
- const pick=(panel,label,skip='-- เลือกผู้เล่น --')=>{const row=document.createElement('div');row.className='flex items-center justify-between gap-2 text-[11px]';const text=document.createElement('span');text.className='text-slate-400';text.textContent=label;const select=document.createElement('select');select.className=selectClass;select.dataset.actionTarget='actor';const empty=document.createElement('option');empty.value='';empty.textContent=skip;select.append(empty);gameState.players.filter(actorAvailable).forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;select.append(o);});row.append(text,select);panel.body.append(row);return select;};
+ const pick=(panel,label,skip='-- เลือกผู้เล่น --')=>{const row=document.createElement('div');row.className='flex items-center justify-between gap-2 text-[11px]';const text=document.createElement('span');text.className='text-slate-400';text.textContent=label;const select=document.createElement('select');select.className=selectClass+' master-target-select';row.classList.add('night-target-row');select.dataset.actionTarget='actor';const empty=document.createElement('option');empty.value='';empty.textContent=skip;select.append(empty);gameState.players.filter(actorAvailable).forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;select.append(o);});row.append(text,select);panel.body.append(row);return select;};
  if(night&&gameState.dayCount>1){make('ขานสะกิดบทบาทที่สามารถแปลงร่างได้ — Apprentice Seer / Cursed / Doppelganger / Drunk','transform','transform');}
  for(const p of gameState.players){const role=gameState.rolePlayerMap[p];if(!NORMAL_ADDITIONS.some(r=>r.id===role))continue;
  if(night&&['prince','persian_prince','drunk'].includes(role))continue;if(!night&&role!=='persian_prince')continue;
  if(['beholder','direwolf','doppelganger'].includes(role)&&(gameState.dayCount!==1||n.inherited?.[p]))continue;
  const r=ROLES_DATABASE.find(r=>r.id===role),panel=make(r.icon+' '+r.name+' — '+p,'normal:'+p,role);panel.box.dataset.actor=p;applyNarrationStatus(panel.box,[p]);const result=document.createElement('div');result.className='text-xs p-2.5 rounded-lg border border-slate-700 bg-slate-950/80 text-slate-300 space-y-1';result.hidden=true;
- if(role==='beholder'){result.hidden=false;result.innerHTML='<div>👁️ Seer: <b>'+safeGuideMarkup(gameState.players.filter(x=>gameState.rolePlayerMap[x]==='seer').join(', ')||'ไม่มี')+'</b></div><div class="text-[10px] text-slate-400">👉 Mod: ชี้ไปที่ Seer ให้ผู้มีตาทิพย์ทราบ</div>';panel.body.append(result);continue;}
+ if(role==='beholder'){result.hidden=false;result.innerHTML='<div>🔮 Seer: <b>'+safeGuideMarkup(gameState.players.filter(x=>gameState.rolePlayerMap[x]==='seer').join(', ')||'ไม่มี')+'</b></div><div class="text-[10px] text-slate-400">👉 Mod: ชี้ไปที่ Seer ให้ผู้มีตาทิพย์ทราบ</div>';panel.body.append(result);continue;}
  if(role==='insomniac'){panel.box.dataset.insomniac=p;result.dataset.insomniacResult='1';panel.body.append(result);if(isPoisoned(p)){const select=document.createElement('select');select.className=selectClass;[['truth','แจ้งผลตามจริง'],['invert','แจ้งผลกลับด้าน']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;select.append(o);});select.value=n.insomniacModes?.[p]||'truth';select.onchange=()=>{(n.insomniacModes||(n.insomniacModes={}))[p]=select.value;refreshInsomniacResults();};panel.body.append(select);}showInspectionResult(result,'insomniac',insomniacResult(p,n.insomniacModes?.[p]==='invert'));continue;}
  if(role==='persian_prince'){const button=document.createElement('button');button.className=buttonClass.replaceAll('rose','amber').replace('text-white','text-slate-950');button.textContent=n.used[p]?.pardon?'พระราชทานอภัยโทษแล้ว':'พระราชทานอภัยโทษ';button.disabled=!actorAvailable(p)||!!n.used[p]?.pardon;button.onclick=()=>royalPardon(p,document.getElementById('day-vote-target-select')?.value||'');panel.body.append(button);continue;}
- const labels={doppelganger:'เลือกคนที่จะสวมรอย:',direwolf:'เลือกคู่หู:',priest:'เลือกคนที่จะอวยพร:',pi:'เลือกคนที่จะสืบ:',cult_leader:'เลือกคนที่จะชวนเข้าลัทธิ:',witch:'เลือกคนที่จะสังหาร:'};const select=pick(panel,labels[role]||'เลือกผู้เล่น:',role==='priest'?'ไม่อวยพร / ข้าม':'-- เลือกผู้เล่น / ข้าม --');select.disabled=!actorAvailable(p);panel.body.append(result);
- if(['direwolf','doppelganger'].includes(role)){select.value=n.links[p]||'';select.onchange=()=>{normalAct(p,'link',select.value);};}
+ const labels={doppelganger:'เลือกคนที่จะสวมรอย:',direwolf:'เลือกคู่หู:',priest:'เลือกคนที่จะอวยพร:',pi:'เลือกคนที่จะสืบ:',cult_leader:'เลือกคนที่จะชวนเข้าลัทธิ:',witch:'เลือกคนที่จะสังหาร:'};const select=pick(panel,labels[role]||'เลือกผู้เล่น:',role==='priest'?'ไม่อวยพร / ข้าม':role==='pi'?'-- เลือกผู้เล่น/ข้าม --':role==='doppelganger'?'-- เลือกผู้เล่น --':'-- เลือกผู้เล่น / ข้าม --');select.disabled=!actorAvailable(p);panel.body.append(result);
+ if(['direwolf','doppelganger'].includes(role)){select.value=n.links[p]||'';const state=gameState,phase=approvedPhaseKey();select.onchange=()=>{if(state!==gameState||phase!==approvedPhaseKey()||victoryLocked())return;if(normalAct(p,'link',select.value)===true&&role==='doppelganger')publishDoppelTarget(p);};}
  if(role==='pi')renderPiControls(panel,select,result,p);
  if(role==='priest'){const prepared=n.prepared||(n.prepared={});select.value=prepared[p]||'';select.onchange=()=>{prepared[p]=select.value;};const bless=document.createElement('button');bless.type='button';bless.className=buttonClass.replaceAll('rose','blue');bless.textContent=n.used[p]?.priest?'ใช้พลังแล้ว':'อวยพร';bless.disabled=!actorAvailable(p)||!!n.used[p]?.priest;bless.onclick=()=>{if(!select.value||n.used[p]?.priest||victoryLocked())return;const value=normalAct(p,'priest',select.value);result.hidden=false;result.innerHTML='<div>✝️ พร: <b>'+(value?'บันทึกแล้ว':'ไม่ได้ใช้พลัง')+'</b></div><div class="text-[10px] text-slate-400">👉 Mod: แจ้งการใช้พรเป็นการส่วนตัว</div>';bless.disabled=!actorAvailable(p)||!!n.used[p]?.priest;renderPlayerStatusList();};panel.body.append(bless);}
  if(role==='cult_leader'){select.value=n.cultCurrent?.[p]||'';select.onchange=()=>chooseCultMember(p,select.value);}
@@ -1399,9 +1443,9 @@ function integrateActorPanels(){
  if(box.dataset.actorIntegrated==='1')continue;box.dataset.actorIntegrated='1';const actors=role==='seer'?seerPanelActors():gameState.players.filter(p=>gameState.rolePlayerMap[p]===role);if(!actors.length)continue;
  let body=box.querySelector('#'+prefix+'-dropdown');if(!body){body=document.createElement('div');body.id=prefix+'-dropdown';body.className='pl-6 space-y-1.5';box.append(body);}
  let target=body.querySelector('select');if(!target){const row=document.createElement('div');row.className='flex items-center justify-between gap-2 text-[11px]';const caption=document.createElement('span');caption.className='text-slate-400';caption.textContent='เลือกคนที่จะส่อง:';target=document.createElement('select');target.className='bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100';const empty=document.createElement('option');empty.value='';empty.textContent='-- เลือกผู้เล่นเพื่อส่อง --';target.append(empty);gameState.players.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;target.append(o);});row.append(caption,target);body.append(row);}
- target.dataset.actionTarget='living';
+ target.classList.add('master-target-select');target.parentElement.classList.add('night-target-row');target.dataset.actionTarget='living';
  if(actors.length===1&&role!=='sorceress')continue;
- let selected=actors.includes(normalState().narrationOwners?.[prefix])?normalState().narrationOwners[prefix]:actors.find(actorAvailable)||actors[0];if(actors.length>1){const owner=document.createElement('select');owner.dataset.actorSelector='1';owner.className='bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100 text-[11px]';actors.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;owner.append(o);});owner.value=selected;body.prepend(owner);owner.onchange=()=>{selected=owner.value;(normalState().narrationOwners||(normalState().narrationOwners={}))[prefix]=selected;target.disabled=!actorAvailable(selected);target.value=actorPowers()[selected]?.target||'';if(result)result.hidden=true;renderNightNarrationControls();};}
+ let selected=actors.includes(normalState().narrationOwners?.[prefix])?normalState().narrationOwners[prefix]:actors.find(actorAvailable)||actors[0];if(actors.length>1){const owner=document.createElement('select');owner.dataset.actorSelector='1';owner.className='bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100 text-[11px]';actors.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;owner.append(o);});owner.value=selected;owner.id=prefix+'-owner-select';const ownerLabel=document.createElement('label');ownerLabel.htmlFor=owner.id;ownerLabel.className='night-owner-label';ownerLabel.textContent='เลือกผู้ใช้พลัง:';body.prepend(ownerLabel,owner);owner.onchange=()=>{selected=owner.value;(normalState().narrationOwners||(normalState().narrationOwners={}))[prefix]=selected;target.disabled=!actorAvailable(selected);target.value=actorPowers()[selected]?.target||'';if(result)result.hidden=true;renderNightNarrationControls();};}
  let result=null;if(['seer','sorceress'].includes(role)){result=body.querySelector('#seer-result-display');if(!result){result=document.createElement('div');body.append(result);}result.hidden=true;result.className='text-xs p-2.5 rounded-lg border font-medium';}
  target.disabled=!actorAvailable(selected);target.onchange=()=>{if(!target.value){if(result){result.hidden=true;normalVisit(selected,[],selected+':inspect');}else actorPowerChoice(selected,role,'');return;}if(result){const value=normalInspect(selected,target.value);showInspectionResult(result,role==='sorceress'?'ผลการส่องหา Seer':'ผลการส่อง',value);refreshInsomniacResults();}else actorPowerChoice(selected,role,target.value);};
  }
@@ -1411,7 +1455,7 @@ const PANEL_HUES={transform:'amber',wolf:'rose',sorceress:'rose',sorcerer:'emera
 function panelTokens(role){const hue=PANEL_HUES[role];return {box:hue?'bg-'+hue+'-950/30 p-2.5 rounded border border-'+hue+'-800/60 space-y-2':'bg-slate-900/40 p-2.5 rounded border border-slate-700/50 space-y-2',title:hue?'text-'+hue+'-200 font-semibold':'text-slate-300 font-semibold',check:'w-4 h-4 text-'+(hue||'indigo')+'-500 rounded bg-slate-900 border-slate-700'};}
 function checklistTitle(role,names){if(role==='transform')return '🔄 ขานสะกิดบทบาทที่สามารถแปลงร่างได้ — Apprentice Seer / Cursed / Doppelganger / Drunk';const r=ROLES_DATABASE.find(r=>r.id===role);return (role==='wolf'?'🐺 Werewolf':r?r.icon+' '+r.name:'🔄 ขานสะกิดบทบาทที่สามารถแปลงร่างได้')+(names.length?' — '+names.join(', '):'');}
 function normalizeChecklistPanels(){const host=document.getElementById('actions-checklist');if(!host)return;const roles={cupid:'cupid',wolf:'wolf',sorcerer2:'sorcerer',bg:'bodyguard',seer:'seer',spellcaster:'spellcaster',sorceress:'sorceress'};
- for(const cb of host.querySelectorAll('input[type="checkbox"]')){const heading=cb.closest('label');if(!heading)continue;const role=heading.parentElement.dataset.panelRole||roles[cb.id.replace('-cb','')];if(!role)continue;let box=heading.parentElement;if(box===host){box=document.createElement('div');heading.before(box);box.append(heading);}const tokens=panelTokens(role);box.className=tokens.box;box.dataset.priority=String(NIGHT_ROLE_META[role]?.[gameState.dayCount===1?'first':'later']??80);heading.className='flex items-center space-x-2 cursor-pointer';cb.className=tokens.check;const title=heading.querySelector('span');if(title){title.className=tokens.title;const names=role==='wolf'?gameState.players.filter(p=>['werewolf','wolf_cub','direwolf','prairie_wolf','kamikaze_wolf'].includes(gameState.rolePlayerMap[p])||gameState.cursedTurned.includes(p)):role==='transform'?gameState.players.filter(p=>['apprentice_seer','cursed','doppelganger','drunk'].includes(normalState().original[p])):gameState.players.filter(p=>gameState.rolePlayerMap[p]===role);title.textContent=checklistTitle(role,names);}}
+ for(const cb of host.querySelectorAll('input[type="checkbox"]')){const heading=cb.closest('label');if(!heading)continue;const role=heading.parentElement.dataset.panelRole||roles[cb.id.replace('-cb','')];if(!role)continue;let box=heading.parentElement;if(box===host){box=document.createElement('div');heading.before(box);box.append(heading);}const tokens=panelTokens(role);box.className=tokens.box;box.dataset.priority=String(NIGHT_ROLE_META[role]?.[gameState.dayCount===1?'first':'later']??80);heading.className='flex items-center space-x-2 cursor-pointer';cb.className=tokens.check;const title=heading.querySelector('span');if(title){title.className=tokens.title;const names=role==='wolf'?gameState.players.filter(p=>['werewolf','wolf_cub','direwolf','prairie_wolf','kamikaze_wolf','alpha_wolf'].includes(gameState.rolePlayerMap[p])||gameState.cursedTurned.includes(p)):role==='transform'?gameState.players.filter(p=>['apprentice_seer','cursed','doppelganger','drunk'].includes(normalState().original[p])):gameState.players.filter(p=>gameState.rolePlayerMap[p]===role);title.textContent=checklistTitle(role,names);}}
 }
 
 function piInspection(actor,target){
@@ -1455,9 +1499,9 @@ function recordPiChoice(actor,target,confirm=false){const n=normalNight();if(!is
  const value=piInspection(actor,target);const used=n.used[actor]||(n.used[actor]={});if(!isPoisoned(actor)){used.pi=true;used.piNight=gameState.dayCount;}
  (n.piResults||(n.piResults={}))[actor]={target,value,night:gameState.dayCount};normalVisit(actor,[target],actor+':pi');return value;
 }
-function renderPiControls(panel,select,result,p){const n=normalNight(),prepared=n.prepared||(n.prepared={});const prior=n.piResults?.[p];select.value=prior?.night===gameState.dayCount?prior.target:prepared[p]||'';select.disabled=!actorAvailable(p)||piLocked(p);
+function renderPiControls(panel,select,result,p){if(piLocked(p)){const note=summaryNode('span','ใช้พลังไปแล้ว — เรียกตามลำดับเหมือนเดิม','text-[10px] text-amber-300 ml-auto');panel.box.firstElementChild.append(note);}const n=normalNight(),prepared=n.prepared||(n.prepared={});const prior=n.piResults?.[p];select.value=prior?.night===gameState.dayCount?prior.target:prepared[p]||'';select.disabled=!actorAvailable(p)||piLocked(p);
  const show=()=>{result.hidden=!select.value;if(select.value)showInspectionResult(result,'ผลการสืบ',piLocked(p)?prior?.value??null:piInspection(p,select.value));};
- if(piLocked(p)){select.value=prior?.target||'';if(!select.value){result.hidden=false;result.textContent='ใช้พลังไปแล้ว';}else show();}else show();
+ if(piLocked(p)){select.value=prior?.target||'';if(!select.value){result.hidden=true;}else show();}else show();
  const state=gameState,night=gameState.dayCount;select.onchange=()=>{if(state!==gameState||night!==gameState.dayCount||!isMod||gameState.gamePhase!=='night'||victoryLocked()||piLocked(p))return;prepared[p]=select.value;recordPiChoice(p,select.value,true);show();refreshInsomniacResults();};
 
 }
@@ -1469,14 +1513,14 @@ function normalVisits(){const n=normalNight();const houses=n.visits.filter(v=>(v
  add(getPlayerByRole('bodyguard'),gameState.bodyguardTarget);add(getPlayerByRole('sorcerer'),gameState.poisonedTarget);add(getPlayerByRole('spellcaster'),gameState.silencedTarget);
  gameState.players.filter(p=>actualWolf(p)&&actorAvailable(p)).forEach(p=>{add(p,gameState.wolfTarget);add(p,gameState.wolfTarget2);});return houses;
 }
-function recordTransformation(kind,player,to){const n=normalState();const events=n.transformEvents||(n.transformEvents=[]);const id=kind+':'+player+':'+to;if(!events.some(e=>e.id===id))events.push({id,kind,player,to,night:gameState.dayCount,ack:false});renderTransformationNotices();}
+function recordTransformation(kind,player,to,from=kind){const n=normalState();const events=n.transformEvents||(n.transformEvents=[]);const id=kind+':'+player+':'+to;if(!events.some(e=>e.id===id))events.push({id,kind,from,player,to,night:gameState.dayCount,ack:false});renderTransformationNotices();}
 function acknowledgeTransformation(id){const event=normalState().transformEvents?.find(e=>e.id===id);if(event)event.ack=true;renderTransformationNotices();}
 function renderTransformationNotices(){document.querySelectorAll('[data-transform-notice]').forEach(e=>e.remove());if(!isMod)return;const host=document.getElementById('actions-checklist');if(!host)return;const top=host.querySelector('[data-panel-role="transform"]');const pending=(normalState().transformEvents||[]).filter(e=>!e.ack);if(!pending.length)return;
  const box=document.createElement('div');box.dataset.transformNotice='1';box.className='space-y-2';if(top)top.append(box);else{box.className=panelTokens('transform').box;box.dataset.priority='110';host.append(box);}
  if(top&&gameState.gamePhase==='night'&&pending.some(e=>e.night===gameState.dayCount)){const end=document.createElement('div');end.dataset.transformNotice='1';end.dataset.priority='110';end.className=panelTokens('transform').box;const text=document.createElement('p');text.textContent='ก่อนจบคืน: มีการแปลงร่างจริงที่ยังไม่ได้สะกิด — ตรวจกล่องเตือนด้านบน';const ack=document.createElement('button');ack.className='bg-amber-700 rounded px-2 py-1 text-xs';ack.textContent='สะกิดครบแล้ว';ack.onclick=()=>{pending.forEach(e=>e.ack=true);renderTransformationNotices();};end.append(text,ack);host.append(end);}
- for(const kind of ['apprentice_seer','cursed','doppelganger','drunk','grave_robber']){const items=pending.filter(e=>e.kind===kind);if(!items.length)continue;const result=document.createElement('div');result.className='text-xs p-2.5 rounded-lg border border-amber-700 bg-amber-950/80 text-amber-300 space-y-1';for(const event of items){const text=document.createElement('div');const from=ROLES_DATABASE.find(r=>r.id===kind)?.name||kind,to=ROLES_DATABASE.find(r=>r.id===event.to)?.name||event.to;const outcome=document.createElement('b');outcome.textContent=event.player+' — '+from+' → '+to;text.append(outcome);const signal=document.createElement('div');signal.className='text-[10px] text-slate-400';signal.textContent='👉 Mod: สะกิด '+event.player+' และแจ้งบทบาทใหม่เป็นการส่วนตัว';const ack=document.createElement('button');ack.className='bg-amber-700 rounded px-2 py-1 text-xs';ack.textContent='สะกิดแล้ว';ack.onclick=()=>acknowledgeTransformation(event.id);result.append(text,signal,ack);}box.append(result);}
+ for(const kind of ['apprentice_seer','cursed','doppelganger','drunk','grave_robber','alpha_wolf']){const items=pending.filter(e=>e.kind===kind);if(!items.length)continue;const result=document.createElement('div');result.className='text-xs p-2.5 rounded-lg border border-amber-700 bg-amber-950/80 text-amber-300 space-y-1';for(const event of items){const text=document.createElement('div');const from=ROLES_DATABASE.find(r=>r.id===(event.from||kind))?.name||event.from||kind,to=ROLES_DATABASE.find(r=>r.id===event.to)?.name||event.to;const outcome=document.createElement('b');outcome.textContent=event.player+' — '+from+' → '+to;text.append(outcome);const signal=document.createElement('div');signal.className='text-[10px] text-slate-400';signal.textContent='👉 Mod: สะกิด '+event.player+' และแจ้งบทบาทใหม่เป็นการส่วนตัว';const ack=document.createElement('button');ack.className='bg-amber-700 rounded px-2 py-1 text-xs';ack.textContent='สะกิดแล้ว';ack.onclick=()=>acknowledgeTransformation(event.id);result.append(text,signal,ack);}box.append(result);}
 }
-function commitCursedConversion(player){if(!player||!gameState.cursedTurned.includes(player))return;const n=normalState();if(n.cursedCommitted?.[player])return;(n.cursedCommitted||(n.cursedCommitted={}))[player]=true;recordTransformation('cursed',player,'werewolf');publishAcquiredCard(player,'werewolf','cursed_turned');}
+function commitCursedConversion(player){if(!player||!gameState.cursedTurned.includes(player))return;const n=normalState();if(n.cursedCommitted?.[player])return;(n.cursedCommitted||(n.cursedCommitted={}))[player]=true;if(gameState.rolePlayerMap[player]==='drunk'){gameState.rolePlayerMap[player]='cursed';(n.inherited||(n.inherited={}))[player]=true;}recordTransformation('cursed',player,'werewolf');publishAcquiredCard(player,'werewolf','cursed_turned');}
 function publishAcquiredCard(player,id,artRoleId=id,send=true){const n=normalState(),r=ROLES_DATABASE.find(r=>r.id===id);if(!r)return;(n.acquiredCards||(n.acquiredCards={}))[player]={id,artRoleId};const device=Object.keys(activeRoleAssignments).find(k=>activeRoleAssignments[k].playerName===player);if(!device)return;const old=activeRoleAssignments[device];activeRoleAssignments[device]={...old,roleSchemaVersion:2,roleId:id,roleName:r.name,roleThai:r.thai,roleIcon:r.icon,team:r.team,desc:'บทบาทใหม่ของคุณคือ '+r.name+' — '+r.desc+(['cupid','beholder','direwolf','doppelganger','prairie_wolf'].includes(id)?' (พลังเฉพาะคืนแรกใช้ไม่ได้หลังรับบทบาท)':''),originalRoleId:n.original[player]||old.originalRoleId||old.roleId,artRoleId};gameState.rolePlayerMap[device]=id;if(send)Object.values(connectedPeers).filter(c=>c.open&&c.wwPlayerId===device).forEach(c=>{try{sendPrivateAssignment(c);}catch(e){console.warn('Private card send failed; replay on reconnect',e);}});}
 function cardArtIdentity(info){return info.artRoleId==='cursed_turned'&&info.roleId==='werewolf'?'cursed_turned':info.roleId;}
 
@@ -1589,7 +1633,7 @@ function renderCommunity(){
  if(lobby){const panel=communityPanel(lobby,'community-survey');renderSurveyPanel(panel,view);}
  const game=document.getElementById(isMod?'gameplay-screen':'screen-player-card');
  if(game){const panel=communityPanel(game,'community-mayor');if(isMod){const status=document.getElementById('player-status-panel');if(status)game.insertBefore(panel,status);}const panelKey=JSON.stringify([view,communityOwn]);if(!isMod&&panel.mobileKey===panelKey&&panel.children.length){if(document.getElementById('mayor-ballot')?.open)renderMayorBallot();return;}const previousTotals=panel.querySelector?.('[data-mayor-totals]');const totalsOpen=panel.totalsElectionId===view.election?.id&&!!previousTotals?.open;panel.totalsElectionId=view.election?.id;panel.replaceChildren();const body=communityNode('div',undefined,'mayor-body');panel.append(communityNode('h3','ผู้ใหญ่บ้านปัจจุบัน'),body);body.append(communityNode('p',view.mayor?view.mayor+' 🏅':view.mayorStatus));if(view.mayor)body.append(communityNode('p','คะแนนโหวตประหาร ×2','community-muted'));
- if(isMod){if(gameState.offlineGame){body.append(communityNode('p','โหมดเครื่องเดียว: ยังไม่รองรับเลือกตั้งผู้ใหญ่บ้าน / รับบัตรออนไลน์','community-muted'));return;}const e=community.election;body.append(communityButton('เปิดเลือกตั้งผู้ใหญ่บ้าน',openMayorElection,!isGameStarted||!!view.mayor||!!e&&e.phase!=='announced'));
+ if(isMod){if(gameState.offlineGame){body.append(communityNode('p','โหมดเครื่องเดียว: ยังไม่รองรับเลือกตั้งผู้ใหญ่บ้าน / รับบัตรออนไลน์','community-muted'));return;}const e=community.election;const open=communityButton('เปิดเลือกตั้งผู้ใหญ่บ้าน',openMayorElection,!isGameStarted||!!view.mayor||!!e&&e.phase!=='announced');open.dataset.mayorOpen='1';body.append(open);
  if(view.mayor){body.append(communityNode('p','ถอดถอนโดยยกมือจริง: ทุกฝ่ายที่มีชีวิตยกเว้นผู้ใหญ่บ้าน คนละ 1 เสียง ต้องอย่างน้อย '+impeachmentThreshold()+' เสียง'),communityButton('ยืนยันผลถอดถอน',impeachMayor));}
  if(e){body.append(communityNode('p',e.phase==='open'?'กำลังรับบัตร • ยืนยันแล้ว '+Object.keys(e.ballots).length+' ใบ':e.phase==='closed'?'ปิดหีบแล้ว • ผลยังไม่ประกาศ':'ประกาศผลแล้ว'));if(e.phase==='open')body.append(communityButton('ปิดหีบ',closeMayorElection));if(e.phase==='closed')body.append(communityButton('ประกาศผล',announceMayor));if(e.phase!=='open'){const totals=communityNode(e.phase==='announced'?'details':'div');totals.dataset.mayorTotals='';if(e.phase==='announced'){totals.open=totalsOpen;totals.append(communityNode('summary','คะแนนรวม'));}else totals.append(communityNode('h4','คะแนนรวม'));for(const [name,n] of Object.entries(e.totals))totals.append(communityNode('p',mayorChoiceLabel(name)+' · '+n));body.append(totals);}const detail=communityNode('details');detail.append(communityNode('summary','รายละเอียดการลงคะแนน'));for(const [id,choice] of Object.entries(e.ballots))detail.append(communityNode('p',(activeRoleAssignments[id]?.playerName||'ผู้เล่น')+' → '+mayorChoiceLabel(choice)));body.append(detail);}
  }else {const e=view.election;if(e){body.append(communityNode('p',e.phase==='open'?'เปิดรับบัตรเลือกตั้ง • ไม่แสดงคะแนนสด':e.phase==='closed'?'ปิดหีบแล้ว รอ Mod ประกาศผล':'ผลเลือกตั้ง: '+(e.result||'ไม่มีผู้ใหญ่บ้าน')));if(e.phase==='open')body.append(communityButton(communityOwn?.ballot!==null&&communityOwn?.ballot!==undefined?'ดูบัตรที่ยืนยันแล้ว':'เปิดบัตรเลือกตั้ง',openMayorBallot,!communityOwn?.alive));}else body.append(communityNode('p','ยังไม่ได้เปิดเลือกตั้ง','community-muted'));if(e?.phase==='open'&&!communityOwn?.alive)body.append(communityNode('p','คุณไม่มีสิทธิ์ลงคะแนนในขณะนี้','community-muted'));const msg=communityNode('p',undefined,'community-muted');msg.dataset.communityMessage='';msg.setAttribute('role','status');body.append(msg);}
@@ -1609,7 +1653,7 @@ function renderSurveyPanel(panel,view){
   if(!isMod){ui.chipList=communityNode('div',undefined,'community-chips');ui.empty=communityNode('span','ยังไม่ได้เลือก','community-muted');ui.chipList.append(ui.empty);panel.append(communityNode('h4','บทที่คุณเลือก'),ui.chipList);}
   ui.ranking=communityNode('div',undefined,'community-ranking');panel.append(communityNode('h4','Top 3'),ui.ranking,communityNode('h4','บทบาททั้งหมด'));
   ui.list=communityNode('div',undefined,'community-role-list');
-  for(const r of guideCatalog().filter(r=>r.category==='normal').sort((a,b)=>ROLE_GROUP_ORDER.indexOf(guideGroup(a))-ROLE_GROUP_ORDER.indexOf(guideGroup(b)))){const row=communityNode('div',undefined,'community-role-row'),detail=communityButton(r.icon+' '+r.name,()=>{openRoleGuide();renderGuideRole(r.id,true);}),score=communityNode('span','0','community-score');detail.dataset.communityFocus='detail-'+r.id;detail.dataset.surveyFaction=guideGroup(r);row.append(detail,score);let select=null;if(!isMod){select=communityButton('เลือก',()=>selectSurveyRole(r.id));select.dataset.communityFocus='select-'+r.id;row.classList.add('community-role-selectable');row.append(select);}ui.rows.set(r.id,{row,detail,score,select});ui.list.append(row);}
+  for(const r of guideCatalog().filter(r=>r.category==='normal').sort((a,b)=>ROLE_GROUP_ORDER.indexOf(guideGroup(a))-ROLE_GROUP_ORDER.indexOf(guideGroup(b))||seerRoleRank(a)-seerRoleRank(b))){const row=communityNode('div',undefined,'community-role-row'),detail=communityButton(r.icon+' '+r.name,()=>{openRoleGuide();renderGuideRole(r.id,true);}),score=communityNode('span','0','community-score');detail.dataset.communityFocus='detail-'+r.id;detail.dataset.surveyFaction=guideGroup(r);row.append(detail,score);let select=null;if(!isMod){select=communityButton('เลือก',()=>selectSurveyRole(r.id));select.dataset.communityFocus='select-'+r.id;row.classList.add('community-role-selectable');row.append(select);}ui.rows.set(r.id,{row,detail,score,select});ui.list.append(row);}
   ui.message=communityNode('p','','community-muted');ui.message.dataset.communityMessage='';ui.message.setAttribute('role','status');panel.append(ui.list,ui.message);
  }
  if(isMod){ui.edit.disabled=isGameStarted;ui.toggle.textContent=s.open?'ปิดแบบสำรวจ':'เปิดแบบสำรวจ';ui.toggle.disabled=s.locked||isGameStarted;}
@@ -1800,7 +1844,7 @@ function initialRoleShortName(initial,current){if(initial===current)return '';if
 function summaryDisplayResult(e){return e.actors?.some(p=>p.role==='mentalist')||e.group==='Mentalist'?String(e.result||'').replace(/\s*—\s*Mod\s+(?:ส่ายหน้า|พยักหน้า)/gu,'').trim():e.result;}
 function summaryFriendlyRole(id){const r=ROLES_DATABASE.find(r=>r.id===id)||Object.values(TRAVELER_ROLES).find(r=>r.id===id);return r?r.icon+' '+r.name:'🎭 บทบาท';}
 function summaryTopicPriority(e){const role=e.group==='Werewolves'?'wolf':e.actors[0]?.role;if(role==='prairie_wolf')return 9;if(role==='mentalist')return 55;if(role==='cutthroat')return 90;return NIGHT_ROLE_META[role]?.[e.day===1?'first':'later']??80;}
-function summaryVerbClass(e){const role=e.actors[0]?.role;if(/สังหาร|โจมตี|ยิง|ระเบิด|ประหาร|เชือด|เลือกคนตายแทน|ฝัง/.test(e.verb))return 'summary-verb-red';if(['sorcerer','sorceress'].includes(role))return 'summary-verb-light-red';if(e.group==='Werewolves'||['werewolf','wolf_cub','direwolf','prairie_wolf','kamikaze_wolf'].includes(role))return 'summary-verb-red';if(/ปกป้อง|ให้พร|ช่วยชีวิต|อภัย|ยกเลิก|ตรวจ|ส่อง|อ่าน|สืบ|ฟัง/.test(e.verb))return 'summary-verb-blue';return '';}
+function summaryVerbClass(e){const role=e.actors[0]?.role;if(role==='cupid'&&e.verb==='ผูกคู่รัก')return 'summary-verb-pink';if(role==='doppelganger'&&e.verb==='ผูกพันกับ')return 'summary-verb-purple';if(role==='spellcaster'&&e.verb==='ทำให้ใบ้')return 'summary-verb-blue';if(role==='cult_leader'&&e.verb==='ชวนเข้าลัทธิ')return 'summary-verb-olive';if(/สังหาร|โจมตี|ยิง|ระเบิด|ประหาร|เชือด|เลือกคนตายแทน|ฝัง/.test(e.verb))return 'summary-verb-red';if(['sorcerer','sorceress'].includes(role))return 'summary-verb-light-red';if(e.group==='Werewolves'||['werewolf','wolf_cub','direwolf','prairie_wolf','kamikaze_wolf','alpha_wolf'].includes(role))return 'summary-verb-red';if(/ปกป้อง|ให้พร|ช่วยชีวิต|อภัย|ยกเลิก|ตรวจ|ส่อง|อ่าน|สืบ|ฟัง/.test(e.verb))return 'summary-verb-blue';return '';}
 function summaryResultClass(e){if(typeof e.displayedPositive==='boolean')return e.displayedPositive?'summary-result-good':'summary-result-bad';if(!/ตรวจ|ส่อง|อ่าน|สืบ/.test(e.verb))return '';const shown=e.result;if(/ไม่พบ Seer|ต่างฝ่าย|ส่ายหน้า/.test(shown))return 'summary-result-bad';if(/ไม่ใช่หมาป่า|ไม่พบหมาป่า|ไม่มีหมาป่า|ฝ่ายชาวบ้าน|ฝ่ายเดียวกัน|พยักหน้า|พบ Seer/.test(shown))return 'summary-result-good';if(/หมาป่า/.test(shown))return 'summary-result-bad';return '';}
 function summaryRoleName(p){const r=summaryRoleInfo(p?.role);return (r?.icon||'🎭')+' '+(r?.name||p?.role||'ผู้เล่น')+' ('+(p?.name||'')+')';}
 // Private structured journal. Action identities are copied at occurrence, never looked up at reveal.
@@ -1831,7 +1875,7 @@ function summaryNightActions(){
  gameState.summaryNightActions=actions;
 }
 function summaryNightCommit(){const day=gameState.dayCount,j=summaryJournal();if(j.keys['night:'+day])return;for(const e of [...(gameState.summaryNightActions||[]),...(gameState.summaryPreview||[])])summaryRecord({...e,phase:'night',day});j.keys['night:'+day]=true;gameState.summaryNightActions=[];gameState.summaryPreview=[];}
-function summaryElectionTop(totals){const all=Object.entries(totals||{}).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));const cutoff=all[Math.min(2,all.length-1)]?.[1];return all.filter((x,i)=>i<3||x[1]>=cutoff).map(([choice,votes])=>({name:choice==='no:'?'Vote No':choice.slice(7),votes}));}
+function summaryElectionTop(totals){const all=Object.entries(totals||{}).filter(([choice])=>choice.startsWith('player:')).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));const cutoff=all[Math.min(4,all.length-1)]?.[1];return all.filter((x,i)=>i<5||x[1]>=cutoff).map(([choice,votes])=>({name:choice==='no:'?'Vote No':choice.slice(7),votes}));}
 function summaryFreeze(value){if(value&&typeof value==='object'){Object.values(value).forEach(summaryFreeze);Object.freeze(value);}return value;}
 function summarySnapshot(result){const n=normalState();return summaryFreeze(JSON.parse(JSON.stringify({version:1,session:currentGameSessionId,winner:result.winner,reason:result.reason,day:gameState.dayCount,phase:gameState.gamePhase,players:gameState.players.map(name=>({name,initial:n.original?.[name]||gameState.rolePlayerMap[name],final:effectiveIdentityRole(name),alive:!!gameState.playerStatus[name]?.alive,bedridden:isBedridden(name),noFaction:gameState.rolePlayerMap[name]==='grave_robber',team:gameState.travelers?.admitted?.[name]?.team||'',trueRole:n.trueRoles?.[name]||'',cult:Object.values(n.cult||{}).some(members=>members.includes(name))})),events:summaryJournal().events})));}
 let receivedSummary=null;
@@ -1839,14 +1883,18 @@ function summaryNode(tag,text,cls){const n=document.createElement(tag);if(text!=
 function summaryRoleButton(role,short=''){const info=summaryRoleInfo(role);const b=summaryNode('button',info.icon+' '+(short||info.name),'community-button summary-role'+(Object.values(TRAVELER_ROLES).some(r=>r.id===role)?' summary-traveler':''));b.type='button';b.title=info.name;b.setAttribute('aria-label',info.icon+' '+info.name);b.onclick=()=>{if(!gameState.victory?.confirmed&&!receivedSummary)return;summaryRoleCard(role);};return b;}
 function summaryRoleCard(role){document.getElementById('summary-role-card')?.remove();const info=ROLES_DATABASE.find(r=>r.id===role)||Object.values(TRAVELER_ROLES).find(r=>r.id===role)||{name:role,icon:'🎭',desc:''};const d=summaryNode('dialog',undefined,'victory-dialog');d.id='summary-role-card';const img=summaryNode('img');const art=ROLE_ARTWORK[role];if(art){img.src=art;img.alt=info.name;img.className='summary-art';d.append(img);}d.append(summaryNode('h2',info.icon+' '+info.name),summaryNode('p',info.desc));const close=summaryNode('button','ปิด','community-button');close.onclick=()=>d.close();d.append(close);document.body.append(d);d.showModal();}
 function summaryShow(snapshot){
- document.getElementById('victory-dialog')?.remove();document.getElementById('game-summary')?.remove();const d=summaryNode('dialog',undefined,'victory-dialog game-summary');d.id='game-summary';
+ // Unchanged confirmed snapshots retain the DOM, disclosure state, focus and scroll.
+ const existing=document.getElementById('game-summary'),key=JSON.stringify(snapshot);
+ if(existing?.summaryKey===key){if(!existing.open){const scroll=existing.scrollTop;existing.showModal();existing.scrollTop=scroll;}summaryReopen(snapshot);return;}
+ const scroll=existing?.scrollTop||0,opened=existing?Array.from(existing.querySelectorAll('.summary-history')).filter(n=>n.open).map(n=>n.dataset.phase):[];
+ document.getElementById('victory-dialog')?.remove();document.getElementById('game-summary')?.remove();const d=summaryNode('dialog',undefined,'victory-dialog game-summary');d.id='game-summary';d.summaryKey=key;
  const names={wolf:'ฝ่ายหมาป่า',village:'ฝ่ายชาวบ้าน',cult:'Cult Leader',tanner:'Tanner',draw:'เสมอ'};d.append(summaryNode('h2',snapshot.winner==='draw'?'เกมจบ — เสมอ':'🏆 '+names[snapshot.winner]+' ชนะ'),summaryNode('p',snapshot.reason),summaryNode('p',(snapshot.phase==='night'?'คืน':'วันที่')+' '+snapshot.day));
  const roster=summaryNode('section',undefined,'summary-roster');roster.append(summaryNode('h3','ใครเป็นใคร','font-semibold'));
  for(const p of snapshot.players){const row=summaryNode('div',undefined,'summary-player'),identity=summaryNode('div',undefined,'summary-identity');identity.append(summaryNode('span',p.name+(p.cult?' 🌀':'')));const shownFinal=p.initial==='drunk'&&p.final==='drunk'&&p.trueRole?p.trueRole:p.final;if(p.initial!==shownFinal){identity.append(summaryRoleButton(p.initial,initialRoleShortName(p.initial,p.final)),summaryNode('span','→'));}identity.append(summaryRoleButton(shownFinal,({apprentice_seer:'App. Seer',grave_robber:'Grave.',doppelganger:'Dopp.',kamikaze_wolf:'Kamikaze',prairie_wolf:'Prairie'})[shownFinal]||''));if(p.noFaction)identity.append(summaryNode('span','ไม่มีฝ่าย — ไม่ชนะร่วมกับฝ่ายอื่น'));if(p.team)identity.append(summaryNode('span',p.team==='wolf'?'ฝ่ายหมาป่า':'ฝ่ายชาวบ้าน','summary-faction summary-faction-'+(p.team==='wolf'?'wolf':'good')));const status=!p.alive?'dead':p.bedridden?'bedridden':'alive';const badge=summaryNode('span',({dead:'💀 ตาย',bedridden:'🛏️ ติดเตียง',alive:'🟢 รอด'})[status],'summary-status summary-status-'+status);row.append(identity,badge);roster.append(row);}d.append(roster);
- for(const phase of summaryPhases(snapshot)){const events=snapshot.events.filter(e=>e.day===phase.day&&e.phase===phase.phase),night=phase.phase==='night',box=summaryNode('details',undefined,'summary-history');box.append(summaryNode('summary',(night?'🌙 คืนที่ ':'☀️ วันที่ ')+phase.day));
- for(const e of events.filter(e=>e.category==='action').sort((a,b)=>summaryTopicPriority(a)-summaryTopicPriority(b))){const topic=summaryNode('div',undefined,'summary-topic');const heading=e.group==='Werewolves'?'🐺 Werewolves ('+e.actors.map(p=>p.name).join(', ')+')':e.group||e.actors.map(summaryRoleName).join(', ');topic.append(summaryNode('h4','• '+heading,'font-semibold'));const action=summaryNode('p');action.append(summaryNode('strong',e.verb+' ',summaryVerbClass(e)),summaryNode('span',e.targets.map(summaryRoleName).join(', ')));topic.append(action);if(e.poisoned)topic.append(summaryNode('p','🧪 ถูกพิษ','text-fuchsia-300'));if(e.result)topic.append(summaryNode('p',summaryDisplayResult(e),summaryResultClass(e)));if(e.ranking){const list=summaryNode('ol');e.ranking.forEach(x=>list.append(summaryNode('li',x.name+' — '+x.votes+' เสียง')));topic.append(list);}box.append(topic);}
+ for(const phase of summaryPhases(snapshot)){const events=snapshot.events.filter(e=>e.day===phase.day&&e.phase===phase.phase),night=phase.phase==='night',box=summaryNode('details',undefined,'summary-history');box.dataset.phase=phase.phase+':'+phase.day;box.open=opened.includes(box.dataset.phase);box.append(summaryNode('summary',(night?'🌙 คืนที่ ':'☀️ วันที่ ')+phase.day));
+ for(const e of events.filter(e=>e.category==='action').sort((a,b)=>summaryTopicPriority(a)-summaryTopicPriority(b))){const topic=summaryNode('div',undefined,'summary-topic');const heading=summaryNode('h4','• ','font-semibold');heading.append(summaryNode('span',e.group==='Werewolves'?'🐺 Werewolves ('+e.actors.map(p=>p.name).join(', ')+')':e.group||e.actors.map(summaryRoleName).join(', ')));topic.append(heading);const action=summaryNode('p');action.append(summaryNode('strong',e.verb+' ',summaryVerbClass(e)),summaryNode('span',e.targets.map(summaryRoleName).join(', ')));topic.append(action);if(e.poisoned)topic.append(summaryNode('p','🧪 ถูกพิษ','text-fuchsia-300'));if(e.result)topic.append(summaryNode('p',summaryDisplayResult(e),summaryResultClass(e)));if(e.ranking){const list=summaryNode('ol');e.ranking.forEach(x=>list.append(summaryNode('li',x.name+' — '+x.votes+' เสียง')));topic.append(list);}box.append(topic);}
  box.append(summaryNode('hr'),summaryNode('p',night?'จบกลางคืน':'จบกลางวัน','font-semibold'),summaryNode('h4',(night?'ผลคืนที่ ':'ผลวันที่ ')+phase.day,'font-semibold'));const outcomes=events.filter(e=>e.category==='outcome');if(outcomes.length){const list=summaryNode('ul');for(const e of outcomes)list.append(summaryNode('li',[e.targets.map(summaryRoleName).join(', '),e.result].filter(Boolean).join(' — ')));box.append(list);}else box.append(summaryNode('p','ไม่มีผลลัพธ์เพิ่มเติมที่บันทึก'));d.append(box);}
- const close=summaryNode('button','ปิดสรุป','community-button');close.onclick=()=>d.close();d.append(close);if(isMod){const again=summaryNode('button','กลับล็อบบี้ / เล่นอีกครั้ง','community-button');again.onclick=()=>resetGame();d.append(again);}document.body.append(d);d.showModal();summaryReopen(snapshot);
+ const close=summaryNode('button','ปิดสรุป','community-button');close.onclick=()=>d.close();d.append(close);if(isMod){const again=summaryNode('button','กลับล็อบบี้ / เล่นอีกครั้ง','community-button');again.onclick=()=>resetGame();d.append(again);}document.body.append(d);d.showModal();d.scrollTop=scroll;summaryReopen(snapshot);
 }
 function summaryReopen(snapshot){if(!gameState.victory?.confirmed&&!receivedSummary)return;let b=document.getElementById('summary-reopen');if(!b){b=summaryNode('button','📋 ดูสรุปเกม','w-full bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600 text-xs font-semibold py-2.5 rounded-xl transition');b.id='summary-reopen';b.type='button';}const reset=isMod&&document.getElementById('dashboard-reset-game');if(reset)reset.before(b);else document.getElementById(isMod?'gameplay-screen':'screen-player-card')?.append(b);b.onclick=()=>summaryShow(snapshot);}
 
@@ -1858,7 +1906,7 @@ function victoryState(){return gameState.victory||(gameState.victory={seen:'',ta
 function victorySnapshot(){
  const v=victoryState(),n=normalState();
  return {started:gameState.gamePhase==='day',settled:!judgeExecutionPending&&!activeMadBomber&&!Object.values(gameState.deathPowers||{}).includes('pending')&&!Object.values(gameState.bomberPowers||{}).some(x=>['pending','resolving'].includes(x)),checkpoint:v.morning?'morning':'day',executedTanner:v.tanner,
- players:gameState.players.map(name=>{const role=gameState.cursedTurned.includes(name)?'werewolf':gameState.rolePlayerMap[name],actualWolf=['werewolf','wolf_cub','direwolf','prairie_wolf','kamikaze_wolf'].includes(role);return {name,role,alive:!!gameState.playerStatus[name]?.alive,bedridden:isBedridden(name),actualWolf,wolfSide:actualWolf||['sorcerer','sorceress'].includes(role)||gameState.travelers?.admitted?.[name]?.team==='wolf',members:n.cult?.[name]||[]};})};
+ players:gameState.players.map(name=>{const role=gameState.cursedTurned.includes(name)?'werewolf':gameState.rolePlayerMap[name],actualWolf=['werewolf','wolf_cub','direwolf','prairie_wolf','kamikaze_wolf','alpha_wolf'].includes(role);return {name,role,alive:!!gameState.playerStatus[name]?.alive,bedridden:isBedridden(name),actualWolf,wolfSide:actualWolf||['sorcerer','sorceress'].includes(role)||gameState.travelers?.admitted?.[name]?.team==='wolf',members:n.cult?.[name]||[]};})};
 }
 function victoryLocked(){return !!(gameState.victory?.tanner||gameState.victory?.confirmed);}
 function victoryTanner(name){victoryState().tanner=name;gameState.playerStatus[name].alive=false;victorySchedule();}
@@ -2486,7 +2534,7 @@ if(typeof window!=='undefined'&&window.visualViewport){window.visualViewport.add
                     const cardKey = JSON.stringify([activeRoomCode, data.gameSessionId || '',
                         myAssignment.playerId, myAssignment.playerName, myAssignment.roleId, myAssignment.originalRoleId, myAssignment.artRoleId, myAssignment.roleSchemaVersion,
                         myAssignment.roleName, myAssignment.roleThai, myAssignment.roleIcon,
-                        myAssignment.team, myAssignment.desc, myAssignment.wolfDisclosure || []]);
+                        myAssignment.team, myAssignment.desc, myAssignment.doppelTargetName || "", myAssignment.wolfDisclosure || []]);
                     const repeatedCard = myAssignedRole && lastCardDelivery &&
                         lastCardDelivery.conn === conn && lastCardDelivery.key === cardKey;
                     acceptJoin(myAssignment.playerName);
@@ -3328,7 +3376,6 @@ if(typeof window!=='undefined'&&window.visualViewport){window.visualViewport.add
         // MOD GAMEPLAY ENGINE (NIGHT & DAY PHASES)
         // ---------------------------------------------
         function renderGameplay() {
-            if(isMod&&!victoryLocked())markApprenticeSuccession();
             awakenDrunks();
             normalizeLegacyRoles();
             const indicator = document.getElementById('day-night-indicator');
@@ -3363,7 +3410,7 @@ if(typeof window!=='undefined'&&window.visualViewport){window.visualViewport.add
 
                 const nightSteps = [
                     { id: 'cupid', name: 'Cupid เลือก Lovers (เฉพาะคืนแรก)', show: assignedNightRole('cupid') && gameState.dayCount === 1 },
-                    { id: 'wolf', name: 'Werewolf เลือกเหยื่อสังหาร', show: assignedNightRole('werewolf') || assignedNightRole('wolf_cub') || assignedNightRole('direwolf') || (assignedNightRole('prairie_wolf') || assignedNightRole('kamikaze_wolf')) || gameState.cursedTurned.some(p => gameState.rolePlayerMap[p] === 'cursed') },
+                    { id: 'wolf', name: 'Werewolf เลือกเหยื่อสังหาร', show: assignedNightRole('werewolf') || assignedNightRole('wolf_cub') || assignedNightRole('direwolf') || (assignedNightRole('prairie_wolf') || assignedNightRole('kamikaze_wolf') || assignedNightRole('alpha_wolf')) || gameState.cursedTurned.some(p => gameState.rolePlayerMap[p] === 'cursed') },
                     { id: 'sorcerer', name: 'Sorcerer เลือกวางยา (บล็อกความสามารถ)', show: assignedNightRole('sorcerer') },
                     { id: 'bodyguard', name: 'Bodyguard เลือกป้องกัน', show: assignedNightRole('bodyguard') },
                     { id: 'seer', name: 'Seer / Apprentice Seer ส่องตรวจดูผู้เล่น', show: assignedNightRole('seer') },
@@ -3385,14 +3432,14 @@ if(typeof window!=='undefined'&&window.visualViewport){window.visualViewport.add
                                     </label>
                                     <div id="cupid-dropdowns" class="hidden pl-6 space-y-1.5">
                                         <div class="flex items-center justify-between text-[11px]">
-                                            <span class="text-slate-400">Lover คนที่ 1:</span>
-                                            <select id="lover-1" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100" onchange="updateLovers()">
+                                            <label for="lover-1" class="text-slate-400">Lover คนที่ 1:</label>
+                                            <select id="lover-1" class="master-target-select bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100" onchange="updateLovers()">
                                                 ${loverOpts}
                                             </select>
                                         </div>
                                         <div class="flex items-center justify-between text-[11px]">
-                                            <span class="text-slate-400">Lover คนที่ 2:</span>
-                                            <select id="lover-2" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100" onchange="updateLovers()">
+                                            <label for="lover-2" class="text-slate-400">Lover คนที่ 2:</label>
+                                            <select id="lover-2" class="master-target-select bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100" onchange="updateLovers()">
                                                 ${loverOpts}
                                             </select>
                                         </div>
@@ -3410,7 +3457,7 @@ if(typeof window!=='undefined'&&window.visualViewport){window.visualViewport.add
                                     <div id="wolf-dropdown" class="hidden pl-6">
                                         <div class="flex items-center justify-between text-[11px]">
                                             <span class="text-slate-400">เลือกเหยื่อที่จะฆ่า:</span>
-                                            <select id="wolf-target-select" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100" onchange="updateWolfTarget()">
+                                            <select id="wolf-target-select" class="master-target-select bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100" onchange="updateWolfTarget()">
                                                 <option value="">-- เลือกผู้เล่น --</option>
                                                 ${playerOpts}
                                             </select>
@@ -3428,7 +3475,7 @@ if(typeof window!=='undefined'&&window.visualViewport){window.visualViewport.add
                                     <div id="sorcerer2-dropdown" class="hidden pl-6 space-y-1.5">
                                         <div class="flex items-center justify-between text-[11px]">
                                             <span class="text-slate-400">เลือกคนที่ถูกวางยา:</span>
-                                            <select id="sorcerer2-target-select" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100" onchange="updateSorcerer2Target()">
+                                            <select id="sorcerer2-target-select" class="master-target-select bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100" onchange="updateSorcerer2Target()">
                                                 <option value="">-- ไม่วางยา / ข้าม --</option>
                                                 ${poisonOpts}
                                             </select>
@@ -3447,7 +3494,7 @@ if(typeof window!=='undefined'&&window.visualViewport){window.visualViewport.add
                                     <div id="bg-dropdown" class="hidden pl-6">
                                         <div class="flex items-center justify-between text-[11px]">
                                             <span class="text-slate-400">เลือกคนที่จะป้องกัน:</span>
-                                            <select id="bg-target-select" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100" onchange="updateBgTarget()">
+                                            <select id="bg-target-select" class="master-target-select bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100" onchange="updateBgTarget()">
                                                 <option value="">-- เลือกผู้เล่น --</option>
                                                 ${bodyguardOpts}
                                             </select>
@@ -3465,7 +3512,7 @@ if(typeof window!=='undefined'&&window.visualViewport){window.visualViewport.add
                                     <div id="seer-dropdown" class="hidden pl-6 space-y-2">
                                         <div class="flex items-center justify-between text-[11px]">
                                             <span class="text-slate-400">เลือกคนที่ Seer ชี้ส่อง:</span>
-                                            <select id="seer-target-select" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100" onchange="inspectSeerTarget()">
+                                            <select id="seer-target-select" class="master-target-select bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100" onchange="inspectSeerTarget()">
                                                 <option value="">-- เลือกผู้เล่นเพื่อส่อง --</option>
                                                 ${playerOpts}
                                             </select>
@@ -3484,7 +3531,7 @@ if(typeof window!=='undefined'&&window.visualViewport){window.visualViewport.add
                                     <div id="spellcaster-dropdown" class="hidden pl-6">
                                         <div class="flex items-center justify-between text-[11px]">
                                             <span class="text-slate-400">เลือกคนที่ถูกเสกใบ้:</span>
-                                            <select id="spellcaster-target-select" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100" onchange="updateSpellcasterTarget()">
+                                            <select id="spellcaster-target-select" class="master-target-select bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100" onchange="updateSpellcasterTarget()">
                                                 <option value="">-- ไม่เสก / ข้าม --</option>
                                                 ${playerOpts}
                                             </select>
@@ -3623,7 +3670,7 @@ if(typeof window!=='undefined'&&window.visualViewport){window.visualViewport.add
                                 </span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <select id="day-vote-target-select" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100">
+                                <select id="day-vote-target-select" class="master-target-select flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100">
                                     <option value="">-- เลือกผู้เล่นที่ถูกโหวตสูงสุด --</option>
                                     ${livingPlayerOpts}
                                 </select>
@@ -3706,7 +3753,7 @@ function updateLovers(){if(!roleAvailable('cupid'))return;const l1=document.getE
 function toggleWolfDropdown(){saveLegacyNarration('wolf');}
 function updateWolfTarget(){legacyUpdateWolfTarget();normalPanel();}
         function legacyUpdateWolfTarget() {
-            if (!roleAvailable('werewolf') && !roleAvailable('wolf_cub') && !roleAvailable('direwolf') && !(roleAvailable('prairie_wolf') || roleAvailable('kamikaze_wolf')) && !gameState.cursedTurned.some(p => gameState.rolePlayerMap[p] === 'cursed' && actorAvailable(p))) return;
+            if (!roleAvailable('werewolf') && !roleAvailable('wolf_cub') && !roleAvailable('direwolf') && !(roleAvailable('prairie_wolf') || roleAvailable('kamikaze_wolf') || roleAvailable('alpha_wolf')) && !gameState.cursedTurned.some(p => gameState.rolePlayerMap[p] === 'cursed' && actorAvailable(p))) return;
             const select = document.getElementById('wolf-target-select');
             gameState.wolfTarget = select ? select.value : '';
             gameState.wolfTarget2 = document.getElementById('wolf-target-select-2')?.value || '';
@@ -3749,7 +3796,7 @@ function inspectSeerTarget(){legacyInspectSeerTarget();normalPanel();}
             const roleId = gameState.rolePlayerMap[target] === 'drunk' ? normalState().trueRoles[target] : gameState.rolePlayerMap[target];
             const isTurnedWolf = gameState.cursedTurned && gameState.cursedTurned.includes(target);
             const isLycan = roleId === 'lycan' && !isBedridden(target);
-            let isWolfRole = roleId === 'werewolf' || roleId === 'wolf_cub' || roleId === 'direwolf' || roleId === 'prairie_wolf' || roleId === 'kamikaze_wolf' || isTurnedWolf;
+            let isWolfRole = roleId === 'werewolf' || roleId === 'wolf_cub' || roleId === 'direwolf' || roleId === 'prairie_wolf' || roleId === 'kamikaze_wolf' || roleId === 'alpha_wolf' || isTurnedWolf;
 
 
 
@@ -3817,7 +3864,7 @@ function inspectSeerTarget(){legacyInspectSeerTarget();normalPanel();}
             return gameState.nightNarration.done;
         }
         // Manual narration never commits powers or derives completion from gameplay state.
-const LEGACY_NARRATION_ROLES={cupid:['cupid'],wolf:['werewolf','wolf_cub','direwolf','prairie_wolf','kamikaze_wolf'],sorcerer2:['sorcerer'],bg:['bodyguard'],seer:['seer'],spellcaster:['spellcaster'],sorceress:['sorceress'],apprentice:['apprentice_seer']};
+const LEGACY_NARRATION_ROLES={cupid:['cupid'],wolf:['werewolf','wolf_cub','direwolf','prairie_wolf','kamikaze_wolf','alpha_wolf'],sorcerer2:['sorcerer'],bg:['bodyguard'],seer:['seer'],spellcaster:['spellcaster'],sorceress:['sorceress'],apprentice:['apprentice_seer']};
 function bindManualNarration(cb,key){if(!key)throw Error('Missing narration identity');if(!cb.id)cb.id='night-check-'+encodeURIComponent(key);cb.dataset.narrationKey=key;cb.dataset.manualNarration='true';cb.disabled=false;cb.checked=!!nightNarrationState()[key];const state=gameState,night=gameState.dayCount;cb.onchange=()=>{if(gameState===state&&gameState.dayCount===night)nightNarrationState()[key]=!!cb.checked;};}
 function narrationOwners(prefix){if(prefix==='seer')return seerPanelActors();const roles=LEGACY_NARRATION_ROLES[prefix]||[];const owners=gameState.players.filter(p=>roles.includes(gameState.rolePlayerMap[p])||(prefix==='wolf'&&gameState.rolePlayerMap[p]==='cursed'&&gameState.cursedTurned.includes(p)));return owners;}
 function narrationLegacyKey(prefix){if(['wolf','apprentice'].includes(prefix))return 'step:'+prefix;const owners=narrationOwners(prefix),chosen=document.getElementById(prefix+'-dropdown')?.querySelector('[data-actor-selector]')?.value;const actor=chosen&&owners.includes(chosen)?chosen:prefix==='seer'&&inspectionOwner()?inspectionOwner():owners[0]||gameState.players.find(p=>(LEGACY_NARRATION_ROLES[prefix]||[]).includes(normalState().original[p]));return actor?'actor:'+actor:'step:'+prefix;}
@@ -3835,6 +3882,19 @@ function refreshNarrationPanelStatuses(){for(const box of document.querySelector
 function seerPanelActors(){const n=normalState(),successors=gameState.players.filter(p=>gameState.rolePlayerMap[p]==='apprentice_seer'&&n.apprenticeAwakened?.[p]),originals=gameState.players.filter(p=>gameState.rolePlayerMap[p]==='seer');return successors.length?[...originals.filter(p=>gameState.playerStatus[p]?.alive||(gameState.nightKilled||[]).includes(p)),...successors]:originals;}
 function refreshSeerNarration(){const cb=document.getElementById('seer-cb'),heading=cb?.closest('label');if(!heading)return;const actors=seerPanelActors(),title=heading.querySelector('span');if(title)title.textContent=checklistTitle('seer',actors);applyNarrationStatus(heading,actors);const selected=document.querySelector('#seer-dropdown [data-actor-selector]')?.value,p=actors.includes(selected)?selected:inspectionOwner()||actors[0],show=p&&normalState().apprenticeAwakened?.[p]&&actorAvailable(p);let note=heading.querySelector('[data-seer-succession]');if(!note){note=document.createElement('span');note.dataset.seerSuccession='1';note.className='text-[10px] text-amber-300';heading.append(note);}note.textContent=show?'Seer คนเก่าเสียชีวิตแล้ว Seer คนใหม่จงโชคดี':'';note.hidden=!show;}
 
+// Presentation only: consume the guarded inspection result; never visit, inspect or kill.
+function seerInspectionResult(node,actor,target,value){
+ if(!isMod||value===null){node.hidden=true;return;}
+ const poisoned=isPoisoned(actor),lycan=actualRoleForCopy(target)==='lycan'&&!isBedridden(target),hue=value?'rose':'emerald';
+ node.hidden=false;node.className='text-xs p-2.5 rounded-lg border border-'+hue+'-700 bg-'+hue+'-950/80 text-'+hue+'-300 space-y-1';
+ if(isTraveler(target)){node.textContent='Traveler: Mod ตัดสินผลการส่องเองตามกติกาที่ตกลง';return;}
+ const seen=poisoned||lycan?'เห็นเป็น':'เป็น';
+ node.innerHTML='<div>'+(value?'🐺':'🟢')+' ผลการส่อง: <b>'+seen+(value?'มนุษย์หมาป่า (Werewolf)':'คนดี (ไม่ใช่หมาป่า)')+'</b></div>'+
+ (poisoned?'<div class="text-[10px] text-fuchsia-300">🧪 Seer ถูกวางยา! ผลปกติคือ <b>'+(value?'คนดี':'หมาป่า')+'</b> แต่ Seer จะเห็นเป็นตรงข้าม</div>':lycan?'<div class="text-[10px] text-amber-300">👉 แท้จริงคือ <b>Lycan (ฝ่ายชาวบ้าน)</b> แต่ Seer จะมองเห็นเป็นหมาป่า!</div>':'')+
+ '<div class="text-[10px] text-slate-400">👉 ให้สัญญาณ Seer: '+(value?'คว่ำนิ้วโป้งลง หรือพยักหน้า':'ชูนิ้วโป้งขึ้น หรือส่ายหน้า')+'</div>'+
+ (poisoned?'<div class="text-[10px] text-fuchsia-300 mt-1">⚠️ Seer ('+safeGuideMarkup(actor)+') ถูกวางยาในคืนนี้ — ผลการส่องกลับด้านโดยอัตโนมัติ พิษที่เป้าหมายไม่กลับผลการส่อง</div>':'');
+}
+
 function roleAvailable(role) {
             if(role==='cupid' && gameState.players.filter(p=>gameState.rolePlayerMap[p]===role).every(p=>normalState().inherited?.[p]))return false;
             return gameState.players.some(p => gameState.rolePlayerMap[p] === role && actorAvailable(p));
@@ -3845,7 +3905,7 @@ function roleAvailable(role) {
             if (seer) return seer;
             // Missing or merely Bedridden/provisionally dead Seers do not trigger succession.
             if (!seers.length || !seers.every(p => gameState.playerStatus[p] && !gameState.playerStatus[p].alive && !(gameState.nightKilled || []).includes(p))) return '';
-            return gameState.players.find(p => gameState.rolePlayerMap[p] === 'apprentice_seer' && actorAvailable(p)) || '';
+            return ''; // Only latched successors may inspect.
         }
         function poisonTargetAllowed(target) {
             const last = gameState.poisonLastChoice;
@@ -3894,7 +3954,7 @@ function roleAvailable(role) {
             if (!confirm('ยืนยันว่า ' + p + ' ใช้สิทธิ์โหวตประหารปกติครั้งสุดท้ายแล้ว? (ไม่ใช่ Exile) ผู้เล่นจะเสียชีวิตทันที')) return;
             b.voteUsed = true;
             gameState.playerStatus[p].alive = false;
-            if (gameState.rolePlayerMap[p] === 'mad_bomber' && !b.bombSpent && !isPoisoned(p)) {
+            if (actualRoleForCopy(p) === 'mad_bomber' && !b.bombSpent && !isPoisoned(p)) {
                 openMadBomberModal(p, 'bedridden-vote');
             } else {
                 b.bombSpent = true;
@@ -4003,13 +4063,13 @@ function askRoyalPardon(prince,victim){
             if(pardon===null||gameState!==executionState||!isMod||gameState.gamePhase!=='day'||gameState.dayCount!==pardonDay||JSON.stringify(gameState.players)!==pardonSeats||!gameState.playerStatus[victim]?.alive||activeMadBomber||nn.endedDay===gameState.dayCount)return;
             if(prince&&(!gameState.playerStatus[prince]?.alive||effectiveRole(prince)!=='persian_prince'||isPoisoned(prince)||nn.used[prince]?.pardon))return;
             if(pardon){(nn.used[prince]||(nn.used[prince]={})).pardon=true;nn.endedDay=gameState.dayCount;alert('ยกเลิกประหาร จบวัน ไม่มีโหวตใหม่');renderGameplay();return;}
-            if(effectiveRole(victim)==='prince'&&!isPoisoned(victim)){nn.endedDay=gameState.dayCount;playModSound('fanfare');alert(victim+' เปิดเผยตัวเป็น Prince ฝ่ายชาวบ้าน รอดจากการประหาร');renderGameplay();return;}
+            if(deathRole(victim)==='prince'&&!isPoisoned(victim)){nn.endedDay=gameState.dayCount;playModSound('fanfare');alert(victim+' เปิดเผยตัวเป็น Prince ฝ่ายชาวบ้าน รอดจากการประหาร');renderGameplay();return;}
             if (await cancelExecutionWithJudge(victim)) return;
             if (gameState !== executionState || !isMod || gameState.gamePhase !== 'day' || !gameState.playerStatus[victim]?.alive || activeMadBomber) return;
-            const roleId = isBedridden(victim) && gameState.rolePlayerMap[victim] === 'mad_bomber' ? 'mad_bomber' : effectiveRole(victim);
+            const roleId = isBedridden(victim) && actualRoleForCopy(victim) === 'mad_bomber' ? 'mad_bomber' : deathRole(victim);
 
             // 1. Tanner Victory check!
-            if (gameState.rolePlayerMap[victim] === 'tanner') {
+            if (actualRoleForCopy(victim) === 'tanner') {
 victoryTanner(victim);return;
             }
 
@@ -4038,7 +4098,7 @@ victoryTanner(victim);return;
             const recorded = gameState.deathPowers || (gameState.deathPowers = {});
             const bombs = gameState.bomberPowers || (gameState.bomberPowers = {});
             gameState.players.forEach(player => {
-                if (gameState.playerStatus[player]?.alive || (gameState.nightKilled || []).includes(player) || bombs[player] || gameState.rolePlayerMap[player] !== 'mad_bomber') return;
+                if (gameState.playerStatus[player]?.alive || (gameState.nightKilled || []).includes(player) || bombs[player] || actualRoleForCopy(player) !== 'mad_bomber') return;
                 bombs[player] = isPoisoned(player) || (isBedridden(player) && bedriddenState().bombSpent) ? 'spent' : 'pending';
             });
             if (!activeMadBomber) {
@@ -4047,8 +4107,8 @@ victoryTanner(victim);return;
             }
             gameState.players.forEach(player => {
                 if (gameState.playerStatus[player]?.alive || (gameState.nightKilled || []).includes(player) || recorded[player]) return;
-                recorded[player] = gameState.rolePlayerMap[player] === 'hunter' && !isPoisoned(player) ? 'pending' : 'spent';
-                if (effectiveRole(player) === 'wolf_cub' && !isPoisoned(player)) gameState.wolfCubNight = gameState.dayCount + 1;
+                recorded[player] = actualRoleForCopy(player) === 'hunter' && !isPoisoned(player) ? 'pending' : 'spent';
+                if (deathRole(player) === 'wolf_cub' && !isPoisoned(player)) gameState.wolfCubNight = gameState.dayCount + 1;
             });
         }
         function renderWolfCubTarget() {
@@ -4107,7 +4167,7 @@ function renderHunterPowers() {
             if (activeMadBomber || gameState.deathPowers?.[player] !== 'pending' || !gameState.playerStatus[target]?.alive) return;
             if (!confirm(player + ' ยิง ' + target + '?')) return;
             gameState.deathPowers[player] = 'spent';
-            const role = isBedridden(target) && gameState.rolePlayerMap[target] === 'mad_bomber' ? 'mad_bomber' : effectiveRole(target);
+            const role = isBedridden(target) && actualRoleForCopy(target) === 'mad_bomber' ? 'mad_bomber' : deathRole(target);
             if (role === 'mad_bomber' && !isPoisoned(target) && !(isBedridden(target) && bedriddenState().bombSpent)) {
                 openMadBomberModal(target, 'manual');
             } else killWithLover(target);
@@ -4155,7 +4215,7 @@ function renderHunterPowers() {
         }
         function calculateWolfBite(additional) {
             if (!additional) undoBedriddenPreview();
-            const wolf = (roleAvailable('werewolf') || roleAvailable('wolf_cub') || roleAvailable('direwolf') || (roleAvailable('prairie_wolf') || roleAvailable('kamikaze_wolf')) || gameState.cursedTurned.some(p => gameState.rolePlayerMap[p] === 'cursed' && actorAvailable(p))) ? gameState.wolfTarget : '';
+            const wolf = (roleAvailable('werewolf') || roleAvailable('wolf_cub') || roleAvailable('direwolf') || (roleAvailable('prairie_wolf') || roleAvailable('kamikaze_wolf') || roleAvailable('alpha_wolf')) || gameState.cursedTurned.some(p => gameState.rolePlayerMap[p] === 'cursed' && actorAvailable(p))) ? gameState.wolfTarget : '';
             const bg = roleAvailable('bodyguard') && bodyguardTargetAllowed(gameState.bodyguardTarget) ? gameState.bodyguardTarget : ''; 
 
             if (!additional) {
@@ -4184,10 +4244,11 @@ function renderHunterPowers() {
                 return;
             }
 
+            prepareAlphaBite(wolf);
             const witch=Object.values(normalNight().witches||{}).find(w=>w.kind==='save'&&w.target===wolf&&actorAvailable(w.actor)&&!isPoisoned(w.actor));
             if(witch){summaryOutcome(wolf,'Witch ('+witch.actor+') ช่วยจากการโจมตีของหมาป่าสำเร็จ');gameState.lastNightResultText='Witch ช่วยชีวิตสำเร็จ';return;}
             if(actorProtected(wolf)){summaryOutcome(wolf,'Bodyguard ('+activeActorActions('bodyguard').filter(([p,a])=>a.target===wolf&&!actorPoisoned(p)).map(([p])=>p).join(', ')+') ป้องกันการโจมตีของหมาป่าสำเร็จ');gameState.lastNightResultText='Bodyguard ป้องกันสำเร็จ';return;}
-            const targetRole = effectiveRole(wolf);
+            const targetRole = deathRole(wolf);
             const isLoverTarget = gameState.lovers.includes(wolf);
             const targetPoisoned = isPoisoned(wolf);
             const bgPlayer = getPlayerByRole('bodyguard');
@@ -4212,12 +4273,13 @@ function renderHunterPowers() {
                 return;
             }
 
+            if(resolveAlphaBite(wolf))return;
             // Poisoned target: special on-death abilities are blocked -> normal death
             const effRole = targetPoisoned ? '__poisoned__' : targetRole;
             if(!['cursed','tough_guy'].includes(effRole)&&normalBlessBlock(wolf,true)){gameState.lastNightResultText='พรป้องกันการตายหนึ่งครั้ง';return;}
 
             // Diseased is triggered by an unblocked, unpoisoned bite, even if Bedridden prevents death.
-            if (gameState.rolePlayerMap[wolf] === 'diseased' && !targetPoisoned) {gameState.wolvesInfectedNext = true;summaryOutcome(wolf,'แพร่เชื้อให้หมาป่า — คืนถัดไปโจมตีไม่ได้');}
+            if (actualRoleForCopy(wolf) === 'diseased' && !targetPoisoned) {gameState.wolvesInfectedNext = true;summaryOutcome(wolf,'แพร่เชื้อให้หมาป่า — คืนถัดไปโจมตีไม่ได้');}
 
             // Resolve conversion before any on-death passive effect. Cursed/Tough Guy do not die yet.
             if (!['cursed', 'tough_guy'].includes(effRole) && offerBedridden(wolf, true)) {
@@ -4252,7 +4314,7 @@ function renderHunterPowers() {
             }
 
             // 5. Target is Mad Bomber: dies; Mod picks the real neighbours in the morning
-            if (effRole === 'mad_bomber' || (isBedridden(wolf) && gameState.rolePlayerMap[wolf] === 'mad_bomber' && !targetPoisoned && !bedriddenState().bombSpent)) {
+            if (effRole === 'mad_bomber' || (isBedridden(wolf) && actualRoleForCopy(wolf) === 'mad_bomber' && !targetPoisoned && !bedriddenState().bombSpent)) {
                 nightKill(wolf);
                 if (isLoverTarget) nightKill(gameState.lovers.find(p => p !== wolf));
                 gameState.pendingMadBomber = wolf;
@@ -4303,7 +4365,7 @@ function renderHunterPowers() {
             const newStatus = !currentStatus;
 
             if (!newStatus) {
-                const roleId = isBedridden(playerName) && gameState.rolePlayerMap[playerName] === 'mad_bomber' ? 'mad_bomber' : effectiveRole(playerName);
+                const roleId = isBedridden(playerName) && actualRoleForCopy(playerName) === 'mad_bomber' ? 'mad_bomber' : deathRole(playerName);
 
                 // If Cursed is being killed, check if it's a wolf bite to transform them instead
                 if (roleId === 'cursed' && !gameState.cursedTurned.includes(playerName) && !isPoisoned(playerName)) {
@@ -4372,11 +4434,7 @@ victoryTanner(playerName);return;
             [leftSelect,rightSelect].forEach((select,index) => {
                 const p = adjacent[index] || '';
                 let optionsHtml = '<option value="">(ไม่มีคนนั่งข้างที่ยังมีชีวิต)</option>';
-                if (p) {
-                    const role = gameState.rolePlayerMap[p] || 'unknown';
-                    const roleObj = ROLES_DATABASE.find(r => r.id === role);
-                    optionsHtml += '<option value="'+p+'">'+p+' ('+(roleObj ? roleDisplay(roleObj).name : role)+')</option>';
-                }
+                for(const candidate of gameState.players.filter(t=>t!==playerName&&gameState.playerStatus[t]?.alive)){optionsHtml += '<option value='+JSON.stringify(safeGuideMarkup(candidate))+'>'+safeGuideMarkup(candidate)+'</option>';}
                 select.innerHTML = optionsHtml;
                 select.value = p;
             });
@@ -4424,11 +4482,8 @@ victoryTanner(playerName);return;
         function triggerMadBomberBlast() {if(victoryLocked())return;
             if (!activeMadBomber) return;
             if(bomberSeatSnapshot!==JSON.stringify(gameState.players)){const p=activeMadBomber,ctx=madBomberContext;activeMadBomber=null;gameState.bomberPowers[p]="pending";openMadBomberModal(p,ctx);return;}
-            const adjacent = getAdjacentLivingPlayers(activeMadBomber);
-            for (const [index,id] of ['mad-bomber-target-left','mad-bomber-target-right'].entries()) {
-                const selected = document.getElementById(id).value;
-                if (selected && selected !== adjacent[index]) return;
-            }
+            const selectedTargets=['mad-bomber-target-left','mad-bomber-target-right'].map(id=>document.getElementById(id).value).filter(Boolean);
+            if(!isMod||new Set(selectedTargets).size!==selectedTargets.length||selectedTargets.some(p=>p===activeMadBomber||!gameState.playerStatus[p]?.alive))return;
             (gameState.bomberPowers || (gameState.bomberPowers = {}))[activeMadBomber] = 'spent';
             if (isBedridden(activeMadBomber)) {
                 if (bedriddenState().bombSpent) return;
@@ -4492,7 +4547,7 @@ victoryTanner(playerName);return;
                 gameState.cursedPreview = '';
                 gameState.cursedPreviews = []; // Commit all final conversions; retain the legacy scalar field.
                 normalState().nightResolution = true;victoryState().morning=true;
-                summaryNightCommit();normalState().blessSpent=[];
+                commitAlphaConversion();summaryNightCommit();normalState().blessSpent=[];
                 gameState.gamePhase = 'day';
                 playModSound('rooster');
                 gameState.wolvesInfected = false; // Diseased infection consumed this night
@@ -4529,6 +4584,8 @@ victoryTanner(playerName);return;
                 gameState.wolfTarget = '';
                 gameState.wolfTarget2 = '';
                 gameState.bodyguardTarget = '';
+                normalState().apprenticeStart=currentGameSessionId+':'+gameState.dayCount;
+                markApprenticeSuccession();
 
 
             }
@@ -4720,10 +4777,10 @@ function resetGame(){
                 travelerKinds.forEach(k => { const o=document.createElement('option'); o.value=k; o.textContent=travelerRole(k).name; kind.append(o); });
                 const team = document.createElement('select'); team.id='local-traveler-team'; team.setAttribute('aria-label','ฝ่ายลับ');
                 [['good','ฝ่ายชาวบ้าน'],['wolf','ฝ่ายหมาป่า']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;team.append(o);});
-                [kind,team].forEach(el=>{el.style.cssText='padding:12px;background:#334155;margin:8px;';modal.append(el);});
+                modal.classList.add('traveler-add-controls');[kind,team].forEach(el=>{el.className='master-target-select';modal.append(el);});
                 const error=document.createElement('p'); error.id='local-traveler-error'; error.setAttribute('role','alert');
                 const add=document.createElement('button'); add.textContent=gameState.gamePhase==='day'?'รับเข้าหมู่บ้าน':'เพิ่มคิว / รอเช้า'; add.style.cssText='display:block;padding:12px;background:#164e63;';
-                add.onclick=()=>queueLocalTraveler(input.value,kind.value,team.value); modal.append(add,error);
+                add.classList.add('traveler-add-action');add.onclick=()=>queueLocalTraveler(input.value,kind.value,team.value); modal.append(add,error);
                 return;
             }
             // Public invitation only: no player roster, assignments or faction data.
@@ -4888,7 +4945,7 @@ function resetGame(){
             // Snapshot assumption: Mod explicitly confirms disclosure at admission only.
             let wolfDisclosure = [];
             if (team === 'wolf') {
-                const suggested = gameState.players.filter(n => ['werewolf','wolf_cub','prairie_wolf','kamikaze_wolf'].includes(gameState.rolePlayerMap[n]) || (gameState.cursedTurned || []).includes(n));
+                const suggested = gameState.players.filter(n => ['werewolf','wolf_cub','prairie_wolf','kamikaze_wolf','alpha_wolf'].includes(gameState.rolePlayerMap[n]) || (gameState.cursedTurned || []).includes(n));
                 const entered = prompt('ยืนยันรายชื่อหมาป่าที่จะเปิดเผยให้ Traveler นี้ (คั่นด้วย comma) รายชื่อจะไม่อัปเดตอัตโนมัติ', suggested.join(', '));
                 if (entered === null) return;
                 wolfDisclosure = entered.split(',').map(n => n.trim()).filter(Boolean);
@@ -4972,7 +5029,7 @@ function resetGame(){
             if (p.kind === 'bureaucrat') {
                 p.bonus = 'pending';
             } else {
-                const role = isBedridden(target) && gameState.rolePlayerMap[target] === 'mad_bomber' ? 'mad_bomber' : effectiveRole(target);
+                const role = isBedridden(target) && actualRoleForCopy(target) === 'mad_bomber' ? 'mad_bomber' : deathRole(target);
                 if (role === 'mad_bomber' && !isPoisoned(target) && !(isBedridden(target) && bedriddenState().bombSpent)) {
                     openMadBomberModal(target, 'gunslinger');
                 } else {
@@ -5024,7 +5081,7 @@ function resetGame(){
                 summary.textContent = p.name + ' — ' + travelerRole(p.kind).name + (gameState.gamePhase === 'day' ? '' : ' (รอเช้า)'); row.append(summary);
                 const select = document.createElement('select');
                 [['good','ฝ่ายชาวบ้าน'],['wolf','ฝ่ายหมาป่า']].forEach(([value,label]) => { const o = document.createElement('option'); o.value=value; o.textContent=label; select.append(o); });
-                select.value=p.team || 'good'; select.className='bg-slate-800 p-1'; row.append(select);
+                row.classList.add('traveler-select-row');select.value=p.team || 'good'; select.className='master-target-select'; row.append(select);
                 const b=document.createElement('button'); b.textContent='รับเข้าหมู่บ้าน'; b.className='p-2 bg-teal-900 rounded';
                 b.disabled=gameState.gamePhase !== 'day'; b.onclick=()=>admitTraveler(p.id,select.value); row.append(b); panel.append(row);
             });
@@ -5048,7 +5105,7 @@ function resetGame(){
                     const note = document.createElement('p'); note.textContent = 'ใช้ยกเลิกประหารแล้ว → ' + p.target; row.append(note);
                 }
                 if (alive && !['politician','judge'].includes(p.kind)) {
-                    const select=document.createElement('select'); select.className='traveler-target-select w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-500';select.dataset.actionTarget='day';select.dataset.targetExclude=p.kind==='bureaucrat'?name:'';const empty=document.createElement('option');empty.value='';empty.textContent='-- เลือกผู้เล่น --';select.append(empty);
+                    const select=document.createElement('select'); select.className='traveler-target-select w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-500';select.classList.add('master-target-select');row.classList.add('traveler-select-row');select.dataset.actionTarget='day';select.dataset.targetExclude=p.kind==='bureaucrat'?name:'';const empty=document.createElement('option');empty.value='';empty.textContent='-- เลือกผู้เล่น --';select.append(empty);
                     gameState.players.filter(n=>gameState.playerStatus[n]?.alive && (p.kind !== 'bureaucrat' || n!==name)).forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;select.append(o);});
                     if (p.kind !== 'judge') row.append(select);
                     const b=document.createElement('button'); b.className='p-2 bg-teal-900 rounded';
@@ -5174,7 +5231,7 @@ function resetGame(){
  const nk=nightKill;nightKill=function(player){const source=summaryCause?.targets?.[0];if(source&&source!==player&&gameState.lovers.includes(source)&&gameState.lovers.includes(player))return summaryWithCause({text:'เสียชีวิตตามคู่รัก '+source,actors:[summaryPerson(source)]},()=>nk(player));return nk(player);};
  const death=applyDeath;applyDeath=function(player,night=deathAtNight(),preview=false){const person=summaryPerson(player),cause=gameState.summaryFatalCauses?.[player]||summaryCause;const value=death(player,night,preview);if(value){if(gameState.summaryFatalCauses)delete gameState.summaryFatalCauses[player];if(!preview||summaryCapture)summaryOutcome(player,cause?.text||'Mod ยืนยันเสียชีวิต',{targets:[person],cause: cause?JSON.parse(JSON.stringify(cause)):null});}return value;};
  const loverDeath=killWithLover;killWithLover=function(player){const cause=summaryCause;const partner=gameState.lovers.includes(player)&&gameState.lovers.find(p=>p!==player);const prior=applyDeath;applyDeath=function(p,...rest){return p===partner?summaryWithCause({text:'เสียชีวิตตามคู่รัก '+player,actors:[summaryPerson(player)]},()=>prior(p,...rest)):prior(p,...rest);};try{return loverDeath(player);}finally{applyDeath=prior;}};
- const transform=recordTransformation;recordTransformation=function(kind,player,to){const prior=summaryPerson(player),value=transform(kind,player,to);summaryOutcome(player,'เปลี่ยนบทบาท '+summaryFriendlyRole(kind)+' → '+summaryFriendlyRole(to),{targets:[{...prior,role:kind}]});return value;};
+ const transform=recordTransformation;recordTransformation=function(kind,player,to,from=kind){const prior=summaryPerson(player),value=transform(kind,player,to,from);summaryOutcome(player,'เปลี่ยนบทบาท '+summaryFriendlyRole(from)+' → '+summaryFriendlyRole(to),{targets:[{...prior,role:from}]});return value;};
  const inspect=normalInspect;normalInspect=function(actor,target){const person=summaryPerson(actor),targets=target?[summaryPerson(target)]:[],poisoned=isPoisoned(actor),value=inspect(actor,target);if(target&&actorAvailable(actor))summaryDraft(actor,'inspect',summaryAction(actor,'ตรวจสอบ',[],person.role==='sorceress'?(value?'พบ Seer':'ไม่พบ Seer'):(value===null?'ใช้พลังไม่ได้':value?'ผลที่แจ้ง: ฝ่ายหมาป่า':'ผลที่แจ้ง: ฝ่ายชาวบ้าน'),{actors:[person],targets,poisoned,displayedPositive:value===null?null:person.role==='sorceress'?value:!value,phase:'night'}));else if(!target)delete normalState().summaryDrafts?.[actor+':inspect'];return value;};
  const seer=legacyInspectSeerTarget;legacyInspectSeerTarget=function(){const actor=inspectionOwner(),target=document.getElementById('seer-target-select')?.value,person=summaryPerson(actor),targets=target?[summaryPerson(target)]:[],poisoned=actor&&isPoisoned(actor),value=seer();if(actor&&target)summaryDraft(actor,'inspect',summaryAction(actor,'ตรวจสอบ',[],summaryShownInspection(document.getElementById('seer-result-display')?.innerHTML||''),{actors:[person],targets,poisoned,phase:'night'}));else if(actor)delete normalState().summaryDrafts?.[actor+':inspect'];return value;};
  const pi=recordPiChoice;recordPiChoice=function(actor,target,confirmed=false){const value=pi(actor,target,confirmed);if(confirmed&&target&&normalState().piResults?.[actor]?.target===target)summaryDraft(actor,'pi',summaryAction(actor,'ตรวจสอบ',[target,...fixedNeighbors(target)],value===null?'ใช้พลังไม่ได้':value?'พบหมาป่าในกลุ่ม':'ไม่พบหมาป่าในกลุ่ม',{poisoned:isPoisoned(actor),displayedPositive:value===null?null:!value,phase:'night'}));return value;};
@@ -5188,9 +5245,9 @@ function resetGame(){
  const bed=offerBedridden;offerBedridden=function(player,preview){const person=summaryPerson(player),value=bed(player,preview);if(value&&!preview)summaryOutcome(player,'ถูกกัดคืนแรกและกลายเป็นผู้ติดเตียง',{targets:[person]});return value;};
  const passBomb=closeMadBomberModal;closeMadBomberModal=function(){const p=activeMadBomber,before=gameState.bomberPowers?.[p],event=summaryAction(p,'ไม่ใช้พลัง',[]);const value=passBomb();if(p&&before!=='spent'&&gameState.bomberPowers?.[p]==='spent')summaryRecord(event);return value;};
  const exile=exileTraveler;exileTraveler=function(p){const before=travelerState().admitted[p]?.exiled,event=summaryAction('','ขับไล่',[p],'',{group:'การลงมติขับไล่'});const value=exile(p);if(!before&&travelerState().admitted[p]?.exiled){summaryRecord(event);summaryOutcome(p,'ถูกขับไล่ออกจากหมู่บ้าน',{targets:event.targets});}return value;};
- const vote=executeDayVote;executeDayVote=async function(){const state=gameState,target=document.getElementById('day-vote-target-select')?.value,n=normalState(),before=JSON.parse(JSON.stringify(n.used||{})),ended=n.endedDay,judges=JSON.parse(JSON.stringify(travelerState().admitted));const targetPerson=summaryPerson(target);const value=await vote();if(state!==gameState)return value;for(const [p,u] of Object.entries(n.used||{}))if(u.pardon&&!before[p]?.pardon){summaryRecord(summaryAction(p,'อภัยโทษ',[],'',{targets:[targetPerson]}));summaryOutcome(target,'ได้รับพระราชทานอภัยโทษ',{targets:[targetPerson]});}for(const [p,j] of Object.entries(travelerState().admitted))if(j.kind==='judge'&&j.used&&!judges[p]?.used){summaryRecord(summaryAction(p,'ยกเลิกประหาร',[],'',{targets:[targetPerson]}));summaryOutcome(target,'Judge ('+p+') ยกเลิกการประหาร',{targets:[targetPerson]});}if(targetPerson.role==='prince'&&ended!==n.endedDay&&gameState.playerStatus[target]?.alive)summaryOutcome(target,'Prince เปิดเผยบทบาทและรอดจากการประหาร',{targets:[targetPerson]});return value;};
- const powers=recordDeathPowers;recordDeathPowers=function(){const before={...gameState.deathPowers},bombs={...gameState.bomberPowers},value=powers();for(const p of gameState.players){if(isPoisoned(p)&&((gameState.rolePlayerMap[p]==='hunter'&&!before[p]&&gameState.deathPowers?.[p]==='spent')||(gameState.rolePlayerMap[p]==='mad_bomber'&&!bombs[p]&&gameState.bomberPowers?.[p]==='spent')))summaryOutcome(p,'ถูกพิษ — พลังเมื่อตายไม่ทำงาน');}return value;};
- const pardon=royalPardon;royalPardon=function(p,t){const before=normalState().used[p]?.pardon,event=summaryAction(p,'อภัยโทษ',[t]);const value=pardon(p,t);if(!before&&normalState().used[p]?.pardon){summaryRecord(event);summaryOutcome(t,'ได้รับพระราชทานอภัยโทษ',{targets:event.targets});}return value;};
+ const vote=executeDayVote;executeDayVote=async function(){const state=gameState,target=document.getElementById('day-vote-target-select')?.value,n=normalState(),before=JSON.parse(JSON.stringify(n.used||{})),ended=n.endedDay,judges=JSON.parse(JSON.stringify(travelerState().admitted));const targetPerson=summaryPerson(target);const value=await vote();if(state!==gameState)return value;for(const [p,u] of Object.entries(n.used||{}))if(u.pardon&&!before[p]?.pardon){summaryRecord(summaryAction(p,'พระราชทานอภัยโทษ',[],'',{targets:[targetPerson]}));summaryOutcome(target,'ได้รับพระราชทานอภัยโทษ',{targets:[targetPerson]});}for(const [p,j] of Object.entries(travelerState().admitted))if(j.kind==='judge'&&j.used&&!judges[p]?.used){summaryRecord(summaryAction(p,'ยกเลิกประหาร',[],'',{targets:[targetPerson]}));summaryOutcome(target,'Judge ('+p+') ยกเลิกการประหาร',{targets:[targetPerson]});}if(targetPerson.role==='prince'&&ended!==n.endedDay&&gameState.playerStatus[target]?.alive)summaryOutcome(target,'Prince เปิดเผยบทบาทและรอดจากการประหาร',{targets:[targetPerson]});return value;};
+ const powers=recordDeathPowers;recordDeathPowers=function(){const before={...gameState.deathPowers},bombs={...gameState.bomberPowers},value=powers();for(const p of gameState.players){if(isPoisoned(p)&&((actualRoleForCopy(p)==='hunter'&&!before[p]&&gameState.deathPowers?.[p]==='spent')||(actualRoleForCopy(p)==='mad_bomber'&&!bombs[p]&&gameState.bomberPowers?.[p]==='spent')))summaryOutcome(p,'ถูกพิษ — พลังเมื่อตายไม่ทำงาน');}return value;};
+ const pardon=royalPardon;royalPardon=function(p,t){const before=normalState().used[p]?.pardon,event=summaryAction(p,'พระราชทานอภัยโทษ',[t]);const value=pardon(p,t);if(!before&&normalState().used[p]?.pardon){summaryRecord(event);summaryOutcome(t,'ได้รับพระราชทานอภัยโทษ',{targets:event.targets});}return value;};
  const bedVote=confirmBedriddenVote;confirmBedriddenVote=function(kind){const b=bedriddenState(),before=b.voteUsed,event=summaryAction(b.player,'ใช้สิทธิ์โหวตครั้งสุดท้าย',[]);const value=bedVote(kind);if(!before&&b.voteUsed)summaryRecord(event);return value;};
  const voting=setTravelerVotingRound;setTravelerVotingRound=function(open){const before=JSON.parse(JSON.stringify(travelerState().admitted)),value=voting(open);for(const [p,t] of Object.entries(travelerState().admitted))if(before[p]?.bonus!==t.bonus&&t.kind==='bureaucrat')summaryRecord(summaryAction(p,t.bonus==='active'?'เริ่มใช้เสียงเพิ่ม':'สิ้นสุดเสียงเพิ่ม',t.target?[t.target]:[]));return value;};
  const election=announceMayor;announceMayor=function(){const e=community.election,phase=e?.phase;const value=election();if(e&&phase==='closed'&&e.phase==='announced')summaryRecord(summaryAction('','ประกาศผลเลือกตั้ง',[],e.result?'ผู้ใหญ่บ้าน: '+e.result:'ไม่มีผู้ชนะการเลือกตั้ง',{group:'การเลือกตั้งผู้ใหญ่บ้าน',ranking:summaryElectionTop(e.totals)}),'election:'+e.id);return value;};
@@ -5218,7 +5275,7 @@ function expansionPending(){return !!gameState.expansion?.grave?.length;}
 function queueGrave(player,night,preview,cause){const x=expansionState(),list=preview?x.previewGrave:x.grave;if(!list.some(e=>e.player===player))list.push({player,night,day:gameState.dayCount,cause:cause?JSON.parse(JSON.stringify(cause)):null});}
 let graveBypass=false;
 function graveTargets(p){return gameState.players.filter(t=>t!==p&&!isTraveler(t)&&gameState.playerStatus[t]?.alive);}
-function resolveGrave(player,target){const x=gameState.expansion,pending=x?.grave?.[0];if(!isMod||pending?.player!==player||!graveTargets(player).includes(target)||gameState.rolePlayerMap[player]!=='grave_robber')return false;const copied=actualRoleForCopy(target);if(!copied||!ROLES_DATABASE.some(r=>r.id===copied))return false;const before=summaryPerson(player),victim=summaryPerson(target);x.grave.shift();
+function resolveGrave(player,target){const x=gameState.expansion,pending=x?.grave?.[0];if(!isMod||pending?.player!==player||!graveTargets(player).includes(target)||actualRoleForCopy(player)!=='grave_robber')return false;const copied=actualRoleForCopy(target);if(!copied||!ROLES_DATABASE.some(r=>r.id===copied))return false;const before=summaryPerson(player),victim=summaryPerson(target);x.grave.shift();
  summaryRecord(summaryAction(player,'เลือกคนตายแทน',[target],'',{actors:[before],targets:[victim],phase:pending.night?'night':'day',day:pending.day}));
  normalAcquire(player,copied);recordTransformation('grave_robber',player,copied);summaryWithCause({text:'ถูก Grave Robber ('+player+') เลือกตายแทน',actors:[before],ignoreProtection:true},()=>applyDeath(target,false,false));
  const lover=gameState.lovers.includes(target)&&gameState.lovers.find(p=>p!==target);if(!gameState.playerStatus[target]?.alive&&lover&&gameState.playerStatus[lover]?.alive)summaryWithCause({text:'เสียชีวิตตามคู่รัก '+target,actors:[victim]},()=>applyDeath(lover,pending.night,false));
@@ -5229,7 +5286,7 @@ function expansionInspectionView(node,entry){targetedInspectionResult(node,gameS
  const available=roleAvailable;roleAvailable=function(role){if(role==='cupid'&&!gameState.players.some(p=>gameState.rolePlayerMap[p]==='cupid'&&actorAvailable(p)&&!normalState().inherited?.[p]))return false;return available(role);};
  const reset=victoryReset;victoryReset=function(){for(const id of ['cutthroat-choice','grave-choice'])document.getElementById(id)?.remove();return reset();};
  const locked=victoryLocked;victoryLocked=function(){return locked()||expansionPending();};const snapshot=victorySnapshot;victorySnapshot=function(){const s=snapshot();s.settled=s.settled&&!expansionPending();return s;};
- const death=applyDeath;applyDeath=function(p,night=deathAtNight(),preview=false){if(!graveBypass&&gameState.playerStatus[p]?.alive&&gameState.rolePlayerMap[p]==='grave_robber'&&!isPoisoned(p)&&!(night&&normalState().blessings[p])&&graveTargets(p).length){queueGrave(p,night||gameState.gamePhase==='night',preview,summaryCause);return false;}return death(p,night,preview);};
+ const death=applyDeath;applyDeath=function(p,night=deathAtNight(),preview=false){if(!graveBypass&&gameState.playerStatus[p]?.alive&&actualRoleForCopy(p)==='grave_robber'&&!isPoisoned(p)&&!(night&&normalState().blessings[p])&&graveTargets(p).length){queueGrave(p,night||gameState.gamePhase==='night',preview,summaryCause);return false;}return death(p,night,preview);};
  const nk=nightKill;nightKill=function(p){const root=summaryCause?.targets?.[0];if(root&&root!==p&&expansionState().previewGrave.some(e=>e.player===root)&&gameState.lovers.includes(root)&&gameState.lovers.includes(p))return false;return nk(p);};
  const calc=calculateNightResult;calculateNightResult=function(){const x=expansionState();x.previewGrave=[];const result=calc();for(const cut of Object.values(x.cuts))if(cut.night===gameState.dayCount&&cut.success&&gameState.playerStatus[cut.target]?.alive){const prior=summaryCapture;summaryCapture=gameState.summaryPreview||(gameState.summaryPreview=[]);try{const died=summaryWithCause({text:'ถูก Cutthroat ('+cut.actor+') เชือด — ผลพิษ/Bodyguard ตรึงตอนยืนยัน',actors:[cut.identity],targets:[cut.target]},()=>nightKill(cut.target));if(died&&gameState.lovers.includes(cut.target)){const lover=gameState.lovers.find(p=>p!==cut.target);summaryWithCause({text:'เสียชีวิตตามคู่รัก '+cut.target},()=>nightKill(lover));}}finally{summaryCapture=prior;}}return result;};
  const commit=summaryNightCommit;summaryNightCommit=function(){for(const e of expansionState().previewGrave)queueGrave(e.player,true,false,e.cause);return commit();};
@@ -5243,13 +5300,13 @@ function openCutthroat(actor){if(victoryLocked()||normalState().used[actor]?.cut
 function skipGrave(player,explicit=true){const x=gameState.expansion,pending=x?.grave?.[0];if(!isMod||pending?.player!==player)return false;x.grave.shift();if(explicit)summaryRecord(summaryAction(player,'ข้าม (เสียชีวิตตามปกติ)',[],'',{phase:pending.night?'night':'day',day:pending.day}));graveBypass=true;let died;try{died=summaryWithCause(pending.cause||{text:'Grave Robber ยอมเสียชีวิตตามปกติ'},()=>applyDeath(player,pending.cause?.ignoreProtection?false:pending.night,false));}finally{graveBypass=false;}const lover=gameState.lovers.includes(player)&&gameState.lovers.find(p=>p!==player);if(died&&lover)summaryWithCause({text:'เสียชีวิตตามคู่รัก '+player},()=>applyDeath(lover,pending.night,false));normalCommittedDeaths();document.getElementById('grave-choice')?.remove();renderPlayerStatusList();renderGameplay();victorySchedule();return true;}
 function renderGraveChoice(){const pending=expansionState().grave[0];if(!pending){document.getElementById('grave-choice')?.remove();return;}if(!isMod)return;const player=pending.player,targets=graveTargets(player);if(!targets.length){skipGrave(player,false);return;}const existing=document.getElementById('grave-choice'),signature=JSON.stringify([player,targets]);if(existing?.graveState===gameState&&existing.graveSignature===signature){if(!existing.open)existing.showModal();return;}const state=gameState,ui=expansionOneTarget('grave-choice','🪦','Grave Robber ลงหลุม!','เลือกคนตายแทน หรือยอมเสียชีวิตตามปกติ',player+' — เลือกผู้เล่นอื่นที่ยังมีชีวิต ห้ามเลือก Traveler','🪏 เป้าหมาย','grave-target',targets,'ฝัง! (สังหารเป้าหมาย)','ข้าม (เสียชีวิตตามปกติ)');ui.panel.graveState=state;ui.panel.graveSignature=signature;ui.confirm.onclick=()=>{if(state===gameState)resolveGrave(player,ui.select.value);};ui.skip.onclick=()=>{if(state===gameState)skipGrave(player);};ui.panel.addEventListener('close',()=>{if(state===gameState&&expansionPending())renderGraveChoice();});ui.panel.showModal();}
 function renderExpansionPanels(){document.querySelectorAll('[data-expansion-panel]').forEach(e=>e.remove());if(!isMod||gameState.gamePhase!=='night')return;const host=document.getElementById('actions-checklist');if(!host)return;for(const p of gameState.players){const role=gameState.rolePlayerMap[p];if(!['prairie_wolf','mentalist','cutthroat'].includes(role))continue;if(role==='prairie_wolf'&&(gameState.dayCount!==1||normalState().inherited?.[p]))continue;const r=ROLES_DATABASE.find(r=>r.id===role),wolf=role==='prairie_wolf',box=summaryNode('div',undefined,wolf?'bg-rose-950/30 p-2.5 rounded border border-rose-800/60 space-y-2':'bg-slate-900/40 p-2.5 rounded border border-slate-700/50 space-y-2');box.dataset.expansionPanel='1';box.dataset.panelRole=role;box.dataset.actor=p;box.dataset.priority=wolf?'9':role==='cutthroat'?'90':'55';const heading=summaryNode('label',undefined,'flex items-center space-x-2 cursor-pointer'),cb=summaryNode('input');cb.type='checkbox';cb.className='w-4 h-4 text-'+(wolf?'rose':'indigo')+'-500 rounded bg-slate-900 border-slate-700';cb.dataset.expansionNarration='true';bindManualNarration(cb,'actor:'+p);heading.append(cb,summaryNode('span',r.icon+' '+r.name+' — '+p,wolf?'text-rose-200 font-semibold':'text-slate-300 font-semibold'));const body=summaryNode('div',undefined,'pl-6 space-y-1.5');box.append(heading,body);host.append(box);applyNarrationStatus(box,[p]);if(role==='cutthroat'){const b=summaryNode('button',normalState().used[p]?.cutthroat?'ใช้พลังแล้ว':'เลือกเพื่อนบ้าน','bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition shadow whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed');b.disabled=!actorAvailable(p)||!!normalState().used[p]?.cutthroat||expansionPending();b.onclick=()=>openCutthroat(p);body.append(b);continue;}
- const old=expansionState().checks[p+':'+gameState.dayCount],picks=expansionState().picks?.[p+':'+gameState.dayCount]||old?.targets||[],targets=gameState.players.filter(t=>actionTargetLiving(t)&&(!wolf?t!==p:true)),first=expansionTargetSelect(targets),second=wolf?null:expansionTargetSelect(targets),out=summaryNode('div');first.className='bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100 max-w-full';first.setAttribute('aria-label',wolf?'เลือกคนที่จะส่อง':'ผู้เล่นคนที่ 1');first.dataset.actionTarget='living';first.dataset.targetExclude=wolf?'':p;first.value=picks[0]||'';first.disabled=!actorAvailable(p);const firstRow=summaryNode('div',undefined,'flex items-center justify-between gap-2 text-[11px]');firstRow.append(summaryNode('span',wolf?'เลือกคนที่จะส่อง:':'ผู้เล่นคนที่ 1:','text-slate-400'),first);body.append(firstRow);if(second){second.className=first.className;second.setAttribute('aria-label','ผู้เล่นคนที่ 2');second.dataset.actionTarget='living';second.dataset.targetExclude=p;second.value=picks[1]||'';second.disabled=!actorAvailable(p);const secondRow=summaryNode('div',undefined,'flex items-center justify-between gap-2 text-[11px]');secondRow.append(summaryNode('span','ผู้เล่นคนที่ 2:','text-slate-400'),second);body.append(secondRow);}out.hidden=!old;body.append(out);if(old)expansionInspectionView(out,old);const change=()=>{if(second){first.dataset.targetOther=second.value;second.dataset.targetOther=first.value;refreshActionTargetSelect(first);refreshActionTargetSelect(second);}const value=expansionInspect(p,second?[first.value,second.value]:[first.value]);out.hidden=value===null;if(value!==null)expansionInspectionView(out,expansionState().checks[p+':'+gameState.dayCount]);};first.onchange=change;if(second)second.onchange=change;
+ const old=expansionState().checks[p+':'+gameState.dayCount],picks=expansionState().picks?.[p+':'+gameState.dayCount]||old?.targets||[],targets=gameState.players.filter(t=>actionTargetLiving(t)&&(!wolf?t!==p:true)),first=expansionTargetSelect(targets),second=wolf?null:expansionTargetSelect(targets),out=summaryNode('div');first.className='bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100 max-w-full';first.classList.add('master-target-select');first.setAttribute('aria-label',wolf?'เลือกคนที่จะส่อง':'ผู้เล่นคนที่ 1');first.dataset.actionTarget='living';first.dataset.targetExclude=wolf?'':p;first.value=picks[0]||'';first.disabled=!actorAvailable(p);const firstRow=summaryNode('div',undefined,'flex items-center justify-between gap-2 text-[11px]');firstRow.append(summaryNode('span',wolf?'เลือกคนที่จะส่อง:':'ผู้เล่นคนที่ 1:','text-slate-400'),first);firstRow.classList.add('night-target-row');body.append(firstRow);if(second){second.className=first.className;second.setAttribute('aria-label','ผู้เล่นคนที่ 2');second.dataset.actionTarget='living';second.dataset.targetExclude=p;second.value=picks[1]||'';second.disabled=!actorAvailable(p);const secondRow=summaryNode('div',undefined,'flex items-center justify-between gap-2 text-[11px]');secondRow.append(summaryNode('span','ผู้เล่นคนที่ 2:','text-slate-400'),second);secondRow.classList.add('night-target-row');body.append(secondRow);}out.hidden=!old;body.append(out);if(old)expansionInspectionView(out,old);const change=()=>{if(second){first.dataset.targetOther=second.value;second.dataset.targetOther=first.value;refreshActionTargetSelect(first);refreshActionTargetSelect(second);}const value=expansionInspect(p,second?[first.value,second.value]:[first.value]);out.hidden=value===null;if(value!==null)expansionInspectionView(out,expansionState().checks[p+':'+gameState.dayCount]);};first.onchange=change;if(second)second.onchange=change;
  }[...host.children].sort((a,b)=>Number(a.dataset.priority||80)-Number(b.dataset.priority||80)).forEach(e=>host.append(e));}
 
 function actionTargetLiving(p){return !!gameState.playerStatus[p]&&(gameState.playerStatus[p].alive||(gameState.gamePhase==='night'&&(gameState.nightKilled||[]).includes(p)));}
 function actionTargetOptions(select){const policy=select.dataset.actionTarget||'living';return gameState.players.filter(p=>actionTargetLiving(p)&&(policy!=='actor'||actorAvailable(p))&&(policy!=='lover'||eligibleLover(p))&&(policy!=='day'||gameState.playerStatus[p]?.alive)&&p!==select.dataset.targetExclude&&p!==select.dataset.targetOther);}
 function refreshActionTargetSelect(select){const previous=select.value||'',blank=[...select.options].find(o=>o.value==='')?.textContent||'-- เลือกผู้เล่น --',options=actionTargetOptions(select);const empty=document.createElement('option');empty.value='';empty.textContent=blank;select.replaceChildren(empty);for(const p of options){const o=document.createElement('option');o.value=p;o.disabled=select.id==='bg-target-select'?!bodyguardTargetAllowed(p):select.id==='sorcerer2-target-select'?!poisonTargetAllowed(p):false;o.textContent=p+(o.disabled?' (เลือกคืนก่อนแล้ว)':'');select.append(o);}select.value=options.includes(previous)&&![...select.options].some(o=>o.value===previous&&o.disabled)?previous:'';}
-function refreshActionTargets(){if(!isMod)return;const ids=['wolf-target-select','wolf-target-select-2','bg-target-select','sorcerer2-target-select','seer-target-select','spellcaster-target-select','lover-1','lover-2','day-vote-target-select'];const found=new Set(document.querySelectorAll('[data-action-target]'));for(const id of ids){const s=document.getElementById(id);if(!s)continue;s.dataset.actionTarget=id.startsWith('lover-')?'lover':id==='day-vote-target-select'?'day':'living';found.add(s);}for(const s of found)refreshActionTargetSelect(s);if(activeMadBomber){const adjacent=getAdjacentLivingPlayers(activeMadBomber);['mad-bomber-target-left','mad-bomber-target-right'].forEach((id,index)=>{const s=document.getElementById(id);if(!s)return;const previous=s.value,empty=document.createElement('option');empty.value='';empty.textContent='(ไม่มีคนนั่งข้างที่ยังมีชีวิต)';s.replaceChildren(empty);const p=adjacent[index];if(p){const o=document.createElement('option');o.value=p;o.textContent=p;s.append(o);}s.value=p===previous?previous:'';});}}
+function refreshActionTargets(){if(!isMod)return;const ids=['wolf-target-select','wolf-target-select-2','bg-target-select','sorcerer2-target-select','seer-target-select','spellcaster-target-select','lover-1','lover-2','day-vote-target-select'];const found=new Set(document.querySelectorAll('[data-action-target]'));for(const id of ids){const s=document.getElementById(id);if(!s)continue;s.dataset.actionTarget=id.startsWith('lover-')?'lover':id==='day-vote-target-select'?'day':'living';found.add(s);}for(const s of found)refreshActionTargetSelect(s);if(activeMadBomber){const adjacent=getAdjacentLivingPlayers(activeMadBomber);['mad-bomber-target-left','mad-bomber-target-right'].forEach((id,index)=>{const s=document.getElementById(id);if(!s)return;const previous=s.value,empty=document.createElement('option');empty.value='';empty.textContent='(ไม่มีคนนั่งข้างที่ยังมีชีวิต)';s.replaceChildren(empty);const candidates=gameState.players.filter(p=>p!==activeMadBomber&&gameState.playerStatus[p]?.alive);for(const p of candidates){const o=document.createElement('option');o.value=p;o.textContent=p;s.append(o);}s.value=candidates.includes(previous)?previous:'';});}}
 (function installActionTargetFiltering(){
  const panel=normalPanel;normalPanel=function(...args){const result=panel(...args);refreshActionTargets();return result;};
  const gameplay=renderGameplay;renderGameplay=function(...args){const result=gameplay(...args);refreshActionTargets();return result;};
@@ -5325,7 +5382,7 @@ const ROLE_GUIDE_COPY = {
     "ฝ่าย": "ชาวบ้าน",
     "คำอธิบาย": "คุณตั้งใจเรียนวิชาอ่านนิมิตมาอย่างดี เพียงแต่ตอนนี้มองเข้าไปแล้วยังไม่ค่อยเห็นอะไร อาจารย์บอกว่าต้องใช้เวลา ซึ่งฟังดูสมเหตุสมผลจนกระทั่งเพื่อนบ้านเริ่มหายไปทีละคน หากผู้หยั่งรู้ล้มลง คุณจะต้องรับช่วงค้นหาความจริงเพื่อให้หมู่บ้านยังมีหวัง ถึงตอนนั้นคงไม่มีใครถามแล้วว่าเรียนจบหรือยัง",
     "ความสามารถ": "เมื่อ Seer เสียชีวิต คุณจะรับช่วงพลังตรวจผู้เล่นว่าเป็นมนุษย์หมาป่าหรือไม่ โดยไม่ทราบชื่อบทบาท",
-    "ช่วงเวลาและข้อจำกัด": "ใช้พลังได้หลังรับช่วงจาก Seer เท่านั้น ทุกคืน คืนละ 1 คน",
+    "ช่วงเวลาและข้อจำกัด": "รับช่วงเมื่อเริ่มคืนถัดไปหลัง Seer เสียชีวิต: หากตายกลางคืน ให้รอผ่านวันถัดมา; หากตายกลางวัน รับช่วงเมื่อเริ่มคืนที่กำลังจะมาถึง ต้องยังมีชีวิตและเกมยังไม่จบ ใช้พลังได้หลังรับช่วงเท่านั้น ทุกคืน คืนละ 1 คน",
     "เป้าหมายของคุณ": "ช่วยฝ่ายชาวบ้านค้นหาและกำจัดมนุษย์หมาป่า พร้อมรับหน้าที่ผู้หยั่งรู้เมื่อถึงเวลา",
     "ข้อยกเว้น": "หลังรับช่วงพลัง ผลตรวจใช้กติกาเดียวกับ Seer รวมถึงผลจาก Lycan และยาพิษ"
   },
@@ -6027,7 +6084,7 @@ document.getElementById('role-guide').addEventListener('close', () => { clearPla
 function guideGroup(r) { return r.guideGroup || setupGroup(r); }
 function isGuideWolfSupporter(r) { return r.category !== 'traveler' && ['sorceress', 'sorcerer', 'the_cloak', 'apprentice_illusionist', 'illusion_artist'].includes(r.id); }
 function renderGuideCategory(category) {
-    const roles = guideCatalog().filter(r=>r.category===category).sort((a,b)=>ROLE_GROUP_ORDER.indexOf(guideGroup(a))-ROLE_GROUP_ORDER.indexOf(guideGroup(b)));
+    const roles = guideCatalog().filter(r=>r.category===category).sort((a,b)=>ROLE_GROUP_ORDER.indexOf(guideGroup(a))-ROLE_GROUP_ORDER.indexOf(guideGroup(b))||seerRoleRank(a)-seerRoleRank(b));
     ['normal', 'traveler', 'expansion'].forEach(c => document.getElementById('rg-' + c).setAttribute('aria-pressed', String(c === category)));
     const list = document.getElementById('rg-list'); list.replaceChildren();
     roles.forEach(r => {
@@ -6061,7 +6118,7 @@ function renderGuideRole(id, focus) {
     image.src = guideArtPath(r);
     const enlarge = document.createElement('button'); enlarge.type = 'button'; enlarge.className = 'rg-enlarge'; enlarge.hidden = false; enlarge.setAttribute('aria-label', 'ขยายภาพ ' + r.name); enlarge.title = 'แตะเพื่อขยายภาพ';
     enlarge.onclick = () => { const viewer = document.getElementById('rg-art-viewer'); const full = document.getElementById('rg-full-art'); full.src = image.src; full.alt = image.alt; document.getElementById('rg-art-title').textContent = r.name; viewer.showModal(); updateGuideTop(); };
-    enlarge.append(image); figure.append(enlarge, fallback); detail.append(title, navigation, figure);
+    enlarge.append(image); figure.append(enlarge, fallback); detail.append(title, figure);
     if(r.category==='expansion'){const upcoming=document.createElement('p');upcoming.textContent='Coming Soon · คู่มือเท่านั้น';detail.append(upcoming);}
     if (copy && copy['คำอธิบาย/เรื่องราว']) {
         ['ฝ่าย','คำอธิบาย/เรื่องราว','ความสามารถ','ช่วงเวลาและข้อจำกัด','เป้าหมายของคุณ','ข้อยกเว้น'].forEach(label => {
@@ -6082,6 +6139,7 @@ function renderGuideRole(id, focus) {
             facts.append(term, value);
         }); detail.append(facts);
     } else { const note = document.createElement('p'); note.textContent = r.desc || 'ยังไม่มีคำอธิบายที่ยืนยัน'; detail.append(note); }
+    title.after(navigation);
     if (focus) focusGuideSection(detail);
     updateGuideTop();
 }
@@ -6095,10 +6153,11 @@ function showGuideToPlayer() {
 }
 function renderGuideNavigation(role){
  const nav=document.getElementById('rg-navigation');nav.replaceChildren();
- const roles=guideCatalog().filter(r=>r.category===role.category).sort((a,b)=>ROLE_GROUP_ORDER.indexOf(guideGroup(a))-ROLE_GROUP_ORDER.indexOf(guideGroup(b)));
+ const roles=guideCatalog().filter(r=>r.category===role.category).sort((a,b)=>ROLE_GROUP_ORDER.indexOf(guideGroup(a))-ROLE_GROUP_ORDER.indexOf(guideGroup(b))||seerRoleRank(a)-seerRoleRank(b));
  const index=roles.findIndex(r=>r.id===role.id);
- for(const [label,destination] of [['Previous',roles[index-1]],['Next',roles[index+1]]]){
-  const button=document.createElement('button');button.type='button';button.disabled=!destination;button.textContent=label;
+ for(const [label,destination] of [['Previous',roles[index-1]],['ปิดคู่มือ',null],['Next',roles[index+1]]]){
+  const button=document.createElement('button');button.type='button';button.disabled=label!=='ปิดคู่มือ'&&!destination;button.textContent=label;
+  if(label==='ปิดคู่มือ'){button.onclick=()=>closeRoleGuide();nav.append(button);continue;}
   button.onclick=()=>{if(!destination||document.getElementById('role-guide').classList.contains('rg-public'))return;renderGuideRole(destination.id,true);};nav.append(button);
  }
 }
@@ -6145,7 +6204,7 @@ function presetBackToCatalog(){if(!presetGuideAllowed())return;const scroll=pres
 function renderPresetDetail(index,count=12,restore=false){
  if(!presetGuideAllowed()||!ROLE_PRESETS[index]||![12,13,14,15].includes(count))return;
  const prior=presetGuideState||{},p=ROLE_PRESETS[index],d=document.getElementById('role-guide');presetGuideState={index,count,scroll:prior.scroll||0,listScroll:prior.listScroll||0};presetGuideMode(true);d.classList.add('rg-preset-detail');
- const detail=document.getElementById('rg-detail');detail.replaceChildren();detail.append(summaryNode('h2',p.name),summaryNode('p',p.thai,'preset-thai'),presetArtwork(p),communityButton('กลับไปเลือกชุด',presetBackToCatalog));presetCopySections(detail,p);detail.append(summaryNode('h3','บทบาทในชุด'));
+ const detail=document.getElementById('rg-detail');detail.replaceChildren();detail.append(summaryNode('h2',p.name),summaryNode('p',p.thai,'preset-thai'),communityButton('กลับไปเลือกชุด',presetBackToCatalog),presetArtwork(p));presetCopySections(detail,p);detail.append(summaryNode('h3','บทบาทในชุด'));
  const counts=summaryNode('div',undefined,'preset-counts');counts.setAttribute('aria-label','จำนวนผู้เล่น');for(const n of [12,13,14,15]){const b=communityButton(n+' คน',()=>{presetGuideState.scroll=d.scrollTop||0;renderPresetDetail(index,n,true);});b.setAttribute('aria-pressed',String(n===count));counts.append(b);}detail.append(counts,summaryNode('p',count+' คน — ทุกบทอย่างละ 1'));
  const ids=[...p.base,...p.add.slice(0,count-12)];for(const [group,label] of [['wolf',index===5?'ฝ่ายหมาป่าเริ่มต้น':'ฝ่ายหมาป่า'],['good',index===5?'ฝ่ายชาวบ้านเริ่มต้น':'ฝ่ายชาวบ้าน'],['special','ฝ่ายอิสระ'],['changing','บทเปลี่ยนบทบาท']]){const roles=ids.map(summaryRoleInfo).filter(r=>(r.id==='grave_robber'||r.id==='doppelganger'?'changing':r.team)===group);if(!roles.length)continue;detail.append(summaryNode('h4',label));const list=summaryNode('ul',undefined,'preset-roster');for(const r of roles){const li=summaryNode('li'),b=communityButton(r.icon+' '+r.name,()=>openPresetRole(r.id));b.dataset.presetRole=r.id;li.append(b);list.append(li);}detail.append(list);}
  detail.append(summaryNode('p','ชื่อบทแต่ละบทกดอ่านรายละเอียดได้ เมื่อเปลี่ยนจำนวนคน รายการนี้จะแสดงบททั้งหมดสำหรับจำนวนนั้น'));presetAdditions(detail,p);detail.append(summaryNode('h3','จุดที่ควรจับตา'));const cautions=summaryNode('ul');p.cautions.forEach(t=>cautions.append(summaryNode('li',t)));detail.append(cautions);
@@ -6250,12 +6309,17 @@ function inspectionReveal(body,key,entry,role){const out=summaryNode('div');out.
 function mentalistDraft(p){const x=expansionState(),key=p+':'+gameState.dayCount;return (x.mentalDrafts||(x.mentalDrafts={}))[key]||((x.mentalDrafts)[key]={targets:[],confirmed:false});}
 function mentalistChoose(p,t){if(!isMod||gameState.gamePhase!=='night'||gameState.rolePlayerMap[p]!=='mentalist'||!actorAvailable(p)||victoryLocked()||!actionTargetLiving(t)||p===t)return;const d=mentalistDraft(p),i=d.targets.indexOf(t);if(i>=0)d.targets.splice(i,1);else if(d.targets.length<2)d.targets.push(t);d.confirmed=false;delete expansionState().checks[p+':'+gameState.dayCount];delete normalState().summaryDrafts?.[p+':expansion'];normalVisit(p,[],p+':mentalist');renderExpansionPanels();}
 function mentalistConfirm(p){if(!isMod||gameState.gamePhase!=='night'||victoryLocked()||!actorAvailable(p))return false;const d=mentalistDraft(p);if(d.targets.length!==2||new Set(d.targets).size!==2||d.targets.includes(p)||!d.targets.every(actionTargetLiving))return false;const v=expansionInspect(p,d.targets);if(v===null)return false;d.confirmed=true;renderExpansionPanels();return true;}
-renderExpansionPanels=function(){document.querySelectorAll('[data-expansion-panel]').forEach(e=>e.remove());if(!isMod||gameState.gamePhase!=='night')return;prairieObserveDeaths();const host=document.getElementById('actions-checklist');if(!host)return;for(const p of gameState.players){const role=gameState.rolePlayerMap[p];if(!['prairie_wolf','mentalist','cutthroat'].includes(role))continue;const r=summaryRoleInfo(role),box=summaryNode('div',undefined,'bg-slate-900/40 p-2.5 rounded border border-slate-700/50 space-y-2'),heading=summaryNode('label',undefined,'flex items-center gap-2'),cb=summaryNode('input'),body=summaryNode('div',undefined,'pl-6 space-y-2');if(role==='prairie_wolf')box.className='bg-rose-950/30 p-2.5 rounded border border-rose-800/60 space-y-2';box.dataset.expansionPanel='1';box.dataset.panelRole=role;box.dataset.actor=p;box.dataset.priority=role==='prairie_wolf'?'9':role==='mentalist'?'55':'90';cb.type='checkbox';bindManualNarration(cb,'actor:'+p);heading.append(cb,summaryNode('span',r.icon+' '+r.name+' — '+p));box.append(heading,body);host.append(box);applyNarrationStatus(box,[p]);if(role==='cutthroat'){body.append(communityButton(normalState().used[p]?.cutthroat?'ใช้พลังแล้ว':'เลือกเพื่อนบ้าน',()=>openCutthroat(p),!actorAvailable(p)||!!normalState().used[p]?.cutthroat||expansionPending()));continue;}if(role==='prairie_wolf'){const count=prairieCount(p);body.append(summaryNode('p','ใช้ได้คืนนี้: '+count+' ครั้ง'));for(let i=0;i<count;i++){const key=p+':'+gameState.dayCount+':'+i,s=expansionTargetSelect(gameState.players.filter(actionTargetLiving)),entry=prairieState().uses[key];s.value=entry?.targets[0]||'';s.disabled=!actorAvailable(p);s.setAttribute('aria-label','ตรวจครั้งที่ '+(i+1));body.append(s);const result=summaryNode('div');body.append(result);if(entry)inspectionReveal(result,key,entry,role);s.onchange=()=>{prairieInspect(p,s.value,i);result.replaceChildren();const e=prairieState().uses[key];if(e)inspectionReveal(result,key,e,role);};}continue;}const d=mentalistDraft(p),grid=summaryNode('div',undefined,'mentalist-targets');for(const t of gameState.players.filter(t=>t!==p&&actionTargetLiving(t))){const at=d.targets.indexOf(t),b=communityButton(t+(at>=0?' — เป้าหมายที่ '+(at+1):''),()=>mentalistChoose(p,t),!actorAvailable(p)||victoryLocked());b.setAttribute('aria-pressed',String(d.targets.includes(t)));grid.append(b);}const status=summaryNode('p',(d.confirmed?'ยืนยันแล้ว: ':'รอยืนยัน: ')+(d.targets.join(' → ')||'ยังไม่ได้เลือก')+' • เปลี่ยนชื่อแล้วต้องยืนยันใหม่');status.setAttribute('role','status');body.append(grid,status,communityButton('ยืนยัน',()=>mentalistConfirm(p),!actorAvailable(p)||d.targets.length!==2||d.confirmed),communityButton('ล้างการเลือก',()=>{d.targets=[];d.confirmed=false;delete expansionState().checks[p+':'+gameState.dayCount];delete normalState().summaryDrafts?.[p+':expansion'];normalVisit(p,[],p+':mentalist');renderExpansionPanels();},!actorAvailable(p)));const entry=expansionState().checks[p+':'+gameState.dayCount];if(d.confirmed&&entry)inspectionReveal(body,p+':'+gameState.dayCount,entry,role);}[...host.children].sort((a,b)=>Number(a.dataset.priority||80)-Number(b.dataset.priority||80)).forEach(e=>host.append(e));};
+renderExpansionPanels=function(){document.querySelectorAll('[data-expansion-panel]').forEach(e=>e.remove());if(!isMod||gameState.gamePhase!=='night')return;prairieObserveDeaths();const host=document.getElementById('actions-checklist');if(!host)return;for(const p of gameState.players){const role=gameState.rolePlayerMap[p];if(!['prairie_wolf','mentalist','cutthroat'].includes(role))continue;const r=summaryRoleInfo(role),box=summaryNode('div',undefined,'bg-slate-900/40 p-2.5 rounded border border-slate-700/50 space-y-2'),heading=summaryNode('label',undefined,'flex items-center gap-2'),cb=summaryNode('input'),body=summaryNode('div',undefined,'pl-6 space-y-2');if(role==='prairie_wolf')box.className='bg-rose-950/30 p-2.5 rounded border border-rose-800/60 space-y-2';box.dataset.expansionPanel='1';box.dataset.panelRole=role;box.dataset.actor=p;box.dataset.priority=role==='prairie_wolf'?'9':role==='mentalist'?'55':'90';cb.type='checkbox';bindManualNarration(cb,'actor:'+p);heading.append(cb,summaryNode('span',r.icon+' '+r.name+' — '+p,panelTokens(role==='prairie_wolf'?'wolf':'seer').title));if(role==='cutthroat'&&normalState().used[p]?.cutthroat)heading.append(summaryNode('span','ใช้พลังไปแล้ว — เรียกตามลำดับเหมือนเดิม','text-[10px] text-amber-300'));box.append(heading,body);host.append(box);applyNarrationStatus(box,[p]);if(role==='cutthroat'){body.append(communityButton(normalState().used[p]?.cutthroat?'ใช้พลังแล้ว':'เลือกเพื่อนบ้าน',()=>openCutthroat(p),!actorAvailable(p)||!!normalState().used[p]?.cutthroat||expansionPending()));continue;}if(role==='prairie_wolf'){const count=prairieCount(p);body.append(summaryNode('p','ใช้ได้คืนนี้: '+count+' ครั้ง'));for(let i=0;i<count;i++){const key=p+':'+gameState.dayCount+':'+i,s=expansionTargetSelect(gameState.players.filter(actionTargetLiving)),entry=prairieState().uses[key];s.value=entry?.targets[0]||'';s.disabled=!actorAvailable(p);s.setAttribute('aria-label','ตรวจครั้งที่ '+(i+1));body.append(s);const result=summaryNode('div');body.append(result);if(entry)inspectionReveal(result,key,entry,role);s.onchange=()=>{prairieInspect(p,s.value,i);result.replaceChildren();const e=prairieState().uses[key];if(e)inspectionReveal(result,key,e,role);};}continue;}const d=mentalistDraft(p),grid=summaryNode('div',undefined,'mentalist-targets wolf-name-grid');for(const t of gameState.players.filter(t=>t!==p&&actionTargetLiving(t))){const at=d.targets.indexOf(t),b=communityButton('',()=>mentalistChoose(p,t),!actorAvailable(p)||victoryLocked());b.className='wolf-name-button'+(at>=0?' selected':'');b.append(summaryNode('span',String(gameState.players.indexOf(t)+1).padStart(2,'0'),'wolf-number'),summaryNode('span',t),summaryNode('small',at>=0?'✓ เป้าหมายที่ '+(at+1):''));b.setAttribute('aria-pressed',String(d.targets.includes(t)));grid.append(b);}const status=summaryNode('p',(d.confirmed?'ยืนยันแล้ว: ':'รอยืนยัน: ')+(d.targets.join(' → ')||'ยังไม่ได้เลือก')+' • เปลี่ยนชื่อแล้วต้องยืนยันใหม่');status.setAttribute('role','status');body.append(grid,status,communityButton('ยืนยันเป้าหมาย',()=>mentalistConfirm(p),!actorAvailable(p)||d.targets.length!==2||d.confirmed),communityButton('ล้างการเลือก',()=>{d.targets=[];d.confirmed=false;delete expansionState().checks[p+':'+gameState.dayCount];delete normalState().summaryDrafts?.[p+':expansion'];normalVisit(p,[],p+':mentalist');renderExpansionPanels();},!actorAvailable(p)));const entry=expansionState().checks[p+':'+gameState.dayCount];if(d.confirmed&&entry)inspectionReveal(body,p+':'+gameState.dayCount,entry,role);}[...host.children].sort((a,b)=>Number(a.dataset.priority||80)-Number(b.dataset.priority||80)).forEach(e=>host.append(e));};
 
-function confirmSeerInspection(){const actor=document.querySelector('#seer-dropdown [data-actor-selector]')?.value||inspectionOwner(),target=document.getElementById('seer-target-select')?.value||document.querySelector('#seer-dropdown select:not([data-actor-selector])')?.value;if(!isMod||gameState.gamePhase!=='night'||victoryLocked()||!actor||!actorAvailable(actor)||effectiveIdentityRole(actor)!=='seer'||!actionTargetLiving(target))return false;const n=normalState(),key=actor+':'+gameState.dayCount;if(n.seerConfirmed?.[key]===target)return false;(n.seerConfirmed||(n.seerConfirmed={}))[key]=target;const value=normalInspect(actor,target),display=document.getElementById('seer-result-display');if(display){display.classList.remove('hidden');showInspectionResult(display,'ผลการส่อง',value);}refreshInsomniacResults();if(gameState.rolePlayerMap[target]==='kamikaze_wolf'&&actorAvailable(target)&&!isPoisoned(target)&&gameState.players.some(p=>p!==target&&gameState.playerStatus[p]?.alive&&actualWolf(p))){const actors=[summaryPerson(target)],cause={text:'Kamikaze Wolf ถูก Seer ตรวจ',actors};for(const p of [target,actor])summaryWithCause(cause,()=>killWithLover(p));summaryRecord(summaryAction(target,'ถูก Seer ตรวจ',[actor],'พลัง Kamikaze ทำงาน — ใช้กติกาป้องกันและผลตายตามปกติ')); normalCommittedDeaths();prairieObserveDeaths();renderPlayerStatusList();}normalPanel();return true;}
-function renderApprovedPanelCopy(){for(const box of document.querySelectorAll('[data-normal-panel][data-actor]')){const p=box.dataset.actor,role=gameState.rolePlayerMap[p],body=box.children[1],n=normalNight();if(role==='witch'){const result=[...body.children].find(e=>e.tagName==='DIV'&&e.className.includes('border-slate-700')),used=n.used[p]?.witch,entry=n.witches?.[p];if(!result)continue;if(used&&entry){result.hidden=false;result.replaceChildren(summaryNode('span','🧙‍♀️ '),summaryNode('strong','ใช้พลังไปแล้ว'),summaryNode('span',' — '+(entry.kind==='save'?'ช่วยชีวิตเหยื่อหมาป่า '+entry.target:'สังหาร '+entry.target+' แทน')));}else if(used){result.hidden=true;const note=summaryNode('span','ใช้พลังไปแล้ว — เรียกตามลำดับเหมือนเดิม','text-[10px] text-amber-300');note.dataset.witchSpent='1';box.querySelector('[data-witch-spent]')?.remove();box.firstElementChild.append(note);}else{result.replaceChildren(summaryNode('div','เลือกช่วยชีวิต หรือสังหารคนอื่นแทน อย่างใดอย่างหนึ่ง'));}}if(role==='priest'){const entry=n.priestResults?.[p];if(entry?.night===gameState.dayCount){const result=[...body.children].find(e=>e.tagName==='DIV'&&e.className.includes('border-slate-700'));if(result){result.hidden=false;result.textContent='✝️ Priest — '+p+' ให้พรแก่ ✨ '+entry.target+' ✨';}}}}
- bindSeerSelection();
+function confirmSeerInspection(){const actor=document.querySelector('#seer-dropdown [data-actor-selector]')?.value||inspectionOwner(),target=document.getElementById('seer-target-select')?.value||document.querySelector('#seer-dropdown select:not([data-actor-selector])')?.value;if(!isMod||gameState.gamePhase!=='night'||victoryLocked()||!actor||!actorAvailable(actor)||effectiveIdentityRole(actor)!=='seer'||!actionTargetLiving(target))return false;const n=normalState(),key=actor+':'+gameState.dayCount;if(n.seerConfirmed?.[key]===target)return false;(n.seerConfirmed||(n.seerConfirmed={}))[key]=target;const value=normalInspect(actor,target),display=document.getElementById('seer-result-display');if(display){display.classList.remove('hidden');seerInspectionResult(display,actor,target,value);}refreshInsomniacResults();if(gameState.rolePlayerMap[target]==='kamikaze_wolf'&&actorAvailable(target)&&!isPoisoned(target)&&gameState.players.some(p=>p!==target&&gameState.playerStatus[p]?.alive&&actualWolf(p))){const actors=[summaryPerson(target)],cause={text:'Kamikaze Wolf ถูก Seer ตรวจ',actors};for(const p of [target,actor])summaryWithCause(cause,()=>killWithLover(p));summaryRecord(summaryAction(target,'ถูก Seer ตรวจ',[actor],'พลัง Kamikaze ทำงาน — ใช้กติกาป้องกันและผลตายตามปกติ')); normalCommittedDeaths();prairieObserveDeaths();renderPlayerStatusList();}normalPanel();return true;}
+function renderApprovedPanelCopy(){for(const box of document.querySelectorAll('[data-normal-panel][data-actor]')){const p=box.dataset.actor,role=gameState.rolePlayerMap[p],body=box.children[1],n=normalNight(),result=[...body.children].find(e=>e.tagName==='DIV'&&(e.className.includes('border-slate-700')||e.dataset.approvedResult));if(!result)continue;
+ if(['beholder','witch','priest'].includes(role)){result.dataset.approvedResult='1';const hue=role==='beholder'?'emerald':'blue';result.className='text-xs p-2.5 rounded-lg border border-'+hue+'-700 bg-'+hue+'-950/80 text-'+hue+'-300 space-y-1';}
+ if(role==='witch'){const used=n.used[p]?.witch,entry=n.witches?.[p];body.querySelector('[data-witch-instruction]')?.remove();if(used&&entry){result.hidden=false;result.replaceChildren(summaryNode('span','🧙‍♀️ '),summaryNode('strong','ใช้พลังไปแล้ว'),summaryNode('span',' — '+(entry.kind==='save'?'ช่วยชีวิตเหยื่อหมาป่า '+entry.target:'สังหาร '+entry.target+' แทน')));}else{result.hidden=true;if(!used){const instruction=summaryNode('p','เลือกช่วยชีวิต หรือสังหารคนอื่นแทน อย่างใดอย่างหนึ่ง');instruction.dataset.witchInstruction='1';result.after(instruction);}}}
+ if(role==='witch'||role==='priest'){const spent=!!n.used[p]?.[role],key=role+'Spent';box.querySelector('[data-'+role+'-spent]')?.remove();if(spent){const note=summaryNode('span','ใช้พลังไปแล้ว — เรียกตามลำดับเหมือนเดิม','text-[10px] text-amber-300');note.dataset[key]='1';box.firstElementChild.append(note);}}
+ if(role==='priest'){const entry=n.priestResults?.[p];if(entry?.night===gameState.dayCount){result.hidden=false;result.textContent='✝️ Priest — '+p+' ให้พรแก่ ✨ '+entry.target+' ✨';}}
+ }bindSeerSelection();
 }
+
 (function installApproved1910(){
  const panel=normalPanel;normalPanel=function(...a){const r=panel(...a);renderApprovedPanelCopy();return r;};
  const act=normalAct;normalAct=function(p,kind,target){const r=act(p,kind,target);if(r===true&&kind==='priest'){(normalState().priestResults||(normalState().priestResults={}))[p]={night:gameState.dayCount,target};normalPanel();}return r;};
@@ -6270,7 +6334,7 @@ function renderApprovedPanelCopy(){for(const box of document.querySelectorAll('[
 })();
 
 // UI-only accidental-activation gate; deliberately not authentication.
-(function(){const toggle=devToggle;devToggle=function(){if(!devEditable())return;if(devMode)return toggle();document.getElementById('dev-unlock')?.remove();const d=summaryNode('dialog'),input=summaryNode('input'),note=summaryNode('p');d.id='dev-unlock';input.type='password';input.autocomplete='off';input.setAttribute('aria-label','รหัสเปิด Dev mode');const unlock=()=>{if(input.value!==String.fromCharCode(110,110,110,46,105,115,104,97,110,100,115,111,109,101)){note.textContent='รหัสไม่ถูกต้อง';input.value='';return;}input.value='';d.close();d.remove();toggle();};d.append(summaryNode('h3','เปิด Dev mode'),input,note,communityButton('เปิด',unlock),communityButton('ยกเลิก',()=>{input.value='';d.remove();}));input.onkeydown=e=>{if(e.key==='Enter')unlock();};document.body.append(d);d.showModal();input.focus();};})();
+(function(){const toggle=devToggle;devToggle=function(){if(!devEditable())return;if(devMode)return toggle();document.getElementById('dev-unlock')?.remove();const d=summaryNode('dialog'),input=summaryNode('input'),note=summaryNode('p');d.id='dev-unlock';input.type='password';input.autocomplete='off';input.setAttribute('aria-label','รหัสเปิด Dev mode');const unlock=()=>{if(input.value!==String.fromCharCode(110,110,110,46,105,115,104,97,110,100,115,111,109,101)){note.textContent='รหัสไม่ถูกต้อง';input.value='';return;}input.value='';d.close();d.remove();toggle();};const actions=summaryNode('div',undefined,'dev-unlock-actions');actions.append(communityButton('เปิด',unlock),communityButton('ยกเลิก',()=>{input.value='';d.remove();}));d.append(summaryNode('h3','เปิด Dev mode'),input,note,actions);input.onkeydown=e=>{if(e.key==='Enter')unlock();};document.body.append(d);d.showModal();input.focus();};})();
 
 // Updated rule text is part of the existing private role card; no death identities are sent.
 (function(){const payload=privateAssignmentPayload;privateAssignmentPayload=function(conn){const card=payload(conn);if(card?.roleId==='prairie_wolf')card.desc=PRAIRIE_RULE;return card;};const card=renderPlayerCard;renderPlayerCard=function(info){if(info?.roleId==='prairie_wolf')info={...info,desc:PRAIRIE_RULE};return card(info);};})();
@@ -6281,6 +6345,72 @@ function bindSeerSelection(){
  const state=gameState,phase=approvedPhaseKey();
  select.onchange=()=>{if(state!==gameState||phase!==approvedPhaseKey()||!isMod||victoryLocked())return;if(!select.value){const actor=host.querySelector('[data-actor-selector]')?.value||inspectionOwner();normalVisit(actor,[],actor+':inspect');const display=document.getElementById('seer-result-display');if(display)display.hidden=true;return;}confirmSeerInspection();};
 }
+
+</script>
+<script>
+// Approved November 14 roles. Host-owned state stays inside the existing recovered round.
+Object.assign(ROLE_GUIDE_COPY,{
+aura_seer:{'ฝ่าย':'ชาวบ้าน','คำอธิบาย':'คุณเคยรับดูดวงเรื่องความรัก แต่กิจการไปได้ไม่ดีนัก ลูกค้าถามว่า “เขาใช่คนที่ใช่หรือเปล่า” คุณก็ตอบตามที่เห็นว่า “เขาไม่ใช่คน” คำตอบแม่นยำ แต่ไม่ใช่สิ่งที่ลูกค้าอยากจ่ายเงินฟัง คุณจึงหันมาใช้พรสวรรค์ช่วยหมู่บ้านแทน งานนี้ไม่มีค่าตอบแทนเช่นกัน แต่อย่างน้อยการจับหมาป่าได้ก็น่าจะช่วยให้คุณมีชีวิตอยู่ทวงค่าดูดวงได้นานขึ้น','ความสามารถ':'ทุกคืน เลือกผู้เล่นหนึ่งคนเพื่อเรียนรู้บทบาทปัจจุบันที่แท้จริงของเขา','ช่วงเวลาและข้อจำกัด':'ทุกคืน คืนละหนึ่งคน หากติดพิษหรือติดเตียง ใช้พลังไม่ได้และไม่รับผลตรวจ','เป้าหมายของคุณ':'ค้นหาหมาป่าและช่วยฝ่ายชาวบ้านชนะ','ข้อยกเว้น':'- Drunk: เห็นบทจริงที่ซ่อนอยู่ แม้ยังไม่เปิดเผย\n- Lycan: เห็นเป็น Lycan\n- Cursed: ก่อนแปลงเห็น Cursed หลังแปลงเห็น Werewolf\n- Kamikaze Wolf: พลังยังทำงานตามเงื่อนไขเดิม\n- พลังปิดบังบทบาท: ไม่ได้รับผลเฉพาะการตรวจเป้าหมายนั้น ไม่ได้เห็นบทปลอม ไม่ปิดพลังถาวรและไม่ห้ามพูด'},
+alpha_wolf:{'ฝ่าย':'หมาป่า','คำอธิบาย':'คุณเชื่อว่าผู้นำที่ดีต้องดูแลจำนวนสมาชิกให้เพียงพอต่อภาระงาน โดยเฉพาะเมื่อชาวบ้านชอบนำพนักงานของคุณไปแขวนคอกลางจัตุรัส หมาป่าตัวอื่นตอบโต้ด้วยความโกรธ แต่คุณมองเห็นโอกาสในการรับคนใหม่ เพียงสัมผัสเดียว เหยื่อของคืนนี้ก็จะกลายเป็นเพื่อนร่วมงาน สวัสดิการมีอาหารมื้อดึกและกิจกรรมกลุ่ม ส่วนการลาออกยังไม่เคยมีใครกลับมาเล่าขั้นตอนให้ฟัง','ความสามารถ':'ร่วมล่ากับฝูงทุกคืน หนึ่งครั้งต่อเกม เลือกแปลงเหยื่อของฝูงหนึ่งคนเป็น Werewolf แทนการฆ่า','ช่วงเวลาและข้อจำกัด':'ใช้ได้เฉพาะคืนถัดจากวันที่หมาป่าตัวจริงถูกประหารและเสียชีวิตจริง หากมีเหยื่อสองคน เลือกแปลงได้หนึ่งคน ผู้ถูกแปลงร่วมตื่นกับฝูงตั้งแต่คืนถัดไป','เป้าหมายของคุณ':'เพิ่มสมาชิกฝูงและช่วยฝ่ายหมาป่าชนะ','ข้อยกเว้น':'- นับหมาป่าตัวจริงทุกชนิด รวม Wolf Cub และผู้ถูกแปลง ไม่รวมผู้สนับสนุนหมาป่า\n- การตายกลางวันจากสาเหตุอื่นไม่เปิดสิทธิ์\n- การป้องกันการโจมตีของหมาป่าขัดขวางการแปลง ใช้พลังแล้วและไม่ฆ่าเป้าหมายนั้นแทน\n- Mod แจ้งผู้ถูกแปลงเป็นการส่วนตัว และยังเรียกบทบาทเดิมเพื่อปกปิดการเปลี่ยนบทบาท ไม่ได้หมายความว่ายังใช้พลังเดิมได้'}
+});
+function alphaState(){const n=normalState();return n.alpha||(n.alpha={eligibleNight:0,used:{},attempt:null});}
+function alphaEligible(p){const s=alphaState();return isMod&&gameState.gamePhase==='night'&&!victoryLocked()&&gameState.rolePlayerMap[p]==='alpha_wolf'&&actorAvailable(p)&&!isPoisoned(p)&&s.eligibleNight===gameState.dayCount&&!s.used[p]&&(!s.attempt||s.attempt.night!==gameState.dayCount);}
+function confirmAlphaConversion(actor,target){if(!alphaEligible(actor)||!wolfDraft().confirmed||![gameState.wolfTarget,gameState.wolfTarget2].includes(target)||!actionTargetLiving(target)||actualWolf(target))return false;const s=alphaState();s.attempt={actor,target,night:gameState.dayCount,success:false};s.used[actor]=true;calculateNightResult();normalPanel();return true;}
+function prepareAlphaBite(target){const a=alphaState().attempt;if(a?.night===gameState.dayCount&&a.target===target)a.success=false;}
+function resolveAlphaBite(target){const a=alphaState().attempt;if(!a||a.night!==gameState.dayCount||a.target!==target)return false;if(normalBlessBlock(target,true)){summaryOutcome(target,'พรป้องกันการแปลง — Alpha Wolf ใช้พลังแล้ว');return true;}a.success=true;summaryOutcome(target,'Alpha Wolf แปลงเป็น Werewolf แทนการสังหาร');gameState.lastNightResultText='Alpha Wolf แปลงเหยื่อแทนการสังหาร';return true;}
+function commitAlphaConversion(){const a=alphaState().attempt;if(!isMod||!normalState().nightResolution||!a||a.committed||a.night!==gameState.dayCount||!a.success||![gameState.wolfTarget,gameState.wolfTarget2].includes(a.target)||!gameState.playerStatus[a.target]?.alive)return;a.committed=true;const from=actualRoleForCopy(a.target);normalAcquire(a.target,'werewolf');recordTransformation('alpha_wolf',a.target,'werewolf',from);}
+function auraInspect(actor,target){if(!isMod||gameState.gamePhase!=='night'||victoryLocked()||gameState.rolePlayerMap[actor]!=='aura_seer'||!actorAvailable(actor)||!actionTargetLiving(target))return null;const n=normalState(),key=actor+':'+gameState.dayCount;normalVisit(actor,[target],actor+':aura');const role=isPoisoned(actor)?null:actualRoleForCopy(target),result=role?summaryRoleInfo(role).name:'ไม่ได้รับผลตรวจ';(n.auraChecks||(n.auraChecks={}))[key]={target,role,result};summaryDraft(actor,'aura',summaryAction(actor,'ตรวจบทบาท',[target],result));if(role&&gameState.rolePlayerMap[target]==='kamikaze_wolf'&&actorAvailable(target)&&!isPoisoned(target)&&gameState.players.some(p=>p!==target&&gameState.playerStatus[p]?.alive&&actualWolf(p))){const cause={text:'Kamikaze Wolf ถูก Aura Seer ตรวจ',actors:[summaryPerson(target)]};for(const p of [target,actor])summaryWithCause(cause,()=>killWithLover(p));normalCommittedDeaths();prairieObserveDeaths();renderPlayerStatusList();}return role;}
+function publishDoppelTarget(p){if(!isMod||gameState.gamePhase!=='night'||gameState.dayCount!==1||victoryLocked()||!actorAvailable(p)||isPoisoned(p))return;const n=normalState(),target=n.links[p];if(gameState.rolePlayerMap[p]!=='doppelganger')return;(n.doppelTargets||(n.doppelTargets={}))[p]=target||'';for(const conn of Object.values(connectedPeers))if(activeRoleAssignments[conn.wwPlayerId]?.playerName===p)sendPrivateAssignment(conn);}
+function renderAuraResult(out,actor,entry){
+ out.replaceChildren();out.hidden=!entry;if(!entry)return;
+ out.className='text-xs p-2.5 rounded-lg border border-emerald-700 bg-emerald-950/80 text-emerald-300 space-y-1';
+ if(!entry.role){out.textContent='ไม่ได้รับผลตรวจ';return;}
+ const line=summaryNode('div','🔮 ผลการส่องออร่า: '),r=summaryRoleInfo(entry.role),button=summaryNode('button',r.icon+' '+r.name,'mod-role-preview text-[10px] text-amber-400 bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-900/50');button.type='button';
+ button.onclick=()=>{if(isMod)previewPlayerCard(entry.target,entry.role);};line.append(button);out.append(line,summaryNode('div','👉 Mod: กดปุ่ม Role ด้านบนแล้วยื่นให้ Aura Seer ดู','text-[10px] text-slate-400'));
+}
+function renderNov14Panels(){
+ document.querySelectorAll('[data-nov14-panel]').forEach(e=>e.remove());if(!isMod||gameState.gamePhase!=='night')return;const host=document.getElementById('actions-checklist');if(!host)return;
+ for(const p of gameState.players){const role=gameState.rolePlayerMap[p];if(!['aura_seer','alpha_wolf'].includes(role))continue;const tokens=panelTokens(role==='alpha_wolf'?'wolf':'seer'),box=summaryNode('div',undefined,tokens.box),heading=summaryNode('label',undefined,'flex items-center gap-2'),cb=summaryNode('input'),r=summaryRoleInfo(role);
+ box.dataset.nov14Panel='1';box.dataset.actor=p;box.dataset.panelRole=role;box.dataset.priority=role==='alpha_wolf'?'30.5':'49';cb.type='checkbox';cb.className=tokens.check;bindManualNarration(cb,'actor:'+p);heading.append(cb,summaryNode('span',r.icon+' '+r.name+' — '+p,tokens.title));box.append(heading);applyNarrationStatus(box,[p]);const state=gameState,phase=approvedPhaseKey(),valid=()=>isMod&&state===gameState&&phase===approvedPhaseKey()&&!victoryLocked();
+ const select=expansionTargetSelect(role==='aura_seer'?gameState.players.filter(actionTargetLiving):[gameState.wolfTarget,gameState.wolfTarget2].filter(t=>t&&actionTargetLiving(t)&&!actualWolf(t)));select.className='bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-100 max-w-full master-target-select';const body=summaryNode('div',undefined,'pl-6 space-y-2'),row=summaryNode('div',undefined,'night-target-row');row.append(select);body.append(row);box.append(body);
+ if(role==='aura_seer'){const out=summaryNode('div'),entry=normalState().auraChecks?.[p+':'+gameState.dayCount];select.value=entry?.target||'';select.disabled=!actorAvailable(p);body.append(out);renderAuraResult(out,p,entry);
+ select.onchange=()=>{if(!valid())return;if(!select.value){delete normalState().auraChecks?.[p+':'+gameState.dayCount];delete normalState().summaryDrafts?.[p+':aura'];normalVisit(p,[],p+':aura');renderAuraResult(out,p,null);return;}auraInspect(p,select.value);renderAuraResult(out,p,normalState().auraChecks?.[p+':'+gameState.dayCount]);};
+ }else{select.options[0].textContent='-- เลือกผู้เล่น/ข้าม --';select.disabled=!alphaEligible(p)||!wolfDraft().confirmed;if(alphaState().used[p])heading.append(summaryNode('span','ใช้พลังไปแล้ว — เรียกตามลำดับเหมือนเดิม','text-[10px] text-amber-300 ml-auto'));else if(select.disabled)heading.append(summaryNode('span','ใช้ได้เฉพาะคืนถัดจากวันที่หมาป่าถูกประหารเท่านั้น','text-[10px] text-amber-300 ml-auto'));const button=communityButton('ยืนยันแปลงเป็นหมาป่า',()=>{if(valid())confirmAlphaConversion(p,select.value);},select.disabled);button.className='bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition shadow whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed';body.append(button);}
+ host.append(box);}
+ [...host.children].sort((a,b)=>Number(a.dataset.priority||80)-Number(b.dataset.priority||80)).forEach(e=>host.append(e));
+}
+(function installNov14(){
+ const execute=summaryPerformExecution;summaryPerformExecution=function(victim,fn){const wolf=['werewolf','wolf_cub','direwolf','prairie_wolf','kamikaze_wolf','alpha_wolf'].includes(effectiveIdentityRole(victim)),alive=gameState.playerStatus[victim]?.alive,day=gameState.dayCount;const result=execute(victim,fn);if(isMod&&gameState.gamePhase==='day'&&alive&&wolf&&!gameState.playerStatus[victim]?.alive)alphaState().eligibleNight=day+1;return result;};
+ const calculate=calculateNightResult;calculateNightResult=function(...args){const a=alphaState().attempt;if(a?.night===gameState.dayCount)a.success=false;return calculate(...args);};
+ const panel=normalPanel;normalPanel=function(...args){const r=panel(...args);renderNov14Panels();return r;};
+ const payload=privateAssignmentPayload;privateAssignmentPayload=function(conn){const card=payload(conn);if(!card)return card;delete card.doppelTargetName;const target=normalState().doppelTargets?.[card.playerName];if(target)card.doppelTargetName=target;return card;};
+ const card=renderPlayerCard;renderPlayerCard=function(info){const result=card(info);document.getElementById('doppel-private-target')?.remove();if(info?.doppelTargetName){const p=summaryNode('p','เป้าหมายที่คุณเลือกคืนแรก: '+info.doppelTargetName,'text-xs text-purple-200');p.id='doppel-private-target';document.getElementById('card-front-content')?.append(p);}return result;};
+})();
+
+</script>
+<script>
+// Both visible phase controls share the existing transition and its gameplay guards.
+let phaseControlBusy=false;
+function phaseControlBlocked(){return !isMod||!isGameStarted||!['day','night'].includes(gameState.gamePhase)||victoryLocked()||judgeExecutionPending||!!activeMadBomber||Object.values(gameState.deathPowers||{}).includes('pending');}
+function renderPhaseControls(){
+ const top=document.getElementById('phase-next-top'),bottom=document.getElementById('phase-next-bottom');if(!top||!bottom)return;
+ const state=gameState,phase=approvedPhaseKey();
+ for(const button of [top,bottom]){button.hidden=!isMod;button.disabled=phaseControlBusy||phaseControlBlocked();button.onclick=()=>{
+  if(button.disabled||phaseControlBusy||state!==gameState||phase!==approvedPhaseKey()||phaseControlBlocked())return;
+  phaseControlBusy=true;top.disabled=bottom.disabled=true;
+  try{return nextPhase();}finally{setTimeout(()=>{phaseControlBusy=false;renderPhaseControls();},350);}
+ };}
+}
+(function installPhaseControls(){
+ // Execution renders while its async Judge/Pardon guard is still held.
+ // Refresh after the complete existing wrapper chain releases it, not before.
+ const execute=executeDayVote;executeDayVote=async function(...args){
+  try{const result=execute(...args);renderPhaseControls();return await result;}
+  finally{renderPhaseControls();}
+ };
+ for(const name of ['renderGameplay','renderPlayerStatusList']){const render=window[name];window[name]=function(...args){const result=render(...args);renderPhaseControls();return result;};}
+ renderPhaseControls();
+})();
 
 </script>
 </body>
