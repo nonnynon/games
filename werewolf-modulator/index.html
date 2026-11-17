@@ -4389,6 +4389,7 @@ function renderDrunkSetup(containerId) {
   }
   select.value = gameState.pendingDrunkRole || '';
   select.onchange = () => {
+    if (!transferCanMutate()) return;
     gameState.pendingDrunkRole = select.value;
     if (online) {
       updateBalanceCalculations();
@@ -5442,6 +5443,7 @@ function communityAlive() {
   return gameState.players.filter((p) => gameState.playerStatus[p]?.alive);
 }
 function communityReconcile() {
+  if (!transferCanMutate()) return;
   if (community.mayor && !communityAlive().includes(community.mayor)) {
     community.mayorStatus = community.mayor + ' — เสียชีวิต';
     community.mayor = null;
@@ -5520,25 +5522,28 @@ function communitySend(conn, requestId = null, error = '') {
     };
   const presence =
     typeof syncEnvelope === 'function' ? syncEnvelope(conn, 'presence', expected) : undefined;
-  conn.send({
-    type: 'COMMUNITY_STATE',
-    room: activeRoomCode,
-    public: pub,
-    own,
-    requestId,
-    error,
-    sync: pub.election ? sync : presence,
-    presence,
-    expected
-  });
+  conn.send(
+    transferStamp({
+      type: 'COMMUNITY_STATE',
+      room: activeRoomCode,
+      public: pub,
+      own,
+      requestId,
+      error,
+      sync: pub.election ? sync : presence,
+      presence,
+      expected
+    })
+  );
 }
 function communityPublish() {
   if (!isMod) return;
-  community.revision++;
+  if (transferCanMutate()) community.revision++;
   Object.values(connectedPeers).forEach((c) => communitySend(c));
   renderCommunity();
 }
 function communityRequest(data, conn) {
+  if (transferReceive(data, conn)) return;
   if (!isMod || !conn || connectedPeers[conn.peer] !== conn || !conn.open) return;
   const id = conn.wwPlayerId,
     member = joinedPlayers.some((p) => p.id === id) || !!activeRoleAssignments[id];
@@ -5550,6 +5555,7 @@ function communityRequest(data, conn) {
     communitySend(conn);
     return;
   }
+  if (!transferCanMutate()) return;
   if (data.epoch !== community.epoch) error = 'สถานะห้องเปลี่ยนแล้ว กรุณาลองอีกครั้ง';
   else if (data.type === 'MAYOR_BALLOT') {
     const p = activeRoleAssignments[id]?.playerName;
@@ -5590,6 +5596,7 @@ function communityRequest(data, conn) {
   renderCommunity();
 }
 function openMayorElection() {
+  if (!transferCanMutate()) return;
   if (
     !isMod ||
     !isGameStarted ||
@@ -5609,6 +5616,7 @@ function openMayorElection() {
   communityPublish();
 }
 function closeMayorElection() {
+  if (!transferCanMutate()) return;
   const e = community.election;
   if (!isMod || e?.phase !== 'open') return;
   e.phase = 'closed';
@@ -5619,6 +5627,7 @@ function closeMayorElection() {
   communityPublish();
 }
 function announceMayor() {
+  if (!transferCanMutate()) return;
   const e = community.election;
   if (!isMod || e?.phase !== 'closed') return;
   const max = Math.max(0, ...Object.values(e.totals)),
@@ -5640,6 +5649,7 @@ function impeachmentThreshold() {
   return Math.floor(Math.max(0, communityAlive().length - 1) / 2) + 1;
 }
 function impeachMayor() {
+  if (!transferCanMutate()) return;
   communityReconcile();
   if (!isMod || !community.mayor) return;
   if (
@@ -5652,6 +5662,7 @@ function impeachMayor() {
   renderPlayerStatusList();
 }
 function toggleRoleSurvey() {
+  if (!transferCanMutate()) return;
   if (!isMod || isGameStarted || community.survey.locked) return;
   community.survey.open = !community.survey.open;
   communityPublish();
@@ -5663,13 +5674,9 @@ function sendCommunityAction(type, extra) {
   }
   const requestId = crypto.randomUUID();
   communityPending = { requestId, type };
-  playerModConn.send({
-    type,
-    room: activeRoomCode,
-    epoch: communityView.epoch,
-    requestId,
-    ...extra
-  });
+  playerModConn.send(
+    transferStamp({ type, room: activeRoomCode, epoch: communityView.epoch, requestId, ...extra })
+  );
   renderCommunity();
   setTimeout(() => {
     if (communityPending?.requestId === requestId) {
@@ -5705,6 +5712,7 @@ function communityMessage(text) {
   document.querySelectorAll('[data-community-message]').forEach((n) => (n.textContent = text));
 }
 function beginLobbyEdit() {
+  if (!transferCanMutate()) return;
   if (!isMod || isGameStarted || lobbyDraft) return;
   lobbyDraft = { counts: { ...currentRoleCounts }, drunk: gameState.pendingDrunkRole };
   renderRolesBuilder();
@@ -5722,6 +5730,7 @@ function renderLobbyEdit() {
   }
 }
 function finishLobbyEdit(save) {
+  if (!transferCanMutate()) return;
   if (!lobbyDraft || !isMod || isGameStarted) return false;
   if (save) {
     const n = Object.values(currentRoleCounts).reduce((a, b) => a + b, 0);
@@ -5773,6 +5782,7 @@ function communityPanel(host, id) {
   return p;
 }
 function renderCommunity() {
+  transferRender();
   if (typeof renderSyncDashboard === 'function') renderSyncDashboard();
   const view = isMod ? communityPublic() : communityView;
   if (!view) {
@@ -5910,8 +5920,13 @@ function renderSurveyPanel(panel, view) {
   const s = view.survey,
     selected = isMod ? [] : communityOwn?.selected || [];
   let ui = panel.surveyUI;
+  if (ui && ui.mod !== isMod) {
+    panel.replaceChildren();
+    panel.surveyUI = null;
+    ui = null;
+  }
   if (!ui) {
-    ui = panel.surveyUI = { rows: new Map(), chips: new Map() };
+    ui = panel.surveyUI = { mod: isMod, rows: new Map(), chips: new Map() };
     panel.append(
       communityNode('h3', '📋 สำรวจบทที่อยากให้มี'),
       communityNode(
@@ -5968,9 +5983,9 @@ function renderSurveyPanel(panel, view) {
     panel.append(ui.list, ui.message);
   }
   if (isMod) {
-    ui.edit.disabled = isGameStarted;
+    ui.edit.disabled = !transferCanMutate() || isGameStarted;
     ui.toggle.textContent = s.open ? 'ปิดแบบสำรวจ' : 'เปิดแบบสำรวจ';
-    ui.toggle.disabled = s.locked || isGameStarted;
+    ui.toggle.disabled = !transferCanMutate() || s.locked || isGameStarted;
   }
   ui.status.textContent = s.locked
     ? 'ล็อกแล้ว — เริ่มเกมแล้ว'
@@ -6127,9 +6142,10 @@ function restoreLobbyButtons() {
 }
 function requestCommunitySync() {
   if (!isMod && joinIntent && activeRoomCode && playerModConn?.open)
-    playerModConn.send({ type: 'COMMUNITY_SYNC', room: activeRoomCode });
+    playerModConn.send(transferStamp({ type: 'COMMUNITY_SYNC', room: activeRoomCode }));
 }
 function receiveCommunityState(data, conn) {
+  if (transferReceive(data, conn)) return;
   if (isMod || conn !== playerModConn || !conn || !data.public || !data.own) return;
   if (typeof syncAccept === 'function' && !syncAccept(data, conn)) return;
   if (communityView?.epoch === data.public.epoch && data.public.revision < communityView.revision)
@@ -6172,9 +6188,13 @@ let syncHost = new Map(),
   syncOwnCooldown = 0,
   syncRetiredEpochs = new Set(),
   syncPlayerEpoch = '';
-function syncReset() {
+// Authority transitions retain the round, not its connection receipts.
+function syncResetForAuthority(epoch) {
+  syncReset(epoch);
+}
+function syncReset(preservedEpoch) {
   if (typeof recoveryRoundReset === 'function') recoveryRoundReset();
-  if (syncPlayerEpoch) syncRetiredEpochs.add(syncPlayerEpoch);
+  if (syncPlayerEpoch && syncPlayerEpoch !== preservedEpoch) syncRetiredEpochs.add(syncPlayerEpoch);
   syncPlayerEpoch = '';
   syncHost.clear();
   syncOwn = {};
@@ -6238,6 +6258,7 @@ function syncValidHost(conn) {
   );
 }
 function syncHostMessage(data, conn) {
+  if (transferReceive(data, conn)) return;
   if (data.room !== activeRoomCode || !syncValidHost(conn)) return;
   const r = syncRecord(conn.wwPlayerId),
     s = data.sync;
@@ -6263,6 +6284,7 @@ function syncHostMessage(data, conn) {
   renderSyncDashboard();
 }
 function syncAccept(data, conn) {
+  if (transferReceive(data, conn)) return false;
   const s = data.sync;
   if (
     isMod ||
@@ -6341,7 +6363,7 @@ function syncReceived(data, conn) {
     now - (old.ackAt || 0) >= 5000
   ) {
     try {
-      conn.send({ type: 'SYNC_ACK', room: activeRoomCode, sync: s });
+      conn.send(transferStamp({ type: 'SYNC_ACK', room: activeRoomCode, sync: s }));
       syncOwn[s.kind].ackAt = now;
     } catch (e) {
       syncOwn[s.kind].ackAt = 0;
@@ -6386,7 +6408,7 @@ function syncRequestOwn() {
   )
     return;
   syncOwnCooldown = now;
-  playerModConn.send({ type: 'SYNC_REQUEST', room: activeRoomCode, sync: v.sync });
+  playerModConn.send(transferStamp({ type: 'SYNC_REQUEST', room: activeRoomCode, sync: v.sync }));
   renderSyncDashboard();
 }
 function syncRoster() {
@@ -6731,14 +6753,16 @@ let devMode = false,
   devReservations = new Map(),
   devNotice = '';
 function devEditable() {
-  return isMod && !isGameStarted && !lobbyDraft;
+  return transferCanMutate() && isMod && !isGameStarted && !lobbyDraft;
 }
 function devReset() {
+  if (!transferCanMutate()) return;
   devMode = false;
   devReservations.clear();
   devNotice = '';
 }
 function devReconcile() {
+  if (!transferCanMutate()) return;
   if (isGameStarted || lobbyDraft) return;
   const ids = new Set(joinedPlayers.map((p) => p.id)),
     remaining = [...gameState.selectedRoles],
@@ -7792,12 +7816,14 @@ function victorySend(conn) {
   if (delivery.acked || Date.now() < delivery.next) return;
   delivery.next = Date.now() + Math.min(30000, 1000 * 2 ** Math.min(delivery.attempts++, 5));
   try {
-    conn.send({
-      type: 'VICTORY_RESULT',
-      ...snapshot,
-      requestId: delivery.requestId,
-      token: delivery.token
-    });
+    conn.send(
+      transferStamp({
+        type: 'VICTORY_RESULT',
+        ...snapshot,
+        requestId: delivery.requestId,
+        token: delivery.token
+      })
+    );
   } catch (e) {
     console.warn('Summary replay deferred');
   }
@@ -7885,15 +7911,17 @@ function victoryReceive(data, conn) {
   }
   // Re-ACK duplicates (including a fresh connection), without opening UI or recomputing history.
   try {
-    conn.send({
-      type: 'VICTORY_ACK',
-      room: data.room,
-      session: data.session,
-      epoch: data.epoch,
-      requestId: data.requestId,
-      token: data.token,
-      id: data.id
-    });
+    conn.send(
+      transferStamp({
+        type: 'VICTORY_ACK',
+        room: data.room,
+        session: data.session,
+        epoch: data.epoch,
+        requestId: data.requestId,
+        token: data.token,
+        id: data.id
+      })
+    );
   } catch (e) {}
 }
 function victoryReset() {
@@ -7912,6 +7940,7 @@ function recoveryDelay(attempt) {
 }
 function recoveryCurrent(r, p) {
   return (
+    transferCurrent(r) &&
     recoveryState === r &&
     !r.stopped &&
     r.room === activeRoomCode &&
@@ -8056,6 +8085,13 @@ function recoveryCreatePeer(r) {
     r.signalDeadline = 0;
     r.signalNext = 0;
     if (r.mod) {
+      if (!transferSignalReady(id)) {
+        r.stopped = true;
+        try {
+          p.destroy();
+        } catch (e) {}
+        return;
+      }
       currentModPeerId = id;
       r.signalId = id;
       recoveryModStatus(true);
@@ -8087,15 +8123,17 @@ function recoveryCreatePeer(r) {
       recoveryDropPlayer(r);
       return;
     }
-    // Only an unclaimed, empty new lobby may choose a fallback signaling ID.
+    // Only a never-advertised empty generation-zero room can select a different canonical code.
     if (
       err?.type === 'unavailable-id' &&
       r.mod &&
       !r.everOpened &&
-      !isGameStarted &&
-      !joinedPlayers.length
-    )
-      r.signalId = getModPeerId(r.room) + '_' + Math.random().toString(36).slice(2, 6);
+      !joinedPlayers.length &&
+      transferAuthority?.generation === 0
+    ) {
+      transferNewCanonical(r, p);
+      return;
+    }
     if (p.disconnected || p.destroyed || !r.ready) {
       r.ready = false;
       r.signalNext = Date.now() + recoveryDelay(r.signalAttempt++);
@@ -8123,13 +8161,15 @@ function recoveryCreatePeer(r) {
         if (!valid()) return;
         conn.wwRecoveryOpened = Date.now();
         try {
-          conn.send({
-            type: 'ROOM_STATE_UPDATE',
-            room: activeRoomCode,
-            joinedCount: joinedPlayers.length,
-            totalTarget: getTotalPlayersCount(),
-            playersList: joinedPlayers.map((p) => p.name)
-          });
+          conn.send(
+            transferStamp({
+              type: 'ROOM_STATE_UPDATE',
+              room: activeRoomCode,
+              joinedCount: joinedPlayers.length,
+              totalTarget: getTotalPlayersCount(),
+              playersList: joinedPlayers.map((p) => p.name)
+            })
+          );
         } catch (e) {}
       });
       conn.on('data', (data) => {
@@ -8153,6 +8193,7 @@ function recoveryCreatePeer(r) {
     });
 }
 function setupRealtimeListener(roomCode, asMod) {
+  if (transferSetup(roomCode, asMod) === false) return false;
   const same = recoveryState?.room === roomCode && recoveryState?.mod === asMod;
   const stable = asMod
     ? same
@@ -8224,7 +8265,12 @@ function connectPlayerToMod(roomCode, targetId) {
       (params.get('room') || '').trim().toUpperCase() === roomCode.trim().toUpperCase()
         ? params.get('mid')
         : null,
-    target = targetId || hint || getModPeerId(roomCode);
+    target =
+      (transferAuthority?.room === roomCode ? transferAuthority.signal : null) ||
+      targetId ||
+      currentModPeerId ||
+      hint ||
+      getModPeerId(roomCode);
   r.dataSince = now;
   r.probeAt = 0;
   updatePlayerConnBadge(false, 'กำลังเชื่อมต่อเข้าห้อง');
@@ -8273,6 +8319,7 @@ function connectPlayerToMod(roomCode, targetId) {
   conn.on('error', failed);
 }
 function recoverySignalTick(r, now) {
+  if (!recoveryCurrent(r)) return;
   const p = peerInstance;
   if (navigator.onLine === false) return;
   if (!p || p.destroyed) {
@@ -8308,6 +8355,7 @@ function recoveryCardRetry(conn, now) {
   }
 }
 function recoveryTick() {
+  transferTick();
   const r = recoveryState;
   if (!r || !recoveryCurrent(r) || gameState.offlineGame) return;
   const now = Date.now();
@@ -8530,6 +8578,1252 @@ if (typeof window !== 'undefined' && window.visualViewport) {
   window.addEventListener('resize', updateMobileModalViewport);
   window.addEventListener('DOMContentLoaded', updateMobileModalViewport);
 }
+
+// Cooperative, predeal handover. Signalling registration is NOT an ownership election.
+// Integration: call transferReceive FIRST in handleIncomingMessage; stamp every send.
+// Call transferSetup before recoveryStop; guard host recovery with transferCurrent.
+// transferTick must run even when recoveryCurrent is false. No monkey patches.
+let transferAuthority = null,
+  transferPending = null,
+  transferStatus = '',
+  transferAcquirePeer = null;
+const transferTab = crypto.randomUUID(); // deliberately NOT sessionStorage (duplicated tabs copy it)
+const transferPrefix = 'ww_transfer_v1:';
+function transferClone(v) {
+  return JSON.parse(JSON.stringify(v));
+}
+function transferRead(k) {
+  const s = localStorage.getItem(transferPrefix + k);
+  return s ? JSON.parse(s) : null;
+}
+function transferWrite(k, v) {
+  if (k.startsWith('pin:')) {
+    const old = transferRead(k);
+    if (
+      old &&
+      (old.instance !== v.instance ||
+        old.generation > v.generation ||
+        (old.generation === v.generation && !transferSame(old, v)))
+    )
+      throw Error('ไม่สามารถย้อนสิทธิ์ห้อง');
+  }
+  const s = JSON.stringify(v);
+  localStorage.setItem(transferPrefix + k, s);
+  if (localStorage.getItem(transferPrefix + k) !== s) throw Error('บันทึกสิทธิ์ห้องไม่สำเร็จ');
+}
+function transferSame(a, b) {
+  return (
+    !!a &&
+    !!b &&
+    a.instance === b.instance &&
+    a.generation === b.generation &&
+    a.owner === b.owner &&
+    a.signal === b.signal
+  );
+}
+function transferOwned() {
+  try {
+    const a = transferAuthority,
+      r = a && transferRead('room:' + activeRoomCode);
+    return (
+      !!a &&
+      a.tab === transferTab &&
+      r?.tab === transferTab &&
+      r.state === 'active' &&
+      transferSame(a, r) &&
+      !transferRead('retired:' + a.instance + ':' + a.generation)
+    );
+  } catch (e) {
+    return false;
+  }
+}
+function transferCanMutate() {
+  if (!activeRoomCode || gameState.offlineGame) return true;
+  if (!isMod) return false;
+  if (!transferAuthority) return false;
+  return transferOwned() && (!transferPending || transferPending.phase === 'committed');
+}
+function transferCurrent(r) {
+  return (
+    !r?.mod ||
+    (transferOwned() &&
+      !(transferPending && ['retired', 'acquiring', 'failed'].includes(transferPending.phase)))
+  );
+}
+function transferSetup(room, asMod) {
+  try {
+    if (!asMod) {
+      transferRefreshPin(room);
+      return true;
+    }
+    if (transferAuthority?.room === room) return transferOwned();
+    const old = transferRead('room:' + room);
+    if (old) {
+      transferStatus = 'ห้องนี้มีเจ้าของหรือถูกส่งต่อแล้ว — เปิดห้องใหม่';
+      return false;
+    }
+    transferAuthority = {
+      v: 1,
+      room,
+      instance: crypto.randomUUID(),
+      generation: 0,
+      owner: myDeviceId,
+      tab: transferTab,
+      signal: getModPeerId(room),
+      chain: []
+    };
+    transferWrite('room:' + room, { ...transferAuthority, state: 'active' });
+    transferWrite('pin:' + room, transferAuthority);
+    return true;
+  } catch (e) {
+    transferStatus = 'ไม่สามารถบันทึกสิทธิ์ห้องได้ — หยุดเพื่อความปลอดภัย';
+    return false;
+  }
+}
+// Called by recovery's host open event BEFORE advertising a newly assigned ID.
+function transferNewCanonical(r, p) {
+  if (!transferOwned() || r.everOpened || joinedPlayers.length || transferPending) return;
+  try {
+    const old = activeRoomCode;
+    transferWrite('room:' + old, { ...transferAuthority, state: 'abandoned' });
+    r.stopped = true;
+    p.destroy();
+    let next;
+    for (let i = 0; i < 100; i++) {
+      next = 'WW-' + Math.floor(1000 + Math.random() * 9000);
+      if (next !== old && !transferRead('room:' + next)) break;
+      next = null;
+    }
+    if (!next) throw Error('ไม่มีรหัสว่าง');
+    transferAuthority = null;
+    currentModPeerId = '';
+    activeRoomCode = next;
+    if (setupRealtimeListener(next, true) === false) throw Error('บันทึกห้องไม่ได้');
+    transferStatus = 'รหัสชนกัน เลือกรหัสใหม่ก่อนเปิดรับผู้เล่น';
+    document.getElementById('mod-room-code-display').innerText = 'กำลังจองรหัสห้อง';
+    generateLobbyQRCode();
+  } catch (e) {
+    r.stopped = true;
+    transferStatus = 'จองรหัสห้องไม่ได้ — กรุณาเริ่มห้องใหม่';
+  }
+  transferRender();
+}
+function transferSignalReady(id) {
+  if (!transferOwned()) return false;
+  try {
+    transferAuthority.signal = id;
+    transferWrite('room:' + activeRoomCode, { ...transferAuthority, state: 'active' });
+    transferWrite('pin:' + activeRoomCode, transferAuthority);
+    const tag = document.getElementById('mod-room-code-display');
+    if (tag) tag.innerText = activeRoomCode;
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+function transferStamp(data) {
+  return transferAuthority
+    ? {
+        ...data,
+        authority: {
+          v: 1,
+          room: transferAuthority.room,
+          instance: transferAuthority.instance,
+          generation: transferAuthority.generation,
+          owner: transferAuthority.owner,
+          signal: transferAuthority.signal,
+          chain: transferAuthority.chain || []
+        }
+      }
+    : data;
+}
+function transferSend(c, type, extra = {}) {
+  if (!c?.open) throw Error('การเชื่อมต่อขาด');
+  c.send(transferStamp({ type, room: activeRoomCode, ...extra }));
+}
+// Re-read durable authority at acceptance: storage events may be delayed.
+function transferRefreshPin(room) {
+  const pin = transferRead('pin:' + room),
+    old = transferAuthority?.room === room ? transferAuthority : null;
+  if (pin && old && pin.instance !== old.instance) throw Error('สิทธิ์ห้องไม่ตรง');
+  if (pin && (!old || pin.generation > old.generation)) transferAuthority = transferClone(pin);
+  else if (pin && old && pin.generation === old.generation && !transferSame(pin, old))
+    throw Error('สิทธิ์ห้องไม่ตรง');
+  else transferAuthority = old;
+  return transferAuthority;
+}
+function transferEnvelope(data, conn) {
+  const a = data.authority;
+  if (
+    !a ||
+    a.v !== 1 ||
+    a.room !== activeRoomCode ||
+    typeof a.instance !== 'string' ||
+    !Number.isSafeInteger(a.generation) ||
+    a.generation < 0 ||
+    typeof a.owner !== 'string' ||
+    typeof a.signal !== 'string'
+  )
+    return false;
+  if (isMod)
+    return !!conn?.open && connectedPeers[conn.peer] === conn && transferSame(a, transferAuthority);
+  if (conn !== playerModConn || !conn?.open || conn.peer !== a.signal) return false;
+  let old;
+  try {
+    old = transferRefreshPin(activeRoomCode);
+  } catch (e) {
+    return false;
+  }
+  // Only the direct host connection is a trust-on-first-use anchor. Public channels never pin.
+  if (old && !transferSame(old, a)) {
+    if (a.instance !== old.instance || a.generation <= old.generation) return false;
+    let prev = old;
+    const chain = a.chain;
+    if (!Array.isArray(chain) || chain.length > 64) return false;
+    for (const c of chain.filter((x) => x.from >= old.generation)) {
+      if (
+        c.instance !== old.instance ||
+        c.from !== prev.generation ||
+        c.previous !== prev.owner ||
+        c.to !== c.from + 1 ||
+        c.signal !== old.signal ||
+        typeof c.digest !== 'string'
+      )
+        return false;
+      prev = { ...prev, generation: c.to, owner: c.owner };
+    }
+    if (!transferSame(prev, a)) return false;
+  }
+  try {
+    transferWrite('pin:' + activeRoomCode, a);
+    transferAuthority = transferClone(a);
+    return true;
+  } catch (e) {
+    transferStatus = 'บันทึกเจ้าของห้องไม่ได้';
+    return false;
+  }
+}
+function transferCandidates() {
+  return joinedPlayers
+    .filter((p) => !p.testBot && p.id !== myDeviceId)
+    .map((p) => ({
+      p,
+      c: Object.values(connectedPeers).find(
+        (c) =>
+          c.open &&
+          c.wwPlayerId === p.id &&
+          c.wwJoinRequestId &&
+          syncHost.get(p.id)?.conn === c &&
+          Date.now() - syncHost.get(p.id).lastReply < 10000
+      )
+    }))
+    .filter((x) => x.c);
+}
+function transferOffer(id, name) {
+  if (
+    !transferCanMutate() ||
+    isGameStarted ||
+    lobbyDraft ||
+    !peerInstance?.open ||
+    transferAuthority.chain.length >= 64
+  )
+    return false;
+  const target = transferCandidates().find((x) => x.p.id === id);
+  name = String(name || '').trim();
+  if (
+    !target ||
+    joinNameError(name, myDeviceId, false) ||
+    !name ||
+    name.length > 40 ||
+    joinedPlayers.some(
+      (p) =>
+        p.id !== id &&
+        (p.id === myDeviceId || p.name.toLocaleLowerCase() === name.toLocaleLowerCase())
+    )
+  ) {
+    transferStatus = 'เลือกผู้เล่นที่เชื่อมต่อและชื่อของคุณที่ไม่ซ้ำ (1–40 ตัวอักษร)';
+    transferRender();
+    return false;
+  }
+  if (
+    !confirm(
+      'ส่งต่อ Host + Mod ให้ ' +
+        target.p.name +
+        ' และเข้าเป็นผู้เล่นชื่อ ' +
+        name +
+        ' แทนที่นั่งเดิม? หลังส่งสิทธิ์แล้วจะย้อนกลับอัตโนมัติไม่ได้'
+    )
+  )
+    return false;
+  const t = (transferPending = {
+    id: crypto.randomUUID(),
+    phase: 'offered',
+    side: 'source',
+    conn: target.c,
+    target: id,
+    name,
+    expires: Date.now() + 30000,
+    nonce: crypto.randomUUID()
+  });
+  clearTimeout(autoStartTimer);
+  autoStartTimer = null;
+  try {
+    transferBindControl(t);
+    transferSend(t.conn, 'TRANSFER_OFFER', {
+      tid: t.id,
+      nonce: t.nonce,
+      target: id,
+      name,
+      expires: t.expires
+    });
+  } catch (e) {
+    transferAbort(e.message);
+  }
+  transferRender();
+  return true;
+}
+function transferAbort(reason = 'ยกเลิกการส่งต่อแล้ว', notify = true) {
+  const t = transferPending;
+  if (!t || ['retired', 'acquiring', 'committed', 'failed'].includes(t.phase)) return;
+  if (notify)
+    try {
+      transferSend(t.conn, 'TRANSFER_CANCEL', { tid: t.id, nonce: t.nonce });
+    } catch (e) {}
+  t.conn.off?.('data', t.controlListener);
+  transferPending = null;
+  transferStatus = reason;
+  transferRender();
+}
+function transferRespond(accept) {
+  const t = transferPending;
+  if (!t || t.side !== 'target' || t.phase !== 'offered') return;
+  if (Date.now() >= t.expires) {
+    transferAbort('คำเชิญหมดอายุ');
+    return;
+  }
+  if (!accept) {
+    transferAbort('ปฏิเสธแล้ว');
+    return;
+  }
+  t.phase = 'accepted';
+  t.until = Date.now() + 30000;
+  try {
+    transferSend(t.conn, 'TRANSFER_ACCEPT', { tid: t.id, nonce: t.nonce });
+  } catch (e) {
+    transferAbort(e.message);
+  }
+  transferRender();
+}
+function transferSnapshot(t) {
+  const roster = joinedPlayers.map((p) => ({
+      id: p.id,
+      name: p.name,
+      ...(p.testBot ? { testBot: true } : {})
+    })),
+    seat = roster.findIndex((p) => p.id === t.target);
+  if (seat < 0) throw Error('ไม่พบที่นั่ง');
+  roster[seat] = { id: myDeviceId, name: t.name };
+  const c = transferClone(community);
+  delete c.survey.votes[t.target];
+  delete c.survey.versions[t.target];
+  delete c.survey.votes[myDeviceId];
+  delete c.survey.versions[myDeviceId];
+  return {
+    v: 1,
+    room: activeRoomCode,
+    authority: transferClone(transferAuthority),
+    next: { generation: transferAuthority.generation + 1, owner: t.target },
+    tid: t.id,
+    seat,
+    departing: t.target,
+    source: { id: myDeviceId, name: t.name },
+    roster,
+    roles: [...gameState.selectedRoles],
+    counts: transferClone(currentRoleCounts),
+    drunk: gameState.pendingDrunkRole ?? null,
+    preset: selectedRolePreset,
+    community: c,
+    dev: {
+      enabled: devMode,
+      reservations: [...devReservations].map(([id, r]) => [id === t.target ? myDeviceId : id, r])
+    }
+  };
+}
+function transferValidate(s) {
+  const fail = () => {
+      throw Error('ข้อมูลล็อบบี้ไม่ถูกต้อง');
+    },
+    roles = new Set(ROLES_DATABASE.map((r) => r.id));
+  if (
+    !s ||
+    s.v !== 1 ||
+    s.room !== activeRoomCode ||
+    s.authority?.room !== s.room ||
+    s.next?.generation !== s.authority.generation + 1 ||
+    s.next.owner !== s.departing ||
+    !Array.isArray(s.roster) ||
+    s.roster.length > 100 ||
+    !s.roster.length ||
+    !Number.isInteger(s.seat) ||
+    s.roster[s.seat]?.id !== s.source?.id ||
+    s.roster[s.seat]?.name !== s.source.name ||
+    s.roster.some(
+      (p) =>
+        typeof p.id !== 'string' ||
+        !p.id ||
+        typeof p.name !== 'string' ||
+        !p.name.trim() ||
+        p.name.length > 40 ||
+        p.id === s.departing
+    ) ||
+    new Set(s.roster.map((p) => p.id)).size !== s.roster.length ||
+    new Set(s.roster.map((p) => p.name.toLocaleLowerCase())).size !== s.roster.length
+  )
+    fail();
+  if (
+    !Array.isArray(s.roles) ||
+    s.roles.length < Math.max(3, s.roster.length) ||
+    s.roles.length > 100 ||
+    s.roles.some((r) => !roles.has(r)) ||
+    !s.counts ||
+    Object.entries(s.counts).some(
+      ([r, n]) => !roles.has(r) || !Number.isInteger(n) || n < 0 || n > 100
+    ) ||
+    s.roles.some((r) => s.counts[r] !== s.roles.filter((x) => x === r).length) ||
+    Object.values(s.counts).reduce((a, b) => a + b, 0) !== s.roles.length ||
+    (s.drunk !== null && !roles.has(s.drunk))
+  )
+    fail();
+  const c = s.community;
+  if (
+    !c ||
+    typeof c.epoch !== 'string' ||
+    !Number.isInteger(c.revision) ||
+    c.election !== null ||
+    c.mayor !== null ||
+    typeof c.survey?.id !== 'string' ||
+    typeof c.survey.open !== 'boolean' ||
+    c.survey.locked !== false ||
+    !c.survey.votes ||
+    !c.survey.versions
+  )
+    fail();
+  for (const [id, v] of Object.entries(c.survey.votes))
+    if (
+      !s.roster.some((p) => p.id === id) ||
+      id === s.source.id ||
+      !Array.isArray(v) ||
+      v.length > 3 ||
+      v.some((r) => !roles.has(r))
+    )
+      fail();
+  for (const [id, v] of Object.entries(c.survey.versions))
+    if (!s.roster.some((p) => p.id === id) || id === s.source.id || !Number.isInteger(v) || v < 0)
+      fail();
+  if (
+    typeof s.dev?.enabled !== 'boolean' ||
+    !Array.isArray(s.dev.reservations) ||
+    s.dev.reservations.length > s.roster.length
+  )
+    fail();
+  const seen = new Set(),
+    pool = [...s.roles];
+  for (const pair of s.dev.reservations) {
+    if (!Array.isArray(pair) || pair.length !== 2) fail();
+    const [id, r] = pair,
+      i = pool.indexOf(r);
+    if (seen.has(id) || !s.roster.some((p) => p.id === id) || i < 0) fail();
+    seen.add(id);
+    pool.splice(i, 1);
+  }
+  return true;
+}
+async function transferDigest(s) {
+  const bytes = new TextEncoder().encode(JSON.stringify(s));
+  if (bytes.length > 262144) throw Error('ข้อมูลเกินขนาด');
+  return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)), (x) =>
+    x.toString(16).padStart(2, '0')
+  ).join('');
+}
+async function transferPrepare(t) {
+  try {
+    if (
+      isGameStarted ||
+      lobbyDraft ||
+      !transferOwned() ||
+      !transferCandidates().some((x) => x.c === t.conn && x.p.id === t.target)
+    )
+      throw Error('ผู้รับไม่พร้อม');
+    t.phase = 'preparing';
+    t.until = Date.now() + 30000;
+    t.snapshot = transferSnapshot(t);
+    transferValidate(t.snapshot);
+    t.digest = await transferDigest(t.snapshot);
+    if (transferPending !== t || t.phase !== 'preparing') return;
+    transferSend(t.conn, 'TRANSFER_PREPARE', {
+      tid: t.id,
+      nonce: t.nonce,
+      snapshot: t.snapshot,
+      digest: t.digest
+    });
+  } catch (e) {
+    if (transferPending === t) transferAbort(e.message);
+  }
+  transferRender();
+}
+async function transferStage(t, data) {
+  try {
+    t.phase = 'validating';
+    transferValidate(data.snapshot);
+    if (
+      data.snapshot.tid !== t.id ||
+      data.snapshot.departing !== myDeviceId ||
+      !transferSame(data.snapshot.authority, transferAuthority)
+    )
+      throw Error('สิทธิ์ไม่ตรง');
+    const digest = await transferDigest(data.snapshot);
+    if (transferPending !== t || t.phase !== 'validating') return;
+    if (digest !== data.digest) throw Error('Digest ไม่ตรง');
+    t.snapshot = transferClone(data.snapshot);
+    t.digest = digest;
+    t.phase = 'prepared';
+    t.until = Date.now() + 30000;
+    transferSend(t.conn, 'TRANSFER_PREPARED', { tid: t.id, nonce: t.nonce, digest });
+  } catch (e) {
+    if (transferPending === t) transferAbort(e.message);
+  }
+  transferRender();
+}
+function transferRetire(t) {
+  try {
+    if (
+      !transferOwned() ||
+      isGameStarted ||
+      lobbyDraft ||
+      !t.conn.open ||
+      connectedPeers[t.conn.peer] !== t.conn ||
+      t.conn.wwPlayerId !== t.target ||
+      Date.now() >= t.until
+    )
+      throw Error('ไม่พร้อมส่งต่อ');
+    const a = transferAuthority,
+      certificate = {
+        instance: a.instance,
+        from: a.generation,
+        to: a.generation + 1,
+        previous: a.owner,
+        owner: t.target,
+        signal: a.signal,
+        tid: t.id,
+        digest: t.digest
+      };
+    t.successor = {
+      ...a,
+      generation: a.generation + 1,
+      owner: t.target,
+      chain: [...a.chain, certificate]
+    };
+    delete t.successor.tab;
+    // Irreversible BEFORE even attempting the grant. Never clear this tombstone.
+    transferWrite('retired:' + a.instance + ':' + a.generation, {
+      tid: t.id,
+      digest: t.digest,
+      successor: t.successor
+    });
+    t.phase = 'retired';
+    t.grantAt = Date.now();
+    t.until = 0;
+    transferWrite('room:' + activeRoomCode, { ...a, state: 'retired', tid: t.id });
+    if (recoveryState) recoveryState.stopped = true;
+    clearTimeout(autoStartTimer);
+    clearTimeout(reconnectTimer);
+    clearTimeout(connectDeadline);
+    transferSend(t.conn, 'TRANSFER_GRANT', {
+      tid: t.id,
+      nonce: t.nonce,
+      digest: t.digest,
+      successor: t.successor
+    });
+    // disconnect releases signalling but preserves the exact grant/control data channel.
+    peerInstance.disconnect();
+    for (const c of Object.values(connectedPeers))
+      if (c !== t.conn)
+        try {
+          c.close();
+        } catch (e) {}
+    connectedPeers = {};
+    transferStatus = 'ส่งสิทธิ์แล้ว กำลังรอผู้รับเปิดห้องเดิม — ห้ามสร้างเจ้าของซ้ำ';
+  } catch (e) {
+    if (t.phase === 'retired' || !transferOwned()) {
+      t.phase = 'retired';
+      transferStatus = 'สิทธิ์เดิมถูกยุติแล้ว กำลังตรวจสอบ — ไม่ย้อนกลับ';
+      if (recoveryState) recoveryState.stopped = true;
+      try {
+        peerInstance?.disconnect();
+      } catch (x) {}
+    } else transferAbort(e.message);
+  }
+  transferRender();
+}
+function transferGrant(t, data) {
+  if (
+    data.digest !== t.digest ||
+    !transferSame(data.successor, {
+      ...t.snapshot.authority,
+      generation: t.snapshot.next.generation,
+      owner: myDeviceId
+    })
+  )
+    return;
+  const expected = {
+    instance: t.snapshot.authority.instance,
+    from: t.snapshot.authority.generation,
+    to: t.snapshot.next.generation,
+    previous: t.snapshot.authority.owner,
+    owner: myDeviceId,
+    signal: t.snapshot.authority.signal,
+    tid: t.id,
+    digest: t.digest
+  };
+  if (
+    JSON.stringify(data.successor.chain) !==
+    JSON.stringify([...t.snapshot.authority.chain, expected])
+  )
+    return;
+  try {
+    transferWrite('grant:' + t.id, {
+      snapshot: t.snapshot,
+      digest: t.digest,
+      successor: data.successor
+    });
+    t.successor = transferClone(data.successor);
+    t.phase = 'acquiring';
+    t.started = Date.now();
+    t.attempt = 0;
+    t.next = 0;
+    if (recoveryState) recoveryState.stopped = true;
+    clearTimeout(reconnectTimer);
+    clearTimeout(connectDeadline);
+    transferAcquire(t);
+  } catch (e) {
+    t.phase = 'failed';
+    transferStatus = 'บันทึกสิทธิ์ใหม่ไม่สำเร็จ — ห้องหยุดเพื่อความปลอดภัย';
+  }
+  transferRender();
+}
+function transferAcquire(t) {
+  if (
+    transferPending !== t ||
+    t.phase !== 'acquiring' ||
+    transferAcquirePeer ||
+    Date.now() < t.next
+  )
+    return;
+  if (Date.now() - t.started > 120000) {
+    t.phase = 'failed';
+    transferStatus = 'รับที่อยู่ห้องเดิมไม่สำเร็จ — ไม่ย้อนสิทธิ์เดิม กรุณาสร้างห้องใหม่โดยชัดแจ้ง';
+    transferRender();
+    return;
+  }
+  let p;
+  try {
+    p = new Peer(t.successor.signal, PEER_SERVER_CONFIG);
+  } catch (e) {
+    t.next = Date.now() + 3000;
+    return;
+  }
+  transferAcquirePeer = p;
+  t.attempt++;
+  t.acquireDeadline = Date.now() + 15000;
+  const failed = () => {
+    if (transferAcquirePeer !== p) return;
+    transferAcquirePeer = null;
+    try {
+      p.destroy();
+    } catch (e) {}
+    t.next = Date.now() + Math.min(10000, 500 * 2 ** Math.min(t.attempt, 5));
+  };
+  p.on('error', () => {
+    if (t.phase === 'acquiring') failed();
+    else if (peerInstance === p && recoveryState) {
+      recoveryState.ready = false;
+      recoveryState.signalDeadline = Date.now() + 15000;
+    }
+  });
+  p.on('disconnected', () => {
+    if (t.phase === 'acquiring') failed();
+  });
+  p.on('connection', (c) => {
+    if (t.phase !== 'committed' || peerInstance !== p || !transferOwned()) {
+      c.close();
+      return;
+    }
+    transferAttachHost(c, p);
+  });
+  p.on('open', (id) => {
+    if (
+      t.phase === 'committed' &&
+      peerInstance === p &&
+      transferOwned() &&
+      id === transferAuthority.signal
+    ) {
+      recoveryState.ready = true;
+      recoveryState.signalDeadline = 0;
+      return;
+    }
+    if (
+      transferPending !== t ||
+      t.phase !== 'acquiring' ||
+      transferAcquirePeer !== p ||
+      id !== t.successor.signal
+    ) {
+      p.destroy();
+      return;
+    }
+    try {
+      transferInstall(t, p);
+      transferAcquirePeer = null;
+    } catch (e) {
+      t.phase = 'failed';
+      transferStatus = 'ติดตั้งห้องไม่สำเร็จ — หยุดเพื่อความปลอดภัย';
+      try {
+        p.destroy();
+      } catch (x) {}
+      transferAcquirePeer = null;
+      transferRender();
+    }
+  });
+  p.on('disconnected', () => {
+    if (peerInstance === p && recoveryState && transferOwned()) {
+      recoveryState.ready = false;
+      recoveryState.signalNext = Date.now() + 1000;
+    }
+  });
+  p.on('close', () => {
+    if (peerInstance === p && recoveryState) recoveryState.ready = false;
+  });
+}
+function transferAttachHost(c, p) {
+  const old = connectedPeers[c.peer];
+  connectedPeers[c.peer] = c;
+  if (old && old !== c) old.close();
+  c.wwRecoveryOpened = Date.now();
+  const valid = () => peerInstance === p && transferOwned() && connectedPeers[c.peer] === c;
+  c.on('open', () => {
+    if (valid())
+      transferSend(c, 'ROOM_STATE_UPDATE', {
+        joinedCount: joinedPlayers.length,
+        totalTarget: getTotalPlayersCount(),
+        playersList: joinedPlayers.map((x) => x.name)
+      });
+  });
+  c.on('data', (d) => {
+    if (valid())
+      try {
+        handleIncomingMessage(d, c);
+      } catch (e) {
+        console.warn('Transfer host receive rejected', e);
+      }
+  });
+  const close = () => {
+    if (connectedPeers[c.peer] === c) delete connectedPeers[c.peer];
+  };
+  c.on('close', close);
+  c.on('error', close);
+}
+function transferInstall(t, p) {
+  transferValidate(t.snapshot);
+  const s = t.snapshot,
+    old = peerInstance;
+  const a = { ...t.successor, tab: transferTab };
+  transferWrite('room:' + s.room, { ...a, state: 'active' });
+  transferWrite('pin:' + s.room, a);
+  transferAuthority = a;
+  joinedPlayers = transferClone(s.roster);
+  currentRoleCounts = transferClone(s.counts);
+  gameState.selectedRoles = [...s.roles];
+  gameState.pendingDrunkRole = s.drunk;
+  gameState.offlineGame = false;
+  selectedRolePreset = s.preset;
+  community = transferClone(s.community);
+  devMode = s.dev.enabled;
+  devReservations = new Map(s.dev.reservations);
+  devNotice = '';
+  lobbyDraft = null;
+  activeRoleAssignments = {};
+  currentGameSessionId = '';
+  isGameStarted = false;
+  isMod = true;
+  activeRoomCode = s.room;
+  currentModPeerId = a.signal;
+  peerInstance = p;
+  playerModConn = null;
+  connectedPeers = {};
+  joinIntent = false;
+  joinAdmitted = false;
+  joinWasAdmitted = false;
+  myAssignedRole = null;
+  clearTimeout(autoStartTimer);
+  autoStartTimer = null;
+  syncResetForAuthority(s.community.epoch);
+  recoveryState = {
+    room: s.room,
+    mod: true,
+    signalId: a.signal,
+    everOpened: true,
+    stopped: false,
+    ready: true,
+    signalAttempt: 0,
+    signalNext: 0,
+    signalDeadline: 0,
+    dataAttempt: 0,
+    dataNext: 0,
+    dataSince: 0,
+    probeAt: 0,
+    lastJoin: 0,
+    appError: '',
+    lastWake: 0
+  };
+  t.installation = transferClone({
+    tid: t.id,
+    digest: t.digest,
+    roster: s.roster,
+    roles: s.roles,
+    counts: s.counts,
+    drunk: s.drunk,
+    preset: s.preset
+  });
+  t.phase = 'committed';
+  t.controlPeer = old;
+  transferStatus = 'คุณเป็น Mod แล้ว ห้องและลิงก์เดิมพร้อมใช้งาน';
+  try {
+    sessionStorage.removeItem('ww_joined_room');
+    sessionStorage.removeItem('ww_assigned_role');
+  } catch (e) {}
+  startSyncHeartbeat();
+  showScreen('screen-mod-lobby');
+  updateModLobbyUI();
+  generateLobbyQRCode();
+  try {
+    transferSend(t.conn, 'TRANSFER_COMMIT', { tid: t.id, nonce: t.nonce, digest: t.digest });
+  } catch (e) {}
+  transferRender();
+}
+function transferReadback(conn) {
+  const t = transferPending;
+  if (
+    !isMod ||
+    t?.side !== 'target' ||
+    t.phase !== 'committed' ||
+    conn?.wwPlayerId !== t.snapshot.source.id
+  )
+    return null;
+  return t.installation &&
+    joinedPlayers.some((p) => p.id === t.snapshot.source.id && p.name === t.snapshot.source.name)
+    ? transferClone(t.installation)
+    : null;
+}
+function transferReadbackMatches(t, r) {
+  return (
+    !!r &&
+    r.tid === t.id &&
+    r.digest === t.digest &&
+    ['roster', 'roles', 'counts', 'drunk', 'preset'].every(
+      (k) => JSON.stringify(r[k]) === JSON.stringify(t.snapshot[k])
+    )
+  );
+}
+function transferLeavePlayerRoom() {
+  if (isMod || (transferPending && transferPending.phase !== 'committed')) return false;
+  recoveryStop();
+  try {
+    localChannel?.close();
+  } catch (e) {}
+  localChannel = null;
+  transferPending = null;
+  transferAuthority = null;
+  transferStatus = '';
+  activeRoomCode = '';
+  currentModPeerId = '';
+  isGameStarted = false;
+  joinIntent = false;
+  joinAdmitted = false;
+  joinWasAdmitted = false;
+  joinRequestId = '';
+  myAssignedRole = null;
+  lastCardDelivery = null;
+  currentGameSessionId = '';
+  joinedPlayers = [];
+  activeRoleAssignments = {};
+  community = freshCommunity();
+  communityView = null;
+  communityOwn = null;
+  communityPending = null;
+  syncReset();
+  devReset();
+  try {
+    for (const k of ['ww_joined_room', 'ww_assigned_role', 'ww_room_code', 'ww_session_id'])
+      sessionStorage.removeItem(k);
+  } catch (e) {}
+  // Preserve device identity and all durable authority/retirement records.
+  return true;
+}
+function transferNewRoom() {
+  if (!confirm('ห้องเดิมอาจยังมี Mod อยู่ จะออกและตั้งค่าห้องใหม่แยกต่างหากใช่หรือไม่? สิทธิ์เดิมจะไม่ถูกคืน')) return;
+  recoveryStop();
+  if (transferAcquirePeer) {
+    try {
+      transferAcquirePeer.destroy();
+    } catch (e) {}
+    transferAcquirePeer = null;
+  }
+  transferPending = null;
+  transferAuthority = null;
+  transferStatus = '';
+  activeRoomCode = '';
+  currentModPeerId = '';
+  isGameStarted = false;
+  isMod = true;
+  gameState.offlineGame = false;
+  joinedPlayers = [];
+  activeRoleAssignments = {};
+  joinIntent = false;
+  joinAdmitted = false;
+  myAssignedRole = null;
+  community = freshCommunity();
+  devReset();
+  startCreateRoom();
+}
+function transferSourceReconnect(t) {
+  if (t.rejoining) return;
+  t.rejoining = true;
+  syncResetForAuthority(t.snapshot.community.epoch);
+  myPlayerName = t.name;
+  transferAuthority = transferClone(t.successor);
+  try {
+    transferWrite('pin:' + activeRoomCode, transferAuthority);
+  } catch (e) {
+    transferStatus = 'บันทึกเจ้าของใหม่ไม่ได้';
+    return;
+  }
+  isMod = false;
+  joinIntent = true;
+  joinAdmitted = false;
+  joinWasAdmitted = true;
+  joinRequestId = crypto.randomUUID();
+  currentModPeerId = t.successor.signal;
+  setupRealtimeListener(activeRoomCode, false);
+  showScreen('screen-player-waiting');
+  transferStatus = 'ผู้รับเปิดห้องแล้ว กำลังยืนยันที่นั่งของคุณ';
+}
+// Dedicated protocol listener survives retirement of the original recovery closures.
+// Duplicate delivery before retirement is harmless because all transitions are phase-bound.
+function transferBindControl(t) {
+  const c = t.conn;
+  const listener = (d) => {
+    if (transferPending === t && d?.type?.startsWith('TRANSFER_')) transferReceive(d, c);
+  };
+  c.on('data', listener);
+  t.controlListener = listener;
+  c.on('close', () => {
+    c.off?.('data', listener);
+    if (t.controlPeer && t.controlPeer !== peerInstance) {
+      try {
+        t.controlPeer.destroy();
+      } catch (e) {}
+      t.controlPeer = null;
+    }
+  });
+}
+function transferReceive(data, conn) {
+  if (!data || typeof data.type !== 'string') return true;
+  const protocol = data.type.startsWith('TRANSFER_'),
+    t = transferPending;
+  // The old control channel stays valid only for this nonce-bound transaction.
+  if (
+    protocol &&
+    t &&
+    conn === t.conn &&
+    conn?.open &&
+    (isMod ||
+      t.side === 'source' ||
+      t.phase === 'acquiring' ||
+      t.phase === 'failed' ||
+      conn === playerModConn) &&
+    (!isMod ||
+      t.phase === 'retired' ||
+      t.phase === 'committed' ||
+      (connectedPeers[conn.peer] === conn && conn.wwPlayerId === t.target)) &&
+    data.room === activeRoomCode &&
+    data.tid === t.id &&
+    data.nonce === t.nonce
+  ) {
+    if (data.type === 'TRANSFER_CANCEL') {
+      transferAbort('ยกเลิกการส่งต่อแล้ว', false);
+      return true;
+    }
+    if (t.side === 'source') {
+      if (data.type === 'TRANSFER_ACCEPT' && t.phase === 'offered' && Date.now() < t.expires)
+        void transferPrepare(t);
+      else if (
+        data.type === 'TRANSFER_PREPARED' &&
+        t.phase === 'preparing' &&
+        data.digest === t.digest
+      )
+        transferRetire(t);
+      else if (
+        data.type === 'TRANSFER_COMMIT' &&
+        t.phase === 'retired' &&
+        data.digest === t.digest &&
+        transferSame(data.authority, t.successor)
+      )
+        transferSourceReconnect(t);
+    } else {
+      if (data.type === 'TRANSFER_PREPARE' && t.phase === 'accepted' && Date.now() < t.until)
+        void transferStage(t, data);
+      else if (
+        data.type === 'TRANSFER_PREPARE' &&
+        t.phase === 'prepared' &&
+        data.digest === t.digest
+      )
+        try {
+          transferSend(conn, 'TRANSFER_PREPARED', { tid: t.id, nonce: t.nonce, digest: t.digest });
+        } catch (e) {}
+      else if (data.type === 'TRANSFER_GRANT' && t.phase === 'prepared' && Date.now() < t.until)
+        transferGrant(t, data);
+      else if (
+        data.type === 'TRANSFER_GRANT' &&
+        t.phase === 'committed' &&
+        data.digest === t.digest
+      )
+        try {
+          transferSend(conn, 'TRANSFER_COMMIT', { tid: t.id, nonce: t.nonce, digest: t.digest });
+        } catch (e) {}
+    }
+    return true;
+  }
+  if (!transferEnvelope(data, conn)) {
+    // First join has no pinned authority yet; the existing admission owner validates it.
+    if (
+      isMod &&
+      data.type === 'PLAYER_JOIN' &&
+      conn?.open &&
+      connectedPeers[conn.peer] === conn &&
+      transferCanMutate() &&
+      (!data.authority ||
+        (data.authority.instance === transferAuthority.instance &&
+          data.authority.generation <= transferAuthority.generation))
+    )
+      return false;
+    return true;
+  }
+  if (protocol) {
+    if (
+      data.type === 'TRANSFER_OFFER' &&
+      !isMod &&
+      (!t || t.phase === 'committed') &&
+      joinAdmitted &&
+      conn === playerModConn &&
+      !isGameStarted &&
+      data.target === myDeviceId &&
+      typeof data.tid === 'string' &&
+      typeof data.nonce === 'string' &&
+      typeof data.name === 'string' &&
+      data.expires > Date.now() &&
+      data.expires <= Date.now() + 31000
+    ) {
+      transferPending = {
+        id: data.tid,
+        nonce: data.nonce,
+        side: 'target',
+        phase: 'offered',
+        conn,
+        expires: data.expires,
+        name: data.name
+      };
+      transferBindControl(transferPending);
+      transferStatus = '';
+      transferRender();
+    }
+    return true;
+  }
+  if (
+    isMod &&
+    !transferCanMutate() &&
+    !['SYNC_ACK', 'SYNC_REQUEST', 'COMMUNITY_SYNC'].includes(data.type)
+  )
+    return true;
+  if (
+    !isMod &&
+    t?.side === 'source' &&
+    t.rejoining &&
+    data.type === 'JOIN_ACK' &&
+    data.id === myDeviceId &&
+    data.name === t.name &&
+    data.requestId === joinRequestId &&
+    transferSame(data.authority, t.successor) &&
+    transferReadbackMatches(t, data.transferReadback)
+  ) {
+    t.phase = 'committed';
+    transferStatus = 'ส่งต่อสำเร็จ และยืนยันที่นั่งของคุณแล้ว — ปิดเครื่องนี้ได้';
+    transferRender();
+  }
+  return false;
+}
+function transferTick() {
+  const t = transferPending,
+    now = Date.now();
+  if (t) {
+    if (t.phase === 'offered' && (now >= t.expires || !t.conn.open))
+      transferAbort('คำเชิญหมดอายุ (30 วินาที)');
+    else if (
+      ['accepted', 'preparing', 'prepared', 'validating'].includes(t.phase) &&
+      (now >= t.until || !t.conn.open)
+    )
+      transferAbort('ยังไม่ได้ส่งสิทธิ์ — ผู้รับไม่พร้อม');
+    else if (t.phase === 'acquiring') {
+      if (transferAcquirePeer && now >= t.acquireDeadline) {
+        const p = transferAcquirePeer;
+        transferAcquirePeer = null;
+        p.destroy();
+        t.next = now + 2000;
+      }
+      transferAcquire(t);
+    } else if (
+      t.phase === 'retired' &&
+      !t.rejoining &&
+      t.successor &&
+      t.conn.open &&
+      now - (t.lastGrant || t.grantAt) > 2500
+    ) {
+      t.lastGrant = now;
+      try {
+        transferSend(t.conn, 'TRANSFER_GRANT', {
+          tid: t.id,
+          nonce: t.nonce,
+          digest: t.digest,
+          successor: t.successor
+        });
+      } catch (e) {}
+    } else if (
+      t.side === 'target' &&
+      t.phase === 'committed' &&
+      t.conn.open &&
+      now - (t.lastCommit || 0) > 2500
+    ) {
+      t.lastCommit = now;
+      try {
+        transferSend(t.conn, 'TRANSFER_COMMIT', { tid: t.id, nonce: t.nonce, digest: t.digest });
+      } catch (e) {}
+    }
+  }
+  if (isMod && transferAuthority && !transferOwned()) {
+    if (recoveryState) recoveryState.stopped = true;
+    clearTimeout(autoStartTimer);
+    transferStatus ||= 'สิทธิ์ Mod นี้สิ้นสุดแล้ว — ไม่สามารถแก้ไขห้อง';
+  }
+  transferRender();
+}
+function transferRender() {
+  if (typeof document === 'undefined' || !document.body) return;
+  const host = document.getElementById(isMod ? 'screen-mod-lobby' : 'screen-player-waiting');
+  if (!host) return;
+  let panel = document.getElementById('host-transfer-panel');
+  if (!panel) {
+    panel = document.createElement('section');
+    panel.id = 'host-transfer-panel';
+    panel.className = 'community-panel';
+    panel.style.cssText = 'max-width:100%;overflow-wrap:anywhere';
+    const heading = document.createElement('h3');
+    heading.textContent = 'ส่งต่อ Host + Mod';
+    const detail = document.createElement('p');
+    detail.textContent =
+      'ก่อนแจกบทเท่านั้น • คุณแทนที่ผู้รับในที่นั่งเดิมด้วยชื่อของคุณ • ลบคะแนนสำรวจของผู้รับ • คงชุดบทและลิงก์เดิมเมื่อรับที่อยู่สำเร็จ';
+    const select = document.createElement('select');
+    select.setAttribute('aria-label', 'เลือก Mod คนใหม่');
+    select.style.maxWidth = '100%';
+    const name = document.createElement('input');
+    name.placeholder = 'ชื่อของคุณเมื่อเป็นผู้เล่น';
+    name.setAttribute('aria-label', 'ชื่อของคุณเมื่อเป็นผู้เล่น');
+    name.maxLength = 40;
+    name.value = myPlayerName || '';
+    name.style.maxWidth = '100%';
+    const button = (label, fn) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'community-button';
+      b.textContent = label;
+      b.onclick = fn;
+      return b;
+    };
+    const offer = button('ส่งคำเชิญ 30 วินาที', () => transferOffer(select.value, name.value)),
+      cancel = button('ยกเลิก', () => transferAbort()),
+      accept = button('รับ Host + Mod', () => transferRespond(true)),
+      reject = button('ปฏิเสธ', () => transferRespond(false)),
+      status = document.createElement('p');
+    status.setAttribute('role', 'status');
+    status.setAttribute('aria-live', 'polite');
+    const recovery = button('ออกและตั้งค่าห้องใหม่', transferNewRoom);
+    panel.append(heading, detail, select, name, offer, accept, reject, cancel, status, recovery);
+    panel.transferUI = {
+      select,
+      name,
+      offer,
+      cancel,
+      accept,
+      reject,
+      status,
+      recovery,
+      options: new Map()
+    };
+  }
+  if (panel.parentElement !== host) host.append(panel);
+  const u = panel.transferUI,
+    t = transferPending;
+  panel.hidden =
+    !!isGameStarted ||
+    !activeRoomCode ||
+    !!gameState.offlineGame ||
+    (!isMod && !t && !transferStatus);
+  const candidates = isMod ? transferCandidates() : [],
+    ids = new Set(candidates.map((x) => x.p.id));
+  for (const [id, o] of u.options)
+    if (!ids.has(id)) {
+      o.remove();
+      u.options.delete(id);
+    }
+  for (const { p } of candidates) {
+    let o = u.options.get(p.id);
+    if (!o) {
+      o = document.createElement('option');
+      o.value = p.id;
+      u.select.append(o);
+      u.options.set(p.id, o);
+    }
+    o.textContent = p.name;
+  }
+  u.recovery.hidden = !(t && ['retired', 'failed'].includes(t.phase));
+  const idle = isMod && (!t || t.phase === 'committed') && transferCanMutate();
+  u.select.hidden = u.name.hidden = u.offer.hidden = !idle;
+  u.offer.disabled = !candidates.length || !!lobbyDraft;
+  u.accept.hidden = u.reject.hidden = !(t?.side === 'target' && t.phase === 'offered');
+  u.cancel.hidden = !(t?.side === 'source' && ['offered', 'preparing'].includes(t.phase));
+  const message =
+    t?.phase === 'offered'
+      ? 'รอตอบรับ ' + Math.max(0, Math.ceil((t.expires - Date.now()) / 1000)) + ' วินาที'
+      : t && ['accepted', 'validating', 'preparing', 'prepared'].includes(t.phase)
+        ? 'กำลังตรวจข้อมูล — ล็อบบี้ถูกพักชั่วคราว'
+        : t?.phase === 'acquiring'
+          ? 'กำลังรับที่อยู่ห้องเดิม อาจใช้เวลา — ยังไม่เสร็จ'
+          : transferStatus || 'เลือกผู้เล่นจริงที่ยืนยันการเชื่อมต่อล่าสุด';
+  if (u.status.textContent !== message) u.status.textContent = message;
+}
+// Storage is authoritative on every mutation, not merely when this event is delivered.
+if (typeof window !== 'undefined')
+  window.addEventListener('storage', (e) => {
+    if (e.key?.startsWith(transferPrefix) && isMod && transferAuthority && !transferOwned())
+      transferTick();
+  });
 
 let timerInterval = null;
 let timeLeft = 60;
@@ -8793,14 +10087,17 @@ function acknowledgeJoin(conn) {
   communitySend(conn);
   const p = joinedPlayers.find((p) => p.id === conn.wwPlayerId);
   if (conn.open && p)
-    conn.send({
-      type: 'JOIN_ACK',
-      room: activeRoomCode,
-      id: p.id,
-      name: p.name,
-      requestId: conn.wwJoinRequestId,
-      joinedCount: joinedPlayers.length
-    });
+    conn.send(
+      transferStamp({
+        type: 'JOIN_ACK',
+        room: activeRoomCode,
+        id: p.id,
+        name: p.name,
+        requestId: conn.wwJoinRequestId,
+        joinedCount: joinedPlayers.length,
+        transferReadback: transferReadback(conn)
+      })
+    );
 }
 
 function acceptJoin(name) {
@@ -8822,6 +10119,7 @@ function acceptJoin(name) {
 }
 
 function moveLobbyPlayer(playerId, direction) {
+  if (!transferCanMutate()) return;
   if (!isMod || isGameStarted || ![-1, 1].includes(direction)) return;
   const index = joinedPlayers.findIndex((p) => p.id === playerId);
   const next = index + direction;
@@ -8854,12 +10152,13 @@ function broadcastMessage(data) {
   data.senderId = myDeviceId;
   data.timestamp = Date.now();
   data.room = activeRoomCode;
+  data = transferStamp(data);
 
   // 1. BroadcastChannel (0ms local tabs on same device)
   // Shared channel carries public room metadata only, never identities or assignments.
   if (localChannel && ['ROOM_STATE_UPDATE', 'GAME_RESET'].includes(data.type)) {
     try {
-      localChannel.postMessage(data);
+      localChannel.postMessage(transferStamp(data));
     } catch (e) {}
   }
   if (data.type === 'GAME_STARTED_ASSIGNMENTS') return;
@@ -8869,7 +10168,7 @@ function broadcastMessage(data) {
     Object.values(connectedPeers).forEach((conn) => {
       if (conn && conn.open) {
         try {
-          conn.send(data);
+          conn.send(transferStamp(data));
         } catch (e) {
           console.warn('Error sending to peer', conn.peer, e);
         }
@@ -8878,7 +10177,7 @@ function broadcastMessage(data) {
   } else {
     if (playerModConn && playerModConn.open) {
       try {
-        playerModConn.send(data);
+        playerModConn.send(transferStamp(data));
       } catch (e) {
         console.warn('Error sending to Mod', e);
       }
@@ -8888,6 +10187,7 @@ function broadcastMessage(data) {
 
 // INDEX: Core / Incoming network messages
 function handleIncomingMessage(data, conn) {
+  if (transferReceive(data, conn)) return;
   if (!data || data.room !== activeRoomCode) return;
   if (data.type === 'VICTORY_RESULT') {
     victoryReceive(data, conn);
@@ -9023,13 +10323,15 @@ function handleIncomingMessage(data, conn) {
     // Direct reply back on conn to ensure newly joined player receives room state instantly
     if (conn && conn.open) {
       try {
-        conn.send({
-          type: 'ROOM_STATE_UPDATE',
-          room: activeRoomCode,
-          joinedCount: joinedPlayers.length,
-          totalTarget: getTotalPlayersCount(),
-          playersList: joinedPlayers.map((p) => p.name)
-        });
+        conn.send(
+          transferStamp({
+            type: 'ROOM_STATE_UPDATE',
+            room: activeRoomCode,
+            joinedCount: joinedPlayers.length,
+            totalTarget: getTotalPlayersCount(),
+            playersList: joinedPlayers.map((p) => p.name)
+          })
+        );
       } catch (e) {}
     }
 
@@ -9192,6 +10494,7 @@ function broadcastRoomStateUpdate() {
 // ---------------------------------------------
 // INDEX: Core / Role selection and room creation
 function startCreateRoom() {
+  if (!transferCanMutate()) return;
   lobbyDraft = null;
   restoreLobbyButtons();
   renderRolesBuilder();
@@ -9278,6 +10581,7 @@ function renderRolesBuilder() {
 }
 
 function changeRoleCount(roleId, delta) {
+  if (!transferCanMutate()) return;
   const current = currentRoleCounts[roleId] || 0;
   const next = Math.max(0, Math.min(15, current + delta));
   currentRoleCounts[roleId] = next;
@@ -9286,6 +10590,7 @@ function changeRoleCount(roleId, delta) {
 }
 
 function toggleSingleRole(roleId, checked) {
+  if (!transferCanMutate()) return;
   currentRoleCounts[roleId] = checked ? 1 : 0;
   renderRolesBuilder();
   updateBalanceCalculations();
@@ -9369,6 +10674,7 @@ function updateBalanceCalculations() {
 // STEP 2: GENERATE QR CODE & ROOM LOBBY
 // ---------------------------------------------
 function confirmRolesAndCreateRoom() {
+  if (!transferCanMutate()) return;
   if (lobbyDraft) {
     finishLobbyEdit(true);
     return;
@@ -9392,8 +10698,24 @@ function confirmRolesAndCreateRoom() {
   });
 
   // Generate Room Code (e.g. WW-7824)
-  const randomCode = Math.floor(1000 + Math.random() * 9000);
-  activeRoomCode = 'WW-' + randomCode;
+  let nextCode = '';
+  try {
+    for (let i = 0; i < 100; i++) {
+      const candidate = 'WW-' + Math.floor(1000 + Math.random() * 9000);
+      if (!transferRead('room:' + candidate)) {
+        nextCode = candidate;
+        break;
+      }
+    }
+  } catch (e) {
+    alert('บันทึกสิทธิ์ห้องไม่ได้');
+    return;
+  }
+  if (!nextCode) {
+    alert('ไม่พบรหัสห้องว่าง กรุณาลองใหม่');
+    return;
+  }
+  activeRoomCode = nextCode;
 
   // Reset lobby state
   isGameStarted = false;
@@ -9411,10 +10733,12 @@ function confirmRolesAndCreateRoom() {
   }
 
   // Setup Realtime connection as Mod
-  setupRealtimeListener(activeRoomCode, true);
+  if (setupRealtimeListener(activeRoomCode, true) === false) return;
 
   // Render Lobby UI
-  document.getElementById('mod-room-code-display').innerText = activeRoomCode;
+  document.getElementById('mod-room-code-display').innerText = recoveryState?.everOpened
+    ? activeRoomCode
+    : 'กำลังจองรหัสห้อง';
   document.getElementById('mod-target-count').innerText = totalPlayers;
   document.getElementById('mod-joined-count').innerText = '0';
   updateModLobbyUI();
@@ -9427,6 +10751,7 @@ function confirmRolesAndCreateRoom() {
 
 // Get Join URL: If opened on file:/// or localhost, automatically point QR Code to GitHub Pages!
 function getFullJoinUrl() {
+  if (isMod && (!transferOwned() || !recoveryState?.everOpened)) return '';
   let base = window.location.href.split('?')[0];
   // If running on local computer (file:/// or localhost), automatically point QR Code to GitHub Pages production URL!
   if (
@@ -9450,6 +10775,10 @@ function generateLobbyQRCode(
   container.innerHTML = '';
   const joinUrl = getFullJoinUrl();
 
+  if (!joinUrl) {
+    if (urlDisplay) urlDisplay.innerText = 'กำลังจองที่อยู่ห้อง — ยังส่งลิงก์ไม่ได้';
+    return;
+  }
   // Display target URL text for Mod verification
   if (urlDisplay) urlDisplay.innerText = joinUrl;
 
@@ -9475,6 +10804,10 @@ function generateLobbyQRCode(
 
 function copyJoinLink() {
   const joinUrl = getFullJoinUrl();
+  if (!joinUrl) {
+    alert('รอจองที่อยู่ห้องสำเร็จก่อน');
+    return;
+  }
   navigator.clipboard
     .writeText(joinUrl)
     .then(() => {
@@ -9490,6 +10823,7 @@ function copyJoinLink() {
 }
 
 function simulatePlayerBot(batch = false) {
+  if (!transferCanMutate()) return;
   if (!devEditable()) return;
   const total = getTotalPlayersCount();
   if (joinedPlayers.length >= total) {
@@ -9550,6 +10884,7 @@ function updateModLobbyUI() {
 }
 
 function removePlayerFromLobby(playerId) {
+  if (!transferCanMutate()) return;
   if (!isMod || isGameStarted) return;
   const player = joinedPlayers.find((p) => p.id === playerId);
   if (!player || !confirm('นำ ' + player.name + ' ออกจากห้อง? เข้าร่วมใหม่ได้')) return;
@@ -9564,6 +10899,7 @@ function removePlayerFromLobby(playerId) {
 }
 
 function cancelRoomAndBack() {
+  if (!transferCanMutate()) return;
   if (confirm('คุณต้องการยกเลิกห้องนี้และกลับสู่หน้าหลักใช่หรือไม่?')) {
     recoveryStop();
     if (autoStartTimer) {
@@ -9639,6 +10975,7 @@ function submitPlayerJoin() {
 
 function leavePlayerWaitingRoom() {
   stopJoinIntent();
+  transferLeavePlayerRoom();
   closeTravelerModal();
   try {
     sessionStorage.removeItem('ww_joined_room');
@@ -9658,6 +10995,7 @@ function manualTriggerGameStart() {
 }
 
 function triggerGameStart() {
+  if (!transferCanMutate()) return;
   if (!isMod || lobbyDraft) return;
   if (joinedPlayers.length !== gameState.selectedRoles.length) {
     alert('จำนวนผู้เล่นต้องตรงกับชุดบทที่บันทึกไว้');
@@ -12409,6 +13747,7 @@ function clearRoundCommunity() {
 }
 // INDEX: Core / Round reset
 function resetGame() {
+  if (!transferCanMutate()) return;
   if (!isMod || !confirm('จบเกมและกลับล็อบบี้เดิม โดยคงผู้เล่นและชุดบทบาทไว้ใช่หรือไม่?')) return;
   stopTimer();
   resetTimer();
@@ -12857,20 +14196,28 @@ function privateAssignmentPayload(conn) {
 function sendPrivateAssignment(conn) {
   const card = privateAssignmentPayload(conn);
   if (!card) return;
-  conn.send({
-    type: 'GAME_STARTED_ASSIGNMENTS',
-    room: activeRoomCode,
-    sync: typeof syncEnvelope === 'function' ? syncEnvelope(conn, 'card', card) : undefined,
-    requestId: conn.wwJoinRequestId,
-    gameSessionId: currentGameSessionId,
-    assignments: { [conn.wwPlayerId]: card }
-  });
+  conn.send(
+    transferStamp({
+      type: 'GAME_STARTED_ASSIGNMENTS',
+      room: activeRoomCode,
+      sync: typeof syncEnvelope === 'function' ? syncEnvelope(conn, 'card', card) : undefined,
+      requestId: conn.wwJoinRequestId,
+      gameSessionId: currentGameSessionId,
+      assignments: { [conn.wwPlayerId]: card }
+    })
+  );
   conn.wwSummaryReadySession = currentGameSessionId;
   victorySend(conn);
 }
 function offerTraveler(conn) {
   if (conn && conn.open)
-    conn.send({ type: 'TRAVELER_OFFER', room: activeRoomCode, requestId: conn.wwJoinRequestId });
+    conn.send(
+      transferStamp({
+        type: 'TRAVELER_OFFER',
+        room: activeRoomCode,
+        requestId: conn.wwJoinRequestId
+      })
+    );
 }
 function chooseTraveler(kind) {
   if (isMod || !activeRoomCode || !travelerKinds.includes(kind)) return;
@@ -12921,12 +14268,14 @@ function joinNameError(name, id, late) {
 }
 function rejectJoin(conn, message) {
   if (conn && conn.open)
-    conn.send({
-      type: 'JOIN_ERROR',
-      room: activeRoomCode,
-      requestId: conn.wwJoinRequestId,
-      message
-    });
+    conn.send(
+      transferStamp({
+        type: 'JOIN_ERROR',
+        room: activeRoomCode,
+        requestId: conn.wwJoinRequestId,
+        message
+      })
+    );
 }
 function showJoinError(message) {
   stopJoinIntent();
@@ -16356,6 +17705,7 @@ const ROLE_PRESETS = [
 let selectedRolePreset = null;
 function presetSetupAllowed() {
   return (
+    transferCanMutate() &&
     isMod &&
     !isGameStarted &&
     !gameState.offlineGame &&
@@ -16673,7 +18023,8 @@ function summaryRoleInfo(id) {
   };
   const start = startCreateRoom;
   startCreateRoom = function (...a) {
-    if (isGameStarted || gameState.offlineGame) return;
+    if (activeRoomCode && !isMod && !joinIntent && !joinAdmitted) transferLeavePlayerRoom();
+    if ((activeRoomCode && !transferCanMutate()) || isGameStarted || gameState.offlineGame) return;
     isMod = true;
     return start(...a);
   };
