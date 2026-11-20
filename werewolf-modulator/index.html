@@ -4185,19 +4185,17 @@ function markApprenticeSuccession() {
   const n = normalState();
   if (n.apprenticeStart !== currentGameSessionId + ':' + gameState.dayCount) return;
   delete n.apprenticeStart;
-  const seers = gameState.players.filter(
-    (p) => gameState.rolePlayerMap[p] === 'seer' || n.apprenticeAwakened?.[p]
-  );
-  if (
-    !seers.some(
-      (p) => !gameState.playerStatus[p]?.alive && !(gameState.nightKilled || []).includes(p)
-    )
-  )
-    return;
-  if (
-    seers.some((p) => gameState.playerStatus[p]?.alive || (gameState.nightKilled || []).includes(p))
-  )
-    return;
+  const sourceRole = Object.values(n.original).includes('seer') ? 'seer' : 'aura_seer',
+    seers = gameState.players.filter(
+      (p) =>
+        n.original[p] === sourceRole ||
+        (sourceRole === 'seer' &&
+          (gameState.rolePlayerMap[p] === 'seer' || n.apprenticeAwakened?.[p]))
+    ),
+    unavailable = (p) =>
+      (!gameState.playerStatus[p]?.alive && !(gameState.nightKilled || []).includes(p)) ||
+      (sourceRole === 'seer' && isBedridden(p));
+  if (!seers.length || !seers.every(unavailable)) return;
   n.apprenticeAwakened = n.apprenticeAwakened || {};
   for (const p of gameState.players.filter(
     (p) => gameState.rolePlayerMap[p] === 'apprentice_seer' && actorAvailable(p)
@@ -11030,7 +11028,17 @@ function refreshSeerNarration() {
     note.className = 'text-[10px] text-amber-300';
     heading.append(note);
   }
-  note.textContent = show ? 'Seer คนเก่าเสียชีวิตแล้ว Seer คนใหม่จงโชคดี' : '';
+  const bedriddenSeer = gameState.players.some(
+    (name) =>
+      normalState().original[name] === 'seer' &&
+      isBedridden(name) &&
+      gameState.playerStatus[name]?.alive
+  );
+  note.textContent = show
+    ? bedriddenSeer
+      ? 'Seer คนเก่าสูญเสียพลังแล้ว Seer คนใหม่จงโชคดี'
+      : 'Seer คนเก่าเสียชีวิตแล้ว Seer คนใหม่จงโชคดี'
+    : '';
   note.hidden = !show;
 }
 
@@ -14782,7 +14790,7 @@ const ROLE_GUIDE_COPY = {
       'คุณตั้งใจเรียนวิชาอ่านนิมิตมาอย่างดี เพียงแต่ตอนนี้มองเข้าไปแล้วยังไม่ค่อยเห็นอะไร อาจารย์บอกว่าต้องใช้เวลา ซึ่งฟังดูสมเหตุสมผลจนกระทั่งเพื่อนบ้านเริ่มหายไปทีละคน หากผู้หยั่งรู้ล้มลง คุณจะต้องรับช่วงค้นหาความจริงเพื่อให้หมู่บ้านยังมีหวัง ถึงตอนนั้นคงไม่มีใครถามแล้วว่าเรียนจบหรือยัง',
     'ความสามารถ': 'เมื่อ Seer เสียชีวิต คุณจะรับช่วงพลังตรวจผู้เล่นว่าเป็นมนุษย์หมาป่าหรือไม่ โดยไม่ทราบชื่อบทบาท',
     'ช่วงเวลาและข้อจำกัด':
-      'รับช่วงเมื่อเริ่มคืนถัดไปหลัง Seer เสียชีวิต: หากตายกลางคืน ให้รอผ่านวันถัดมา; หากตายกลางวัน รับช่วงเมื่อเริ่มคืนที่กำลังจะมาถึง ต้องยังมีชีวิตและเกมยังไม่จบ ใช้พลังได้หลังรับช่วงเท่านั้น ทุกคืน คืนละ 1 คน',
+      'รับช่วงเมื่อเริ่มคืนถัดไปหลัง Seer เสียชีวิตหรือติดเตียงจนเสียพลังถาวร; หากชุดเริ่มต้นไม่มี Seer ให้รับช่วงเมื่อ Aura Seer เสียชีวิต โดยกลายเป็น Seer ปกติ: หากตายกลางคืน ให้รอผ่านวันถัดมา; หากตายกลางวัน รับช่วงเมื่อเริ่มคืนที่กำลังจะมาถึง ต้องยังมีชีวิตและเกมยังไม่จบ ใช้พลังได้หลังรับช่วงเท่านั้น ทุกคืน คืนละ 1 คน',
     'เป้าหมายของคุณ': 'ช่วยฝ่ายชาวบ้านค้นหาและกำจัดมนุษย์หมาป่า พร้อมรับหน้าที่ผู้หยั่งรู้เมื่อถึงเวลา',
     'ข้อยกเว้น': 'หลังรับช่วงพลัง ผลตรวจใช้กติกาเดียวกับ Seer รวมถึงผลจาก Lycan และยาพิษ'
   },
